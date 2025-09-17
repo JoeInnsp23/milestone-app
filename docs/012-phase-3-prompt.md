@@ -8,7 +8,7 @@ You are tasked with implementing Phase 3 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Review authentication requirements
-2. `/root/projects/milestone-app/phase-3-authentication.md` - Review auth specification
+2. `/root/projects/milestone-app/phase-3-details.md` - Review auth specification
 3. `/root/projects/milestone-app/phase-3-tasks.md` - Study all 45 tasks (T071-T114 including T080a)
 4. `/root/projects/milestone-app/phase-3-QA.md` - Understand validation requirements
 5. Review `.reference` folder screenshots for MVP design patterns
@@ -23,7 +23,7 @@ Before starting implementation:
 - Use WebSearch to find:
   - Latest Clerk Next.js setup (2024)
   - Clerk custom sign-in page styling
-  - Clerk webhook configuration
+  - Clerk user management
   - basePath configuration with Clerk
 
 ### 3. Pre-requisites Check
@@ -106,8 +106,7 @@ export default authMiddleware({
   publicRoutes: [
     "/",
     "/sign-in",
-    "/sign-up",
-    "/api/webhooks/n8n"
+    "/sign-up"
   ]
 });
 
@@ -186,7 +185,7 @@ export default function AuthenticatedLayout() {
    - Consistent color scheme from `.reference` folder
 
 2. **Route Protection:**
-   - Public routes: /, /sign-in, /sign-up, /api/webhooks/n8n
+   - Public routes: /, /sign-in, /sign-up
    - All other routes require authentication
    - Redirect to /sign-in when unauthorized
 
@@ -284,6 +283,6 @@ node -e "console.log(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? 'Clerk key 
 - DO NOT create custom JWT handling - use Clerk's built-in
 - DO NOT skip the basePath configuration (T080a)
 - Keep sign-in/sign-up pages simple - let Clerk handle complexity
-- Remember: n8n webhook must remain public (no auth)
+- Remember: n8n writes directly to the database (no webhooks needed)
 
 Upon completion, Phase 3 should provide complete authentication with Clerk, ready for dashboard implementation in Phase 4.

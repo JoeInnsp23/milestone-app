@@ -121,7 +121,7 @@ Complete task-oriented breakdown for implementing Clerk authentication with midd
 - Add "/" to public routes
 - Add "/sign-in" routes
 - Add "/sign-up" routes
-- Add "/api/webhooks/n8n" for data sync
+- No webhook routes needed (n8n writes directly to DB)
 - Consider basePath in production
 - Dependencies: T082
 - Estimated Time: 3 minutes

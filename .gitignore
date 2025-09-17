@@ -42,3 +42,10 @@ next-env.d.ts
 
 # reference files
 .reference/
+
+# PostgreSQL data
+postgres_data/
+postgres_backups/
+
+# Drizzle files
+drizzle/meta/

@@ -8,7 +8,7 @@ You are tasked with implementing Phase 5 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Review data ownership model
-2. `/root/projects/milestone-app/phase-5-project-features.md` - Project features specification
+2. `/root/projects/milestone-app/phase-5-details.md` - Project features specification
 3. `/root/projects/milestone-app/phase-5-tasks.md` - Study all 54 tasks (T164-T217)
 4. `/root/projects/milestone-app/phase-5-QA.md` - Understand validation requirements
 5. Review `.reference` folder for table and detail page designs

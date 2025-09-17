@@ -8,7 +8,7 @@ You are tasked with implementing Phase 6 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Review export requirements
-2. `/root/projects/milestone-app/phase-6-export-functionality.md` - Export specification
+2. `/root/projects/milestone-app/phase-6-details.md` - Export specification
 3. `/root/projects/milestone-app/phase-6-tasks.md` - Study all 56 tasks (T218-T273)
 4. `/root/projects/milestone-app/phase-6-QA.md` - Understand validation requirements
 5. Review `.reference` folder for report layouts

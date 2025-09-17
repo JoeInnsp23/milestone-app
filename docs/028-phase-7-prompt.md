@@ -8,7 +8,7 @@ You are tasked with implementing Phase 7 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Review deployment architecture
-2. `/root/projects/milestone-app/phase-7-deployment.md` - Deployment specification with Coolify
+2. `/root/projects/milestone-app/phase-7-details.md` - Deployment specification with Coolify
 3. `/root/projects/milestone-app/phase-7-tasks.md` - Study all 57 tasks (T274-T330)
 4. `/root/projects/milestone-app/phase-7-QA.md` - Understand validation requirements
 

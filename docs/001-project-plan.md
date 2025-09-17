@@ -20,7 +20,7 @@ Complete migration of the current vanilla JavaScript P&L dashboard to a modern N
 - Data visualization and reporting
 - PDF/Excel exports from database data
 - Viewing sync status (read-only)
-- Requesting sync via n8n webhook (optional)
+- n8n handles all synchronization autonomously
 
 ### Key Objectives
 1. Implement GDPR-compliant authentication using Clerk
@@ -549,7 +549,7 @@ graph TD
 - All Xero data flows through n8n to PostgreSQL
 - The app only reads Xero-sourced data from the database
 - User-created estimates are managed directly by the app
-- Sync requests are optional and go through n8n webhooks
+- n8n runs on a schedule, no manual sync requests needed
 
 ## Business Workflows
 
@@ -713,13 +713,12 @@ Nodes:
 
   9. Complete:
      - Update sync_status table (status = 'COMPLETED')
-     - Optionally notify Next.js app via webhook
+     - Update completed_at timestamp in sync_status table
 ```
 
-### 2. Manual Sync Request Handler
+### 2. Manual Sync (Not Implemented)
 ```yaml
-Name: Handle Manual Sync Request
-Trigger: Webhook POST /webhook/manual-sync
+Note: Manual sync not needed - n8n runs on schedule
 Nodes:
   1. Validate Request:
      - Check request comes from Next.js app
@@ -745,7 +744,7 @@ Nodes:
      - Get sync summary from sync_status
 
   2. Call App Webhook:
-     - POST to Next.js /api/webhooks/n8n
+     - Write directly to PostgreSQL database
      - Include sync results
 
   3. Log Response:

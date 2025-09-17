@@ -96,7 +96,7 @@ Comprehensive quality assurance checklist for validating Phase 3 authentication 
 - Access / without auth (or /milestone-app in production)
 - Visit /sign-in unauthenticated
 - Check /sign-up accessibility
-- Verify /api/webhooks/n8n open
+- No webhook endpoints to test
 - **Expected**: Public routes accessible with basePath
 - **Methodology**: Route access testing
 
