@@ -8,7 +8,7 @@ You are tasked with implementing Phase 2 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Understand n8n/Xero architecture
-2. `/root/projects/milestone-app/phase-2-database-setup.md` - Review database specification
+2. `/root/projects/milestone-app/phase-2-details.md` - Review database specification
 3. `/root/projects/milestone-app/phase-2-tasks.md` - Study all 35 tasks (T036-T070)
 4. `/root/projects/milestone-app/phase-2-QA.md` - Understand validation requirements
 
@@ -222,9 +222,10 @@ npm run db:studio
 
 ## Critical Notes
 - n8n handles ALL Xero integration - app NEVER connects to Xero directly
-- Database is read-write for user content (estimates)
-- Xero data comes via n8n webhooks only
+- n8n writes directly to PostgreSQL - NO webhooks needed in the app
+- App has READ-ONLY access to Xero data (projects, invoices, bills)
+- App has READ-WRITE access for user content (estimates, preferences)
 - Use UUIDs for user-generated content ONLY
-- Keep webhook endpoint public (no auth)
+- Xero-synced data uses varchar IDs from Xero
 
 Upon completion, Phase 2 should provide a complete database layer ready for authentication in Phase 3.

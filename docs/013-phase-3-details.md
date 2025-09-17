@@ -137,11 +137,6 @@ export default authMiddleware({
     `${basePath}/`,
     `${basePath}/sign-in`,
     `${basePath}/sign-up`,
-    '/api/webhooks/n8n',  // n8n webhook for data sync
-  ],
-  // Skip Clerk auth for n8n webhooks
-  ignoredRoutes: [
-    '/api/webhooks/n8n',
   ],
   afterAuth(auth, req) {
     // Log successful sign-ins for audit trail
@@ -668,7 +663,7 @@ export async function GET() {
 
 1. Users are invited via Clerk dashboard
 2. No self-registration needed
-3. No webhook handlers needed for user creation
+3. No webhook handlers needed - n8n writes directly to database
 4. Login events are logged to our audit_logs table for compliance
 
 ## Step 16: Test Authentication Flow

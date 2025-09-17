@@ -88,9 +88,9 @@ This documentation is organized in sequential order for implementing the Milesto
 ## Architecture Summary
 
 ```
-Xero API → n8n (webhooks) → PostgreSQL → Next.js App
-                                ↑
-                             Clerk Auth
+Xero API → n8n (reads & writes) → PostgreSQL ← Next.js App (reads only)
+                                        ↑
+                                   Clerk Auth
 ```
 
 - **Frontend**: Next.js 15 with App Router
@@ -101,7 +101,7 @@ Xero API → n8n (webhooks) → PostgreSQL → Next.js App
 
 ## Important Notes
 
-1. **No Direct Xero Integration** - All Xero data comes via n8n webhooks
+1. **No Direct Xero Integration** - n8n handles all Xero API calls and writes directly to PostgreSQL
 2. **UUID Usage** - User-generated content uses UUIDs, Xero data uses string IDs
 3. **Server Actions** - Preferred over API routes (3-5 endpoints max)
 4. **Gradient Design** - Header only, white content area

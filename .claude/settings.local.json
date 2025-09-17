@@ -1,13 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Read(//tmp/**)",
-      "Bash(npm install)",
-      "Bash(npm install:*)",
-      "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs",
-      "Bash(npx shadcn@latest init:*)",
-      "Bash(npx shadcn@latest add:*)",
+      "Bash(docker inspect:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker network inspect:*)",
+      "Bash(docker:*)",
+      "Read(///**)",
+      "Read(//opt/n8n/**)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Read(//etc/nginx/**)",
+      "Bash(openssl rand:*)",
+      "Bash(npx tsx:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run build:*)",
       "Bash(timeout 5 npm run dev)",
@@ -32,7 +36,10 @@
       "Bash(npx husky init:*)",
       "Bash(chmod:*)",
       "Bash(xargs:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(npm run:*)",
+      "Bash(npx drizzle-kit studio:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

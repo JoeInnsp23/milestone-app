@@ -1,24 +1,55 @@
-# CLAUDE.md
+# CLAUDE.md - AI Assistant Guide
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides critical guidance to Claude Code (claude.ai/code) when working with this repository. **All information in this document is essential and must be followed exactly.**
+
+## 🚨 CRITICAL DATABASE INFORMATION
+
+**Database Setup**: This application uses a **dedicated PostgreSQL container** completely separate from n8n's database.
+
+```yaml
+Container: milestone-postgres
+Port: 5433 (exposed to host)
+Database: milestone
+User: milestone_user
+Password: J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=
+Network: n8n_n8n-network (for inter-container communication)
+```
+
+**Connection Strings**:
+- From Host (Next.js): `postgresql://milestone_user:[password]@localhost:5433/milestone`
+- From Docker Network: `postgresql://milestone_user:[password]@milestone-postgres:5432/milestone`
+
+**Database Management**:
+- ✅ Can safely use `npm run db:push` - we have our own database
+- ✅ Full control over schema and migrations
+- ✅ No risk to n8n operations
 
 ## 📊 Project Status
 
 | Phase | Status | QA Results | Date Completed |
 |-------|--------|------------|----------------|
 | Phase 1: Next.js Setup | ✅ COMPLETE | 50/50 Passed | Sept 17, 2025 |
-| Phase 2: Database | ⏳ Pending | - | - |
+| Phase 2: Database | ✅ COMPLETE | 48/50 Passed (2 N/A) | Sept 17, 2025 |
 | Phase 3: Authentication | ⏳ Pending | - | - |
 | Phase 4: Dashboard | ⏳ Pending | - | - |
 | Phase 5: CRUD Features | ⏳ Pending | - | - |
 | Phase 6: Export | ⏳ Pending | - | - |
 | Phase 7: Deployment | ⏳ Pending | - | - |
 
-## Project Overview
+## 🎯 Project Overview
 
-Milestone P&L Dashboard - A read-only dashboard for construction/professional services companies to track project profitability. Data flows from Xero → n8n → PostgreSQL → Next.js app (Clerk auth).
+**Milestone P&L Dashboard** - A read-only dashboard for construction/professional services companies to track project profitability.
 
-## Development Commands
+**Data Flow**:
+```
+Xero API → n8n (reads & writes) → PostgreSQL ← Next.js Dashboard (reads only)
+```
+- App NEVER directly connects to Xero
+- n8n handles ALL Xero API interactions and database updates
+- App has read-only access to Xero data in PostgreSQL
+- App only writes user-generated content (estimates, preferences)
+
+## 💻 Development Commands
 
 ```bash
 # Install dependencies
@@ -33,31 +64,39 @@ npm run type-check
 # Build for production
 npm run build
 
-# Start production server
-npm run start
+# Database operations (safe with dedicated database)
+npm run db:push      # Push schema to database
+npm run db:generate  # Generate migration files
+npm run db:migrate   # Apply migrations
+npm run db:studio    # Open Drizzle Studio GUI
+npm run db:seed      # Run seed data
 
-# Database migrations
-npm run db:migrate
-
-# Open Drizzle Studio (database GUI)
-npm run db:studio
+# Docker operations
+docker compose up -d     # Start PostgreSQL container
+docker compose down      # Stop container
+docker compose logs -f   # View logs
 ```
 
-## Architecture & Key Decisions
+## 🏗️ Architecture & Key Decisions
 
-**Data Flow**: The app NEVER directly connects to Xero. All Xero data is read-only from PostgreSQL (populated by n8n webhooks). The app only writes user estimates and preferences.
+### Technology Stack
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Drizzle ORM (dedicated container)
+- **Authentication**: Clerk
+- **Styling**: Tailwind CSS v4 + shadcn/ui
+- **Charts**: Recharts
+- **Notifications**: React Hot Toast (NOT Sonner)
+- **Deployment**: Coolify on Ubuntu server
 
-**Stack**:
-- Next.js 15 with App Router
-- TypeScript
-- PostgreSQL with Drizzle ORM
-- Clerk for authentication
-- Tailwind CSS v4 + shadcn/ui
-- React Hot Toast for notifications (not Sonner)
-- Server Components for all data fetching
-- Minimal API routes (only for mutations)
+### Key Architectural Decisions
+1. **Server Components First**: Minimize client-side JavaScript
+2. **No Complex State Management**: React's built-in state is sufficient
+3. **Read-Only Xero Data**: All Xero data comes via n8n
+4. **User Can Only Edit**: Estimates and preferences
+5. **Keep It Simple**: This is a dashboard, not a complex application
 
-**Folder Structure**:
+### Folder Structure
 ```
 src/
 ├── app/
@@ -70,78 +109,112 @@ src/
 └── types/                  # TypeScript types
 ```
 
-## Implementation Phases
+## 🚨 CRITICAL: Phase Implementation Workflow
 
-The project is structured in 7 phases (see docs/ folder):
-1. **Phase 1**: Next.js setup with TypeScript and Tailwind ✅ **COMPLETE (50/50 QA passed)**
-2. **Phase 2**: Database setup with Drizzle ORM
+**YOU MUST FOLLOW THIS EXACT WORKFLOW FOR EACH PHASE:**
+
+### 1. Read the Documents (in order)
+   - `docs/XXX-phase-N-prompt.md` - Complete implementation instructions
+   - `docs/XXX-phase-N-details.md` - Technical specifications
+   - `docs/XXX-phase-N-tasks.md` - Task breakdown
+   - `docs/XXX-phase-N-QA.md` - QA validation items
+
+### 2. Execute ALL Tasks
+   - **CRITICAL**: Every task (T001, T002, etc.) MUST be completed
+   - Tasks are ordered - complete them sequentially
+   - DO NOT skip any tasks
+   - Update task status in the markdown file as you complete them
+
+### 3. Run Complete QA Validation
+   - Execute ALL QA items (QA001, QA002, etc.)
+   - QA CANNOT PASS until ALL items are complete
+   - Any failed QA item must be fixed before marking phase complete
+   - Document all QA results
+
+### Why This Matters
+- Previous Claude instances have missed tasks
+- Skipping tasks causes QA failures
+- Each phase builds on the previous one
+- Incomplete phases compound into larger issues
+
+## 📋 Implementation Phases
+
+1. **Phase 1**: Next.js setup with TypeScript and Tailwind ✅ **COMPLETE**
+2. **Phase 2**: Database setup with Drizzle ORM ✅ **COMPLETE**
+   - All tables, views, and functions created
+   - Seed data loaded
+   - Note: Webhook tasks (T060-T062) not needed - n8n writes directly to DB
 3. **Phase 3**: Clerk authentication integration
 4. **Phase 4**: Dashboard implementation
 5. **Phase 5**: Project features & estimates CRUD
 6. **Phase 6**: Export functionality (PDF/Excel)
 7. **Phase 7**: Production deployment with Coolify
 
-## 🚨 CRITICAL: Phase Implementation Workflow
+## 🗄️ Database Schema Overview
 
-**YOU MUST FOLLOW THIS EXACT WORKFLOW FOR EACH PHASE:**
+### Xero-Synced Tables (varchar IDs from Xero)
+- `projects` - Project data from Xero
+- `invoices` - Invoice data from Xero
+- `bills` - Bill/expense data from Xero
+- `build_phases` - Build phase categories from Xero
 
-1. **Read the Prompt Document** (`docs/XXX-phase-N-prompt.md`)
-   - Contains the complete implementation instructions
-   - Specifies exact requirements and constraints
+### User-Generated Tables (UUID primary keys)
+- `project_estimates` - User-created estimates with versioning
+- `audit_logs` - Minimal audit trail for changes
+- `export_history` - Export tracking
+- `user_preferences` - User settings
 
-2. **Read the Details Document** (`docs/XXX-phase-N-details.md`)
-   - Technical specifications
-   - Architecture decisions
-   - Component details
+### Performance Optimizations
+- Materialized view: `project_phase_summary` for dashboard
+- Auto-update triggers for `updated_at` columns
+- Strategic indexes for hot query paths
+- Partial unique indexes for estimate versioning
 
-3. **Execute ALL Tasks** (`docs/XXX-phase-N-tasks.md`)
-   - **CRITICAL**: Every task (T001, T002, etc.) MUST be completed
-   - Tasks are ordered - complete them sequentially
-   - DO NOT skip any tasks
-   - Each task has dependencies - respect them
+## 🔒 Security & Best Practices
 
-4. **Run Complete QA Validation** (`docs/XXX-phase-N-QA.md`)
-   - Execute ALL QA items (QA001, QA002, etc.)
-   - **QA CANNOT PASS until ALL items are complete**
-   - Any failed QA item must be fixed before marking phase complete
-   - Document all QA results
+### Database Security
+- Parameterized queries through Drizzle ORM
+- Role-based access control (when deployed)
+- No direct Xero API access from app
+- SSL/TLS in production
 
-### Why This Matters:
-- Previous Claude instances have missed tasks
-- Skipping tasks causes QA failures
-- Each phase builds on the previous one
-- Incomplete phases compound into larger issues
+### Code Standards
+- **DO NOT ADD COMMENTS** unless specifically requested
+- Follow existing code conventions
+- Use existing libraries and utilities
+- Check neighboring files for patterns
+- Never commit secrets or keys
 
-### Phase Status:
-- ✅ Phase 1: COMPLETE (50/50 QA items passed)
-- ⏳ Phase 2-7: Pending
-
-## Database Notes
-
-- Use read-only database role for Xero tables
-- Only write to estimates and user preference tables
-- Materialized views for dashboard performance
-- All queries through Drizzle ORM (parameterized for security)
-
-## Production Environment
+## 🌐 Production Environment
 
 - **URL**: https://dashboard.innspiredaccountancy.com/milestone-app
 - **Deployment**: Coolify on Ubuntu server
-- **Database**: PostgreSQL in Docker with internal_net
+- **Database**: PostgreSQL in Docker
 - **SSL**: Handled by Coolify/reverse proxy
 
-## Reference Materials
+## 📚 Reference Materials
 
 The `.reference/` directory contains:
-- **MVP Screenshots**: Visual reference from the original dashboard (`Screenshot*.png`)
-- **Legacy Implementation**: Original vanilla JavaScript code (`public/` subdirectory)
-- **Scripts**: Deployment and caching scripts from the legacy system
-- This directory is excluded from git for security/size reasons
+- MVP Screenshots from original dashboard
+- Legacy implementation code
+- This directory is excluded from git
 
-## Important Constraints
+## ⚠️ Important Constraints
 
-- Server Components first approach - minimize client-side JavaScript
-- No complex state management libraries - React's built-in state is sufficient
-- Read-only for all Xero data
-- User can only edit estimates and preferences
-- Keep it simple - this is a dashboard, not a complex application
+1. **Never directly connect to Xero** - all data via n8n
+2. **Read-only for Xero data** - only n8n writes these tables
+3. **User can only edit** - estimates and preferences
+4. **Use Server Components** - minimize client JavaScript
+5. **No unnecessary documentation** - only create docs when requested
+
+## 🎯 Success Criteria
+
+- Sub-2 second page load times
+- 100% data accuracy from PostgreSQL
+- GDPR compliance ready
+- All QA items passing before phase completion
+- Clean, maintainable code following patterns
+
+---
+
+**Remember**: This is a focused dashboard application, not a complex system. Keep implementations simple and follow the established patterns.

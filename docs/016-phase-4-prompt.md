@@ -8,7 +8,7 @@ You are tasked with implementing Phase 4 of the Milestone P&L Dashboard project.
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
 1. `/root/projects/milestone-app/project-plan.md` - Review data flow from n8n
-2. `/root/projects/milestone-app/phase-4-dashboard-implementation.md` - Dashboard specification
+2. `/root/projects/milestone-app/phase-4-details.md` - Dashboard specification
 3. `/root/projects/milestone-app/phase-4-tasks.md` - Study all 49 tasks (T115-T163)
 4. `/root/projects/milestone-app/phase-4-QA.md` - Understand validation requirements
 5. Review ALL files in `.reference` folder for exact MVP design

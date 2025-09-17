@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  # Connect to existing n8n network for internal communication
+  n8n-network:
+    external: true
+    name: n8n_n8n-network
+
+services:
+  milestone-postgres:
+    image: postgres:16-alpine
+    container_name: milestone-postgres
+    hostname: milestone-postgres
+    networks:
+      - n8n-network
+    ports:
+      - "5433:5432"  # Expose on port 5433 to avoid conflicts
+    environment:
+      POSTGRES_USER: milestone_user
+      POSTGRES_PASSWORD: J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=
+      POSTGRES_DB: milestone
+      # PostgreSQL optimization for small instance
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # Disable SSL for local development
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres_backups:/backups  # For backup storage
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U milestone_user -d milestone']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Resource limits (optional, adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
