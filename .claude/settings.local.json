@@ -31,7 +31,8 @@
       "Bash(git rm:*)",
       "Bash(npx husky init:*)",
       "Bash(chmod:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
