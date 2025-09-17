@@ -26,7 +26,12 @@
       "Bash(ls:*)",
       "Read(//root/**)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git rm:*)",
+      "Bash(npx husky init:*)",
+      "Bash(chmod:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []

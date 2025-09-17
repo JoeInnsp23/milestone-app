@@ -85,6 +85,14 @@ Each phase has detailed documentation in `docs/` with tasks and QA checklists.
 - **Database**: PostgreSQL in Docker with internal_net
 - **SSL**: Handled by Coolify/reverse proxy
 
+## Reference Materials
+
+The `.reference/` directory contains:
+- **MVP Screenshots**: Visual reference from the original dashboard (`Screenshot*.png`)
+- **Legacy Implementation**: Original vanilla JavaScript code (`public/` subdirectory)
+- **Scripts**: Deployment and caching scripts from the legacy system
+- This directory is excluded from git for security/size reasons
+
 ## Important Constraints
 
 - Server Components first approach - minimize client-side JavaScript

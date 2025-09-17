@@ -1427,7 +1427,7 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 
 The Milestone P&L Dashboard is now fully implemented and production-ready. The application includes:
 
-1. **Modern Tech Stack**: Next.js 14, TypeScript, PostgreSQL, Clerk Auth
+1. **Modern Tech Stack**: Next.js 15, TypeScript, PostgreSQL, Clerk Auth
 2. **Core Features**: Dashboard, Projects, Estimates CRUD, Export functionality
 3. **Production Infrastructure**: Coolify deployment, Docker PostgreSQL, auto-deploy
 4. **Security**: Authentication, authorization, rate limiting, input validation

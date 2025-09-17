@@ -93,7 +93,7 @@ Xero API → n8n (webhooks) → PostgreSQL → Next.js App
                              Clerk Auth
 ```
 
-- **Frontend**: Next.js 14 with App Router
+- **Frontend**: Next.js 15 with App Router
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Clerk
 - **Deployment**: Coolify on Ubuntu with Docker

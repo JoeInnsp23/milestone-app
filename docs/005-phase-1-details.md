@@ -783,7 +783,7 @@ drizzle/*.sql
 
 ```bash
 git add .
-git commit -m "Initial project setup with Next.js 14, TypeScript, Tailwind CSS, and shadcn/ui"
+git commit -m "Initial project setup with Next.js 15, TypeScript, Tailwind CSS, and shadcn/ui"
 ```
 
 ## Step 12: Install UI Components
@@ -840,7 +840,7 @@ npm run format
 
 ## Phase 1 Complete Checklist
 
-- [ ] Next.js 14 project created with App Router
+- [ ] Next.js 15 project created with App Router
 - [ ] TypeScript configured with strict mode
 - [ ] Tailwind CSS configured with custom theme
 - [ ] shadcn/ui initialized and components installed

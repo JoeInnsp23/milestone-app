@@ -16,7 +16,7 @@ First, thoroughly read and understand these documents in this exact order:
 ### 2. Context Building
 Before starting implementation:
 - Use `mcp__context7__resolve-library-id` and `mcp__context7__get-library-docs` to research:
-  - Next.js 14 Server Components with data fetching
+  - Next.js 15 Server Components with data fetching
   - Tremor React components
   - Recharts with Next.js
   - Server Component patterns

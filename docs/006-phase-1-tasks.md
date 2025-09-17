@@ -16,7 +16,7 @@ Complete task-oriented breakdown for setting up the Next.js 15 project with Type
 
 ## Project Initialization Tasks
 
-**T002-Create Next.js Project**: Initialize new Next.js 14 application
+**T002-Create Next.js Project**: Initialize new Next.js 15 application
 - Run `npx create-next-app@latest milestone-app`
 - Select TypeScript: Yes
 - Select ESLint: Yes

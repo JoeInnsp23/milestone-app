@@ -161,7 +161,7 @@ Each phase has a final verification task ensuring:
 - **Domain**: Optional (~$12/year)
 
 ### Team Skills Required
-- Next.js 14 and React
+- Next.js 15 and React
 - TypeScript proficiency
 - PostgreSQL and SQL
 - Tailwind CSS

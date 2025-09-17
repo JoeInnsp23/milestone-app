@@ -253,7 +253,7 @@ export default function SignUpPage() {
 
 ### 9.1 Create Header with User Button
 
-**Note**: Based on Next.js 14 best practices, we use route groups `(auth)` and `(protected)` to organize routes without affecting URLs. This is the recommended approach for separating public and protected routes.
+**Note**: Based on Next.js 15 best practices, we use route groups `(auth)` and `(protected)` to organize routes without affecting URLs. This is the recommended approach for separating public and protected routes.
 
 Create `src/components/nav-header.tsx`:
 

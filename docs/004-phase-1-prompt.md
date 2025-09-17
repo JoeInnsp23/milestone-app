@@ -1,7 +1,7 @@
 # Phase 1: Next.js Setup & Configuration - Implementation Prompt
 
 ## Context Initialization
-You are tasked with implementing Phase 1 of the Milestone P&L Dashboard project. This phase establishes the foundation using Next.js 14 with App Router, TypeScript, and Tailwind CSS.
+You are tasked with implementing Phase 1 of the Milestone P&L Dashboard project. This phase establishes the foundation using Next.js 15 with App Router, TypeScript, and Tailwind CSS.
 
 ## Pre-Implementation Requirements
 
@@ -15,12 +15,12 @@ First, thoroughly read and understand these documents in this exact order:
 ### 2. Context Building
 Before starting implementation:
 - Use `mcp__context7__resolve-library-id` and `mcp__context7__get-library-docs` to research:
-  - Next.js 14 App Router best practices
+  - Next.js 15 App Router best practices
   - TypeScript configuration for Next.js
   - Tailwind CSS setup with Next.js
   - shadcn/ui component installation
 - Use WebSearch to find:
-  - Latest Next.js 14 with App Router patterns
+  - Latest Next.js 15 with App Router patterns
   - Current shadcn/ui installation procedures
   - Best practices for project structure
 
@@ -190,4 +190,4 @@ npx tsc --noEmit && echo "✅ No TypeScript errors"
 - Keep all configurations production-ready
 - Remember: production URL will be dashboard.innspiredaccountancy.com/milestone-app
 
-Upon completion, Phase 1 should provide a clean Next.js 14 foundation ready for Phase 2 database setup.
+Upon completion, Phase 1 should provide a clean Next.js 15 foundation ready for Phase 2 database setup.
