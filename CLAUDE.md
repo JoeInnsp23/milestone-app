@@ -2,6 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📊 Project Status
+
+| Phase | Status | QA Results | Date Completed |
+|-------|--------|------------|----------------|
+| Phase 1: Next.js Setup | ✅ COMPLETE | 50/50 Passed | Sept 17, 2025 |
+| Phase 2: Database | ⏳ Pending | - | - |
+| Phase 3: Authentication | ⏳ Pending | - | - |
+| Phase 4: Dashboard | ⏳ Pending | - | - |
+| Phase 5: CRUD Features | ⏳ Pending | - | - |
+| Phase 6: Export | ⏳ Pending | - | - |
+| Phase 7: Deployment | ⏳ Pending | - | - |
+
 ## Project Overview
 
 Milestone P&L Dashboard - A read-only dashboard for construction/professional services companies to track project profitability. Data flows from Xero → n8n → PostgreSQL → Next.js app (Clerk auth).
@@ -61,7 +73,7 @@ src/
 ## Implementation Phases
 
 The project is structured in 7 phases (see docs/ folder):
-1. **Phase 1**: Next.js setup with TypeScript and Tailwind
+1. **Phase 1**: Next.js setup with TypeScript and Tailwind ✅ **COMPLETE (50/50 QA passed)**
 2. **Phase 2**: Database setup with Drizzle ORM
 3. **Phase 3**: Clerk authentication integration
 4. **Phase 4**: Dashboard implementation
@@ -69,7 +81,40 @@ The project is structured in 7 phases (see docs/ folder):
 6. **Phase 6**: Export functionality (PDF/Excel)
 7. **Phase 7**: Production deployment with Coolify
 
-Each phase has detailed documentation in `docs/` with tasks and QA checklists.
+## 🚨 CRITICAL: Phase Implementation Workflow
+
+**YOU MUST FOLLOW THIS EXACT WORKFLOW FOR EACH PHASE:**
+
+1. **Read the Prompt Document** (`docs/XXX-phase-N-prompt.md`)
+   - Contains the complete implementation instructions
+   - Specifies exact requirements and constraints
+
+2. **Read the Details Document** (`docs/XXX-phase-N-details.md`)
+   - Technical specifications
+   - Architecture decisions
+   - Component details
+
+3. **Execute ALL Tasks** (`docs/XXX-phase-N-tasks.md`)
+   - **CRITICAL**: Every task (T001, T002, etc.) MUST be completed
+   - Tasks are ordered - complete them sequentially
+   - DO NOT skip any tasks
+   - Each task has dependencies - respect them
+
+4. **Run Complete QA Validation** (`docs/XXX-phase-N-QA.md`)
+   - Execute ALL QA items (QA001, QA002, etc.)
+   - **QA CANNOT PASS until ALL items are complete**
+   - Any failed QA item must be fixed before marking phase complete
+   - Document all QA results
+
+### Why This Matters:
+- Previous Claude instances have missed tasks
+- Skipping tasks causes QA failures
+- Each phase builds on the previous one
+- Incomplete phases compound into larger issues
+
+### Phase Status:
+- ✅ Phase 1: COMPLETE (50/50 QA items passed)
+- ⏳ Phase 2-7: Pending
 
 ## Database Notes
 
