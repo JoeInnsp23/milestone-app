@@ -21,7 +21,8 @@
       "Bash(npx shadcn@latest add radio-group:*)",
       "WebSearch",
       "Bash(npm run dev:*)",
-      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*\")"
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*\")",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []

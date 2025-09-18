@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   // Treat pdfkit as external to avoid bundling issues with font files
   serverExternalPackages: ['pdfkit'],
 
+  // Configure server actions to handle port forwarding properly
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb', // Increase limit for large PDFs
+    },
+  },
+
   // Allow any types in interfaces for database compatibility
   eslint: {
     ignoreDuringBuilds: true,
