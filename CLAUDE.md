@@ -129,7 +129,7 @@ src/
    - Execute ALL QA items (QA001, QA002, etc.)
    - QA CANNOT PASS until ALL items are complete
    - Any failed QA item must be fixed before marking phase complete
-   - Document all QA results
+   - Update QA status in the QA markdown file as you complete them
 
 ### Why This Matters
 - Previous Claude instances have missed tasks

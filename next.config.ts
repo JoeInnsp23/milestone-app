@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // basePath configuration for production deployment
+  basePath: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
 
   // Security headers for small dashboard app
   async headers() {

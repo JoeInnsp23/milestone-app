@@ -39,7 +39,14 @@
       "Bash(git merge:*)",
       "Bash(npm run:*)",
       "Bash(npx drizzle-kit studio:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(timeout 10 npm run dev:*)",
+      "Bash(rm:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "WebFetch(domain:clerk.com)",
+      "Bash(npx tsc:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []
