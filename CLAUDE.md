@@ -6,6 +6,7 @@ This file provides critical guidance to Claude Code (claude.ai/code) when workin
  - **ALWAYS** use best practices never implement quick fixes
  - **ALWAYS** use context7 and websearch to double check syntax before programming
  - **ALWAYS** commit any code changes after finishing a task
+ - **ALWAYS** use big.js for any calculaitons for the frontend
 
 ## 🚨 CRITICAL DATABASE INFORMATION
 

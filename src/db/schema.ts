@@ -1,5 +1,4 @@
 import {
-  pgTable,
   pgSchema,
   varchar,
   timestamp,
@@ -116,8 +115,11 @@ export const projectEstimates = milestone.table(
     build_phase_id: varchar('build_phase_id', { length: 50 }).references(
       () => buildPhases.id
     ),
+    description: varchar('description', { length: 500 }).notNull().default('Estimate'),
     estimate_type: estimateTypeEnum('estimate_type').notNull(),
     amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+    estimate_date: date('estimate_date').notNull().defaultNow(),
+    confidence_level: integer('confidence_level').default(3),
     currency: varchar('currency', { length: 3 }).default('GBP'),
     notes: text('notes'),
     valid_from: date('valid_from'),
