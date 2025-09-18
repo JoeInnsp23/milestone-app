@@ -17,15 +17,15 @@ async function seed() {
   try {
     // Clear existing data
     console.log('🧹 Clearing existing data...');
-    await db.execute(sql`TRUNCATE TABLE audit_logs CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE export_history CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE user_preferences CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE project_estimates CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE bills CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE invoices CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE projects CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE build_phases CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE sync_log CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.audit_logs CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.export_history CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.user_preferences CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.project_estimates CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.bills CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.invoices CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.projects CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.build_phases CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.sync_status CASCADE`);
     console.log('✅ Existing data cleared\n');
 
     // Insert build phases (Xero tracking categories)
@@ -398,7 +398,7 @@ async function seed() {
 
     // Refresh materialized view
     console.log('🔄 Refreshing materialized view...');
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY project_phase_summary`);
+    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY milestone.project_phase_summary`);
     console.log('✅ Materialized view refreshed\n');
 
     console.log('🎉 Database seeding completed successfully!');

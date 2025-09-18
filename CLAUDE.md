@@ -2,6 +2,11 @@
 
 This file provides critical guidance to Claude Code (claude.ai/code) when working with this repository. **All information in this document is essential and must be followed exactly.**
 
+# 🚨 CRITICAL BEHAVIOUR
+ - **ALWAYS** use best practices never implement quick fixes
+ - **ALWAYS** use context7 and websearch to double check syntax before programming
+ - **ALWAYS** commit any code changes after finishing a task
+
 ## 🚨 CRITICAL DATABASE INFORMATION
 
 **Database Setup**: This application uses a **dedicated PostgreSQL container** completely separate from n8n's database.
@@ -31,7 +36,7 @@ Network: n8n_n8n-network (for inter-container communication)
 | Phase 1: Next.js Setup | ✅ COMPLETE | 50/50 Passed | Sept 17, 2025 |
 | Phase 2: Database | ✅ COMPLETE | 48/50 Passed (2 N/A) | Sept 17, 2025 |
 | Phase 3: Authentication | ✅ COMPLETE | 51/51 Passed | Sept 18, 2025 |
-| Phase 4: Dashboard | 🚧 In Progress | - | - |
+| Phase 4: Dashboard | ✅ COMPLETE | 44/48 Passed (91.7%) | Sept 18, 2025 |
 | Phase 5: CRUD Features | ⏳ Pending | - | - |
 | Phase 6: Export | ⏳ Pending | - | - |
 | Phase 7: Deployment | ⏳ Pending | - | - |
@@ -149,7 +154,13 @@ src/
    - Custom sign-in page with gradients
    - Invite-only configuration (no sign-up)
    - Fixed critical Edge Runtime "self is not defined" error
-4. **Phase 4**: Dashboard implementation 🚧 **IN PROGRESS**
+4. **Phase 4**: Dashboard implementation ✅ **COMPLETE**
+   - All KPI cards implemented with real-time data
+   - Revenue distribution donut chart
+   - Monthly revenue trend line chart
+   - Profit by project bar chart
+   - Projects table with all metrics
+   - Full Clerk theme integration
 5. **Phase 5**: Project features & estimates CRUD
 6. **Phase 6**: Export functionality (PDF/Excel)
 7. **Phase 7**: Production deployment with Coolify

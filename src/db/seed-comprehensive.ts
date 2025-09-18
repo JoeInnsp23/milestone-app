@@ -1,0 +1,468 @@
+import { db } from './index';
+import {
+  projects,
+  buildPhases,
+  invoices,
+  bills,
+  projectEstimates,
+  syncStatus,
+  auditLogs,
+  userPreferences
+} from './schema';
+import { sql } from 'drizzle-orm';
+
+// UK construction company names
+const companies = [
+  'Balfour Beatty Construction', 'Kier Group', 'Morgan Sindall', 'Laing O\'Rourke',
+  'Galliford Try', 'BAM Construct UK', 'Willmott Dixon', 'ISG Construction',
+  'Wates Group', 'Mace Ltd', 'Skanska UK', 'Vinci Construction UK',
+  'Bowmer & Kirkland', 'McLaughlin & Harvey', 'Graham Construction', 'Seddon Construction',
+  'Lovell Partnerships', 'Keepmoat Homes', 'Miller Construction', 'Robertson Group',
+  'Osborne Construction', 'Buckingham Group', 'VolkerWessels UK', 'Winvic Construction',
+  'McLaren Construction', 'Byrne Group', 'Durkan Ltd', 'Ardmore Construction',
+  'Geoffrey Osborne Ltd', 'Higgins Construction', 'Bugler Developments', 'Rydon Construction',
+  'Thomas Sinden Ltd', 'Rooff Ltd', 'Feltham Construction', 'Borras Construction',
+  'Farrans Construction', 'Bennett Construction', 'Speller Metcalfe', 'Bluestone Construction',
+  'RG Carter', 'Jehu Group', 'Ashe Construction', 'Barnes Construction',
+  'Stepnell Ltd', 'Claritas Group', 'Paragon Building', 'Westridge Construction',
+  'Horizon Construction', 'Premier Building Solutions'
+];
+
+// UK cities and regions
+const locations = [
+  'London', 'Manchester', 'Birmingham', 'Leeds', 'Liverpool', 'Newcastle', 'Bristol',
+  'Sheffield', 'Nottingham', 'Leicester', 'Brighton', 'Southampton', 'Portsmouth',
+  'Reading', 'Oxford', 'Cambridge', 'Norwich', 'Ipswich', 'Milton Keynes', 'Luton',
+  'Coventry', 'Cardiff', 'Swansea', 'Edinburgh', 'Glasgow', 'Aberdeen', 'Dundee',
+  'Belfast', 'Derry', 'York', 'Bath', 'Chester', 'Durham', 'Exeter', 'Gloucester',
+  'Kingston upon Hull', 'Stoke-on-Trent', 'Wolverhampton', 'Plymouth', 'Derby',
+  'Warwick', 'Worcester', 'Lincoln', 'Canterbury', 'St Albans', 'Chelmsford'
+];
+
+// Project types
+const projectTypes = [
+  'Residential Complex', 'Office Building', 'Shopping Centre', 'Hospital Wing',
+  'School Extension', 'University Campus', 'Hotel Development', 'Warehouse Facility',
+  'Industrial Park', 'Retail Park', 'Medical Centre', 'Sports Complex',
+  'Community Centre', 'Care Home', 'Student Accommodation', 'Apartment Block',
+  'Housing Estate', 'Business Park', 'Technology Hub', 'Distribution Centre',
+  'Manufacturing Plant', 'Research Facility', 'Conference Centre', 'Theatre Renovation',
+  'Museum Extension', 'Library Refurbishment', 'Transport Hub', 'Railway Station',
+  'Airport Terminal', 'Marina Development'
+];
+
+// Project prefixes for naming
+const projectPrefixes = [
+  'New', 'Central', 'Royal', 'Victoria', 'Queens', 'Kings', 'St', 'Park',
+  'Grand', 'Premier', 'Elite', 'Horizon', 'Summit', 'Gateway', 'Bridge',
+  'Riverside', 'Lakeside', 'Hillside', 'Westfield', 'Eastgate', 'Northpoint', 'Southbank'
+];
+
+// Project managers
+const projectManagers = [
+  'John Matthews', 'Sarah Chen', 'Mike Johnson', 'Emma Williams', 'David Brown',
+  'Lisa Anderson', 'Tom Wilson', 'Rachel Green', 'Chris Taylor', 'Amy Roberts',
+  'James Mitchell', 'Sophie Clarke', 'Daniel Lee', 'Karen White', 'Paul Martin',
+  'Helen Davies', 'Mark Thompson', 'Julie Robinson', 'Steve Harris', 'Linda Walker'
+];
+
+// Supplier names for bills
+const suppliers = [
+  'BuildMart Supplies Ltd', 'ProBuild Materials', 'TradePoint Direct', 'Construction Depot',
+  'Jewson Ltd', 'Travis Perkins', 'Selco Builders', 'RGB Building Supplies',
+  'Buildbase', 'MKM Building Supplies', 'Gibbs & Dandy', 'Covers Timber & Builders',
+  'PowerTech Electrical', 'Edmundson Electrical', 'City Electrical Factors', 'Rexel UK',
+  'PlumbCenter', 'Wolseley Plumb', 'Screwfix Trade', 'Toolstation Pro',
+  'HSS Hire', 'Speedy Hire', 'A-Plant', 'Brandon Hire Station',
+  'SIG Roofing', 'Roofing Superstore', 'About Roofing Supplies', 'Burton Roofing',
+  'Aggregate Industries', 'Tarmac', 'CEMEX UK', 'Hanson UK',
+  'British Steel', 'Severfield', 'Barrett Steel', 'Metal Supplies Ltd',
+  'Saint-Gobain Glass', 'Pilkington UK', 'Guardian Glass', 'Kawneer UK'
+];
+
+// Helper function to generate random date between two dates
+function randomDate(start: Date, end: Date): Date {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+// Helper function to generate random amount
+function randomAmount(min: number, max: number): string {
+  return (Math.random() * (max - min) + min).toFixed(2);
+}
+
+async function seedComprehensive() {
+  console.log('🌱 Starting comprehensive database seed...\n');
+
+  try {
+    // Clear existing data
+    console.log('🧹 Clearing existing data...');
+    await db.execute(sql`TRUNCATE TABLE milestone.audit_logs CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.export_history CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.user_preferences CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.project_estimates CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.bills CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.invoices CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.projects CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.build_phases CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE milestone.sync_status CASCADE`);
+    console.log('✅ Existing data cleared\n');
+
+    // Insert build phases
+    console.log('📦 Inserting build phases...');
+    const phasesData = [
+      {
+        id: 'BP001',
+        xero_phase_id: 'XBP001',
+        name: 'Planning & Design',
+        description: 'Initial planning, architectural design, and permits',
+        tracking_category_id: 'TRACK002',
+        display_order: 1,
+        color: '#3B82F6',
+        icon: 'blueprint',
+        typical_duration_days: 30,
+      },
+      {
+        id: 'BP002',
+        xero_phase_id: 'XBP002',
+        name: 'Foundation',
+        description: 'Site preparation and foundation work',
+        tracking_category_id: 'TRACK002',
+        display_order: 2,
+        color: '#8B5CF6',
+        icon: 'foundation',
+        typical_duration_days: 21,
+      },
+      {
+        id: 'BP003',
+        xero_phase_id: 'XBP003',
+        name: 'Framing',
+        description: 'Structural framing and roofing',
+        tracking_category_id: 'TRACK002',
+        display_order: 3,
+        color: '#10B981',
+        icon: 'frame',
+        typical_duration_days: 28,
+      },
+      {
+        id: 'BP004',
+        xero_phase_id: 'XBP004',
+        name: 'MEP Installation',
+        description: 'Mechanical, electrical, and plumbing',
+        tracking_category_id: 'TRACK002',
+        display_order: 4,
+        color: '#F59E0B',
+        icon: 'electrical',
+        typical_duration_days: 21,
+      },
+      {
+        id: 'BP005',
+        xero_phase_id: 'XBP005',
+        name: 'Interior Finishes',
+        description: 'Drywall, flooring, painting, and fixtures',
+        tracking_category_id: 'TRACK002',
+        display_order: 5,
+        color: '#EF4444',
+        icon: 'paint',
+        typical_duration_days: 35,
+      },
+    ];
+    await db.insert(buildPhases).values(phasesData);
+    console.log(`✅ Inserted ${phasesData.length} build phases\n`);
+
+    // Generate 50+ projects
+    console.log('🏗️ Generating projects...');
+    const projectsData = [];
+    const numProjects = 55; // Generate 55 projects
+
+    for (let i = 0; i < numProjects; i++) {
+      const status = Math.random() > 0.3 ? 'active' : 'completed';
+      const startDate = randomDate(new Date('2023-01-01'), new Date('2024-06-01'));
+      const endDate = new Date(startDate);
+      endDate.setMonth(endDate.getMonth() + Math.floor(Math.random() * 18) + 3);
+
+      // Generate project name
+      const prefix = projectPrefixes[Math.floor(Math.random() * projectPrefixes.length)];
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      const type = projectTypes[Math.floor(Math.random() * projectTypes.length)];
+      const projectName = `${prefix} ${location} ${type}`;
+
+      projectsData.push({
+        id: `PROJ${String(i + 1).padStart(3, '0')}`,
+        xero_project_id: `XPROJ${String(i + 1).padStart(3, '0')}`,
+        name: projectName,
+        client_name: companies[i % companies.length],
+        client_contact_id: `CONT${String(i + 1).padStart(3, '0')}`,
+        tracking_category_id: 'TRACK001',
+        status: status,
+        start_date: startDate.toISOString().split('T')[0],
+        end_date: endDate.toISOString().split('T')[0],
+        project_manager: projectManagers[i % projectManagers.length],
+        is_active: status === 'active',
+        metadata: {
+          location: location,
+          type: type.split(' ')[0].toLowerCase(),
+          size: ['small', 'medium', 'large', 'enterprise'][Math.floor(Math.random() * 4)]
+        },
+      });
+    }
+    await db.insert(projects).values(projectsData);
+    console.log(`✅ Inserted ${projectsData.length} projects\n`);
+
+    // Generate invoices (200+)
+    console.log('💰 Generating invoices...');
+    const invoicesData = [];
+    let invoiceCounter = 1;
+
+    for (const project of projectsData) {
+      // Each project gets 3-5 invoices
+      const numInvoices = Math.floor(Math.random() * 3) + 3;
+
+      for (let j = 0; j < numInvoices; j++) {
+        const phase = phasesData[j % phasesData.length];
+        const invoiceDate = randomDate(
+          new Date(project.start_date),
+          new Date(project.end_date)
+        );
+        const dueDate = new Date(invoiceDate);
+        dueDate.setDate(dueDate.getDate() + 30);
+
+        // Determine invoice status
+        const statusRoll = Math.random();
+        const status = statusRoll > 0.7 ? 'PAID' : statusRoll > 0.4 ? 'AUTHORISED' : 'DRAFT';
+
+        // Generate amounts based on project size
+        const baseAmount = project.metadata.size === 'enterprise' ? 500000 :
+                          project.metadata.size === 'large' ? 200000 :
+                          project.metadata.size === 'medium' ? 50000 : 10000;
+
+        const subTotal = randomAmount(baseAmount * 0.5, baseAmount * 1.5);
+        const taxAmount = (parseFloat(subTotal) * 0.2).toFixed(2);
+        const total = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
+        const amountPaid = status === 'PAID' ? total :
+                          status === 'AUTHORISED' ? randomAmount(0, parseFloat(total)) : '0.00';
+        const amountDue = (parseFloat(total) - parseFloat(amountPaid)).toFixed(2);
+
+        invoicesData.push({
+          id: `INV${String(invoiceCounter).padStart(3, '0')}`,
+          xero_invoice_id: `XINV${String(invoiceCounter).padStart(3, '0')}`,
+          invoice_number: `INV-2024-${String(invoiceCounter).padStart(4, '0')}`,
+          reference: `${project.name} - ${phase.name}`,
+          contact_id: project.client_contact_id,
+          contact_name: project.client_name,
+          project_id: project.id,
+          build_phase_id: phase.id,
+          type: 'ACCREC' as const,
+          status: status as 'DRAFT' | 'AUTHORISED' | 'PAID' | 'VOIDED',
+          line_amount_types: 'Exclusive',
+          sub_total: subTotal,
+          total_tax: taxAmount,
+          total: total,
+          amount_paid: amountPaid,
+          amount_due: amountDue,
+          currency_code: 'GBP',
+          invoice_date: invoiceDate.toISOString().split('T')[0],
+          due_date: dueDate.toISOString().split('T')[0],
+          fully_paid_date: status === 'PAID' ? dueDate.toISOString().split('T')[0] : null,
+          line_items: [],
+          payments: [],
+          credit_notes: [],
+          attachments: [],
+          xero_data: {},
+        });
+
+        invoiceCounter++;
+      }
+    }
+    await db.insert(invoices).values(invoicesData);
+    console.log(`✅ Inserted ${invoicesData.length} invoices\n`);
+
+    // Generate bills (150+)
+    console.log('📄 Generating bills...');
+    const billsData = [];
+    let billCounter = 1;
+
+    for (const project of projectsData) {
+      // Each project gets 2-4 bills
+      const numBills = Math.floor(Math.random() * 3) + 2;
+
+      for (let j = 0; j < numBills; j++) {
+        const phase = phasesData[j % phasesData.length];
+        const billDate = randomDate(
+          new Date(project.start_date),
+          new Date(project.end_date)
+        );
+        const dueDate = new Date(billDate);
+        dueDate.setDate(dueDate.getDate() + 30);
+
+        // Determine bill status
+        const statusRoll = Math.random();
+        const status = statusRoll > 0.6 ? 'PAID' : statusRoll > 0.3 ? 'AUTHORISED' : 'DRAFT';
+
+        // Generate amounts (bills are typically 40-60% of invoice amounts)
+        const baseAmount = project.metadata.size === 'enterprise' ? 200000 :
+                          project.metadata.size === 'large' ? 80000 :
+                          project.metadata.size === 'medium' ? 20000 : 5000;
+
+        const subTotal = randomAmount(baseAmount * 0.5, baseAmount * 1.5);
+        const taxAmount = (parseFloat(subTotal) * 0.2).toFixed(2);
+        const total = (parseFloat(subTotal) + parseFloat(taxAmount)).toFixed(2);
+        const amountPaid = status === 'PAID' ? total : '0.00';
+        const amountDue = (parseFloat(total) - parseFloat(amountPaid)).toFixed(2);
+
+        billsData.push({
+          id: `BILL${String(billCounter).padStart(3, '0')}`,
+          xero_bill_id: `XBILL${String(billCounter).padStart(3, '0')}`,
+          bill_number: `BILL-2024-${String(billCounter).padStart(4, '0')}`,
+          reference: `${phase.name} - ${project.name}`,
+          contact_id: `SUPP${String((billCounter % 40) + 1).padStart(3, '0')}`,
+          contact_name: suppliers[billCounter % suppliers.length],
+          project_id: project.id,
+          build_phase_id: phase.id,
+          type: 'BILL' as const,
+          status: status as 'DRAFT' | 'AUTHORISED' | 'PAID' | 'VOIDED',
+          sub_total: subTotal,
+          total_tax: taxAmount,
+          total: total,
+          amount_paid: amountPaid,
+          amount_due: amountDue,
+          currency_code: 'GBP',
+          bill_date: billDate.toISOString().split('T')[0],
+          due_date: dueDate.toISOString().split('T')[0],
+          fully_paid_date: status === 'PAID' ? dueDate.toISOString().split('T')[0] : null,
+          line_items: [],
+          payments: [],
+          attachments: [],
+          xero_data: {},
+        });
+
+        billCounter++;
+      }
+    }
+    await db.insert(bills).values(billsData);
+    console.log(`✅ Inserted ${billsData.length} bills\n`);
+
+    // Generate project estimates for active projects
+    console.log('📊 Generating project estimates...');
+    const estimatesData = [];
+
+    for (const project of projectsData.filter(p => p.status === 'active')) {
+      // Add 1-2 estimates per active project
+      const phase = phasesData[Math.floor(Math.random() * phasesData.length)];
+
+      estimatesData.push({
+        project_id: project.id,
+        build_phase_id: phase.id,
+        estimate_type: 'revenue' as const,
+        amount: randomAmount(100000, 500000),
+        currency: 'GBP',
+        notes: `Revenue estimate for ${phase.name}`,
+        created_by: project.project_manager.toLowerCase().replace(' ', '.') + '@company.com',
+        updated_by: project.project_manager.toLowerCase().replace(' ', '.') + '@company.com',
+        version: 1,
+      });
+
+      estimatesData.push({
+        project_id: project.id,
+        build_phase_id: phase.id,
+        estimate_type: 'cost' as const,
+        amount: randomAmount(50000, 300000),
+        currency: 'GBP',
+        notes: `Cost estimate for ${phase.name}`,
+        created_by: project.project_manager.toLowerCase().replace(' ', '.') + '@company.com',
+        updated_by: project.project_manager.toLowerCase().replace(' ', '.') + '@company.com',
+        version: 1,
+      });
+    }
+    await db.insert(projectEstimates).values(estimatesData);
+    console.log(`✅ Inserted ${estimatesData.length} project estimates\n`);
+
+    // Insert sync status record
+    console.log('🔄 Inserting sync status...');
+    const syncData = {
+      sync_type: 'full_sync',
+      status: 'COMPLETED' as const,
+      started_at: new Date(),
+      completed_at: new Date(),
+      records_processed: invoicesData.length + billsData.length,
+      records_created: invoicesData.length + billsData.length,
+      records_updated: 0,
+      records_failed: 0,
+      triggered_by: 'seed_script',
+    };
+    await db.insert(syncStatus).values(syncData);
+    console.log('✅ Inserted sync status record\n');
+
+    // Insert sample audit logs
+    console.log('📝 Inserting audit logs...');
+    const auditData = [];
+    for (let i = 0; i < 10; i++) {
+      auditData.push({
+        event_type: 'data_import',
+        event_action: 'create',
+        entity_id: projectsData[i].id,
+        user_id: 'seed_script',
+        user_email: 'system@milestone.com',
+        metadata: { source: 'comprehensive_seed' },
+      });
+    }
+    await db.insert(auditLogs).values(auditData);
+    console.log(`✅ Inserted ${auditData.length} audit logs\n`);
+
+    // Insert user preferences
+    console.log('⚙️ Inserting user preferences...');
+    const preferencesData = {
+      user_id: 'user_2abc123',
+      default_view: 'dashboard',
+      theme: 'light',
+      date_format: 'DD/MM/YYYY',
+      currency: 'GBP',
+      notifications: { email: true, in_app: true },
+      dashboard_layout: {
+        widgets: ['revenue_chart', 'project_list', 'alerts'],
+        collapsed: []
+      },
+      saved_filters: [],
+      favorite_projects: projectsData.slice(0, 5).map(p => p.id),
+    };
+    await db.insert(userPreferences).values(preferencesData);
+    console.log('✅ Inserted user preferences\n');
+
+    // Refresh materialized view
+    console.log('🔄 Refreshing materialized view...');
+    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY milestone.project_phase_summary`);
+    console.log('✅ Materialized view refreshed\n');
+
+    // Calculate statistics
+    const totalRevenue = invoicesData.reduce((sum, inv) => sum + parseFloat(inv.sub_total), 0);
+    const totalCosts = billsData.reduce((sum, bill) => sum + parseFloat(bill.sub_total), 0);
+    const profit = totalRevenue - totalCosts;
+    const profitMargin = (profit / totalRevenue) * 100;
+
+    console.log('🎉 Comprehensive database seeding completed successfully!');
+    console.log('\n📊 Summary:');
+    console.log(`   - ${phasesData.length} build phases`);
+    console.log(`   - ${projectsData.length} projects`);
+    console.log(`   - ${invoicesData.length} invoices (Total: £${totalRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2 })})`);
+    console.log(`   - ${billsData.length} bills (Total: £${totalCosts.toLocaleString('en-GB', { minimumFractionDigits: 2 })})`);
+    console.log(`   - ${estimatesData.length} project estimates`);
+    console.log(`   - Profit: £${profit.toLocaleString('en-GB', { minimumFractionDigits: 2 })} (${profitMargin.toFixed(1)}%)`);
+    console.log(`   - ${auditData.length} audit log entries`);
+    console.log(`   - 1 sync status record`);
+    console.log(`   - 1 user preference record`);
+
+    console.log('\n📈 Project Distribution:');
+    console.log(`   - Active: ${projectsData.filter(p => p.status === 'active').length}`);
+    console.log(`   - Completed: ${projectsData.filter(p => p.status === 'completed').length}`);
+    console.log(`   - Small: ${projectsData.filter(p => p.metadata.size === 'small').length}`);
+    console.log(`   - Medium: ${projectsData.filter(p => p.metadata.size === 'medium').length}`);
+    console.log(`   - Large: ${projectsData.filter(p => p.metadata.size === 'large').length}`);
+    console.log(`   - Enterprise: ${projectsData.filter(p => p.metadata.size === 'enterprise').length}`);
+
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Seeding failed:', error);
+    process.exit(1);
+  }
+}
+
+seedComprehensive();

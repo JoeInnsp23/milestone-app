@@ -1,7 +1,7 @@
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { desc, eq, and, isNull } from 'drizzle-orm';
-import { subMonths } from 'date-fns';
+import { subMonths, subYears, subDays } from 'date-fns';
 import { unstable_cache } from 'next/cache';
 import {
   projects,
@@ -50,17 +50,31 @@ async function _getDashboardStats() {
     .orderBy(desc(syncStatus.completed_at))
     .limit(1);
 
-  const result = stats && stats.length > 0 ? stats[0] as Record<string, unknown> : {
-    total_revenue: 0,
-    total_costs: 0,
-    total_profit: 0,
-    profit_margin: 0,
-    active_projects: 0,
-    pending_invoices: 0,
-    overdue_invoices: 0,
+  const rawResult = stats && stats.length > 0 ? stats[0] as Record<string, unknown> : {
+    total_revenue: '0',
+    total_costs: '0',
+    total_profit: '0',
+    profit_margin: '0',
+    active_projects: '0',
+    pending_invoices: '0',
+    overdue_invoices: '0',
     date_from: null,
     date_to: null,
     company_name: 'Build By Milestone Ltd'
+  };
+
+  // Convert decimal strings to numbers
+  const result = {
+    total_revenue: parseFloat(String(rawResult.total_revenue || '0')),
+    total_costs: parseFloat(String(rawResult.total_costs || '0')),
+    total_profit: parseFloat(String(rawResult.total_profit || '0')),
+    profit_margin: parseFloat(String(rawResult.profit_margin || '0')),
+    active_projects: parseInt(String(rawResult.active_projects || '0')),
+    pending_invoices: parseInt(String(rawResult.pending_invoices || '0')),
+    overdue_invoices: parseInt(String(rawResult.overdue_invoices || '0')),
+    date_from: rawResult.date_from,
+    date_to: rawResult.date_to,
+    company_name: rawResult.company_name
   };
 
   return {
@@ -100,7 +114,28 @@ export async function getProjectSummaries() {
       SELECT * FROM milestone.project_phase_summary
       ORDER BY project_name, phase_order
     `);
-    return summaries || [];
+
+    // Convert decimal strings to numbers for calculations
+    // We use parseFloat here since these values will be used in the UI
+    return (summaries || []).map((row: Record<string, unknown>) => ({
+      project_id: row.project_id as string,
+      project_name: row.project_name as string,
+      client_name: row.client_name as string | null,
+      project_status: row.project_status as string | null,
+      phase_id: row.phase_id as string | null,
+      phase_name: row.phase_name as string | null,
+      phase_order: row.phase_order as number | null,
+      actual_revenue: parseFloat((row.actual_revenue as string) || '0'),
+      revenue_paid: parseFloat((row.revenue_paid as string) || '0'),
+      actual_costs: parseFloat((row.actual_costs as string) || '0'),
+      costs_paid: parseFloat((row.costs_paid as string) || '0'),
+      profit: parseFloat((row.profit as string) || '0'),
+      profit_margin: parseFloat((row.profit_margin as string) || '0'),
+      estimated_revenue: parseFloat((row.estimated_revenue as string) || '0'),
+      estimated_cost: parseFloat((row.estimated_cost as string) || '0'),
+      invoice_count: parseInt((row.invoice_count as string) || '0'),
+      bill_count: parseInt((row.bill_count as string) || '0')
+    }));
   } catch (error) {
     console.error('Error fetching project summaries:', error);
     return [];
@@ -417,16 +452,43 @@ export async function refreshDashboardView() {
 }
 
 // Get monthly revenue data for charts with period calculations
-export async function getMonthlyRevenue(months: number = 6) {
-  // Convert date to ISO string format that PostgreSQL understands (YYYY-MM-DD)
-  const startDate = subMonths(new Date(), months).toISOString().split('T')[0];
+export async function getMonthlyRevenue(period: '1m' | '3m' | '6m' | '1y' | 'all' = '6m') {
+  // Calculate yesterday as the end date
+  const yesterday = subDays(new Date(), 1);
+  const endDate = yesterday.toISOString().split('T')[0];
+
+  let startDate: string;
+
+  if (period === 'all') {
+    // For 'all', get the earliest date from invoices and bills
+    const earliestDateQuery = `
+      SELECT MIN(date) as earliest_date FROM (
+        SELECT MIN(invoice_date) as date FROM milestone.invoices WHERE invoice_date IS NOT NULL
+        UNION ALL
+        SELECT MIN(bill_date) as date FROM milestone.bills WHERE bill_date IS NOT NULL
+      ) dates
+    `;
+    const result = await db.execute(sql.raw(earliestDateQuery));
+    startDate = result[0]?.earliest_date ?
+      new Date(result[0].earliest_date as string).toISOString().split('T')[0] :
+      subYears(yesterday, 2).toISOString().split('T')[0]; // Default to 2 years if no data
+  } else {
+    // Calculate start date based on period
+    const periodMap = {
+      '1m': () => subMonths(yesterday, 1),
+      '3m': () => subMonths(yesterday, 3),
+      '6m': () => subMonths(yesterday, 6),
+      '1y': () => subYears(yesterday, 1),
+    };
+    startDate = periodMap[period]().toISOString().split('T')[0];
+  }
 
   // Use raw SQL string to avoid parameter type inference issues with PostgreSQL
   const query = `
     WITH months AS (
       SELECT generate_series(
         date_trunc('month', '${startDate}'::date),
-        date_trunc('month', CURRENT_DATE),
+        date_trunc('month', '${endDate}'::date),
         '1 month'::interval
       )::date as month
     ),
@@ -437,6 +499,7 @@ export async function getMonthlyRevenue(months: number = 6) {
       FROM milestone.invoices
       WHERE status IN ('AUTHORISED', 'PAID')
         AND invoice_date >= '${startDate}'::date
+        AND invoice_date <= '${endDate}'::date
       GROUP BY date_trunc('month', invoice_date)
     ),
     bill_data AS (
@@ -446,6 +509,7 @@ export async function getMonthlyRevenue(months: number = 6) {
       FROM milestone.bills
       WHERE status IN ('AUTHORISED', 'PAID')
         AND bill_date >= '${startDate}'::date
+        AND bill_date <= '${endDate}'::date
       GROUP BY date_trunc('month', bill_date)
     )
     SELECT
@@ -461,7 +525,13 @@ export async function getMonthlyRevenue(months: number = 6) {
 
   const monthlyData = await db.execute(sql.raw(query));
 
-  return monthlyData || [];
+  // Convert decimal strings to numbers
+  return (monthlyData || []).map((row: Record<string, unknown>) => ({
+    month: row.month as string,
+    revenue: parseFloat((row.revenue as string) || '0'),
+    costs: parseFloat((row.costs as string) || '0'),
+    profit: parseFloat((row.profit as string) || '0')
+  }));
 }
 
 // Calculate period-over-period metrics
@@ -547,7 +617,14 @@ export async function getTopProjects(limit: number = 10) {
     LIMIT ${limit}
   `);
 
-  return projects || [];
+  // Convert decimal strings to numbers
+  return (projects || []).map((row: Record<string, unknown>) => ({
+    ...row,
+    total_revenue: parseFloat((row.total_revenue as string) || '0'),
+    total_costs: parseFloat((row.total_costs as string) || '0'),
+    total_profit: parseFloat((row.total_profit as string) || '0'),
+    avg_margin: parseFloat((row.avg_margin as string) || '0')
+  }));
   } catch (error) {
     console.error('Error fetching top projects:', error);
     return [];

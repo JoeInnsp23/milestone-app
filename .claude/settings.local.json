@@ -52,7 +52,11 @@
       "Bash(npx shadcn@latest add:*)",
       "WebFetch(domain:stackoverflow.com)",
       "Bash(npx drizzle-kit migrate:list:*)",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dn\")",
+      "Bash(sudo rm:*)",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT TO_CHAR(date_trunc(''month'', invoice_date), ''Mon YYYY'') as month, COUNT(*) as invoice_count, SUM(total) as total FROM invoices WHERE invoice_date IS NOT NULL GROUP BY date_trunc(''month'', invoice_date) ORDER BY date_trunc(''month'', invoice_date) LIMIT 10;\")",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT * FROM milestone.project_phase_summary LIMIT 2;\")"
     ],
     "deny": [],
     "ask": []

@@ -3,6 +3,7 @@ import { getDashboardStats, getProjectSummaries, getMonthlyRevenue, getTopProjec
 import { Navigation } from '@/components/dashboard/navigation';
 import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
+import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
 import { format } from 'date-fns';
 
@@ -20,10 +21,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const view = params?.view || 'overview';
 
   // Fetch data using Server Component
-  const [statsRaw, projectSummaries, , topProjects] = await Promise.all([
+  const [statsRaw, projectSummaries, monthlyRevenue, topProjects] = await Promise.all([
     getDashboardStats(),
     getProjectSummaries(),
-    getMonthlyRevenue(6),
+    getMonthlyRevenue('6m'),
     getTopProjects(10),
   ]);
 
@@ -128,8 +129,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               <h1>Projects P&L Dashboard</h1>
               <div className="subtitle">
                 {stats.company_name || 'Build By Milestone Ltd'} -
-                {stats.date_from ? ` ${format(new Date(stats.date_from), 'd MMMM yyyy')}` : ' 1 January 2024'} to
-                {stats.date_to ? ` ${format(new Date(stats.date_to), 'd MMMM yyyy')}` : ' 31 December 2024'}
+                {stats.date_from && stats.date_to ?
+                  ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
+                  ' All Time'}
               </div>
             </div>
 
@@ -165,13 +167,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <div className="chart-title">Revenue Breakdown</div>
                 <RevenueChart data={revenueBreakdownData} />
               </div>
-              {/* TODO: Add Cost Analysis Chart */}
-              <div className="chart-card">
-                <div className="chart-title">Cost Analysis</div>
-                <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Coming Soon</span>
-                </div>
-              </div>
+              <MonthlyTrendWrapper
+                initialData={Array.isArray(monthlyRevenue) ? monthlyRevenue.map((item: Record<string, unknown>) => ({
+                  month: String(item.month || ''),
+                  revenue: Number(item.revenue || 0),
+                  costs: Number(item.costs || 0),
+                  profit: Number(item.profit || 0)
+                })) : []}
+              />
               {/* TODO: Add Distribution Chart */}
               <div className="chart-card">
                 <div className="chart-title">Project Performance Distribution</div>
