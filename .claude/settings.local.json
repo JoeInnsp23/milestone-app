@@ -46,7 +46,8 @@
       "mcp__context7__get-library-docs",
       "WebFetch(domain:clerk.com)",
       "Bash(npx tsc:*)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
