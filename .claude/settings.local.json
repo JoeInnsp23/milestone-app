@@ -12,7 +12,13 @@
       "Bash(git commit:*)",
       "Bash(npm run lint)",
       "Bash(npm run type-check:*)",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git checkout:*)",
+      "mcp__context7__get-library-docs",
+      "mcp__context7__resolve-library-id",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add dropdown-menu:*)",
+      "Bash(npx shadcn@latest add radio-group:*)"
     ],
     "deny": [],
     "ask": []

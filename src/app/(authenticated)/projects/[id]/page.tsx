@@ -6,6 +6,7 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectKPICards } from '@/components/projects/project-kpi-cards';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
 import { ProjectTabs } from '@/components/projects/project-tabs';
+import { ExportButton } from '@/components/export/export-button';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -61,12 +62,17 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
         {/* Header Card */}
         <div className="header-card">
-          <h1>{project.name}</h1>
-          <div className="subtitle">
-            {project.client_name || 'No Client'} -
-            {project.start_date && project.end_date ?
-              ` ${new Date(project.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} to ${new Date(project.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}` :
-              ' Date Range Not Set'}
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              <h1>{project.name}</h1>
+              <div className="subtitle">
+                {project.client_name || 'No Client'} -
+                {project.start_date && project.end_date ?
+                  ` ${new Date(project.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} to ${new Date(project.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}` :
+                  ' Date Range Not Set'}
+              </div>
+            </div>
+            <ExportButton projectId={resolvedParams.id} template="summary" />
           </div>
         </div>
 

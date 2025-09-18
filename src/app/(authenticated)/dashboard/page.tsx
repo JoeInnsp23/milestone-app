@@ -5,6 +5,7 @@ import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
+import { ExportButton } from '@/components/export/export-button';
 import { format } from 'date-fns';
 
 interface DashboardPageProps {
@@ -126,12 +127,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <>
             {/* Header Card */}
             <div className="header-card">
-              <h1>Projects P&L Dashboard</h1>
-              <div className="subtitle">
-                {stats.company_name || 'Build By Milestone Ltd'} -
-                {stats.date_from && stats.date_to ?
-                  ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
-                  ' All Time'}
+              <div className="flex justify-between items-center">
+                <div className="flex-1">
+                  <h1>Projects P&L Dashboard</h1>
+                  <div className="subtitle">
+                    {stats.company_name || 'Build By Milestone Ltd'} -
+                    {stats.date_from && stats.date_to ?
+                      ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
+                      ' All Time'}
+                  </div>
+                </div>
+                <ExportButton template="detailed" />
               </div>
             </div>
 
