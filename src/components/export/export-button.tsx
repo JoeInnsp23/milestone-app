@@ -16,7 +16,6 @@ import { exportPDF, exportExcel } from '@/app/actions/export';
 
 interface ExportButtonProps {
   projectId?: string;
-  template?: 'summary' | 'detailed';
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
   size?: 'sm' | 'default' | 'lg';
@@ -24,7 +23,6 @@ interface ExportButtonProps {
 
 export function ExportButton({
   projectId,
-  template = 'summary',
   className,
   variant = 'outline',
   size = 'default',

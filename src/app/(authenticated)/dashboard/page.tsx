@@ -137,7 +137,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                       ' All Time'}
                   </div>
                 </div>
-                <ExportButton template="detailed" />
+                <ExportButton />
               </div>
             </div>
 

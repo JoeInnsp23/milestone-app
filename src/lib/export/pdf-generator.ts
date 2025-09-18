@@ -1,21 +1,21 @@
 import PDFDocument from 'pdfkit';
 import { format } from 'date-fns';
-import { getProjectExportData, getMonthlyMetricsExport, getDashboardExportData } from '@/lib/export/queries';
+import { getProjectExportData, getDashboardExportData } from '@/lib/export/queries';
 import { formatCurrency, formatPercentage, formatDate } from '@/lib/export/utils';
 import { EXPORT_CONFIG } from '@/lib/export/config';
+import type { InvoiceAggregated, ProjectWithAggregates } from '@/types/export';
 
 export async function generateSummaryPDF(
   userId: string,
   projectId?: string
 ): Promise<Buffer> {
   const result = await getProjectExportData(userId, projectId);
-  const projectData = result as any;
 
-  if (!projectData.rows || !projectData.rows.length) {
+  if (!result.rows || !result.rows.length) {
     throw new Error('No project data found');
   }
 
-  const project = projectData.rows[0];
+  const project = result.rows[0];
 
   const doc = new PDFDocument({
     margin: EXPORT_CONFIG.pdf.margins.top,
@@ -61,7 +61,7 @@ export async function generateSummaryPDF(
      .text('TOTAL REVENUE', EXPORT_CONFIG.pdf.margins.left, kpiY);
   doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
      .fillColor(EXPORT_CONFIG.pdf.colors.text)
-     .text(formatCurrency(project.revenue || 0), EXPORT_CONFIG.pdf.margins.left, kpiY + 15);
+     .text(formatCurrency(Number(project.revenue) || 0), EXPORT_CONFIG.pdf.margins.left, kpiY + 15);
 
   // Costs
   doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
@@ -69,10 +69,10 @@ export async function generateSummaryPDF(
      .text('TOTAL COSTS', EXPORT_CONFIG.pdf.margins.left + kpiWidth, kpiY);
   doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
      .fillColor(EXPORT_CONFIG.pdf.colors.text)
-     .text(formatCurrency(project.costs || 0), EXPORT_CONFIG.pdf.margins.left + kpiWidth, kpiY + 15);
+     .text(formatCurrency(Number(project.costs) || 0), EXPORT_CONFIG.pdf.margins.left + kpiWidth, kpiY + 15);
 
   // Net Profit
-  const profit = project.profit || 0;
+  const profit = Number(project.profit) || 0;
   doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
      .fillColor(EXPORT_CONFIG.pdf.colors.muted)
      .text('NET PROFIT', EXPORT_CONFIG.pdf.margins.left + kpiWidth * 2, kpiY);
@@ -93,7 +93,7 @@ export async function generateSummaryPDF(
     ['Status', project.status || 'Active'],
     ['Start Date', formatDate(project.start_date)],
     ['End Date', formatDate(project.end_date)],
-    ['Margin', formatPercentage(project.margin || 0)]
+    ['Margin', formatPercentage(Number(project.margin) || 0)]
   ];
 
   doc.fontSize(EXPORT_CONFIG.pdf.fontSize.body);
@@ -110,9 +110,9 @@ export async function generateSummaryPDF(
     doc.moveDown();
 
     doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small);
-    project.invoices.forEach((invoice: any) => {
+    project.invoices.forEach((invoice: InvoiceAggregated) => {
       doc.text(
-        `${invoice.invoice_number || 'N/A'} - ${formatDate(invoice.issue_date)} - ${formatCurrency(invoice.total || 0)} - ${invoice.status || 'N/A'}`,
+        `${invoice.invoice_number || 'N/A'} - ${formatDate(invoice.invoice_date)} - ${formatCurrency(Number(invoice.total) || 0)} - ${invoice.status || 'N/A'}`,
         EXPORT_CONFIG.pdf.margins.left
       );
       doc.moveDown(0.5);
@@ -178,9 +178,8 @@ export async function generateDetailedPDF(
 
   // Summary statistics
   const stats = dashboardData.stats;
-  const totalRevenue = stats?.total_revenue || 0;
-  const totalCosts = stats?.total_costs || 0;
-  const totalProfit = stats?.total_profit || 0;
+  const totalRevenue = Number(stats?.total_revenue) || 0;
+  const totalProfit = Number(stats?.total_profit) || 0;
   const totalProjects = stats?.total_projects || 0;
   const profitableProjects = stats?.profitable_projects || 0;
 
@@ -253,17 +252,17 @@ export async function generateDetailedPDF(
     doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
        .fillColor(EXPORT_CONFIG.pdf.colors.text);
 
-    dashboardData.projects.slice(0, 15).forEach((project: any) => {
+    dashboardData.projects.slice(0, 15).forEach((project: ProjectWithAggregates) => {
       const rowY = doc.y;
-      const profit = project.profit || 0;
-      const margin = project.margin || 0;
+      const profit = Number(project.profit) || 0;
+      const margin = Number(project.margin) || 0;
 
       xPos = EXPORT_CONFIG.pdf.margins.left;
       doc.text(project.name || 'Unnamed', xPos, rowY);
       xPos += colWidths[0];
-      doc.text(formatCurrency(project.revenue || 0), xPos, rowY);
+      doc.text(formatCurrency(Number(project.revenue) || 0), xPos, rowY);
       xPos += colWidths[1];
-      doc.text(formatCurrency(project.costs || 0), xPos, rowY);
+      doc.text(formatCurrency(Number(project.costs) || 0), xPos, rowY);
       xPos += colWidths[2];
       doc.fillColor(profit > 0 ? EXPORT_CONFIG.pdf.colors.success : EXPORT_CONFIG.pdf.colors.danger)
          .text(formatCurrency(profit), xPos, rowY);
@@ -283,9 +282,9 @@ export async function generateDetailedPDF(
     doc.moveDown();
 
     doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small);
-    dashboardData.monthlyData.slice(0, 12).forEach((month: any) => {
+    dashboardData.monthlyData.slice(0, 12).forEach((month) => {
       doc.text(
-        `${format(new Date(month.month), 'MMM yyyy')}: Revenue ${formatCurrency(month.revenue || 0)}, Costs ${formatCurrency(month.costs || 0)}, Profit ${formatCurrency(month.profit || 0)}`,
+        `${format(new Date(month.month), 'MMM yyyy')}: Revenue ${formatCurrency(Number(month.revenue) || 0)}, Costs ${formatCurrency(Number(month.costs) || 0)}, Profit ${formatCurrency(Number(month.profit) || 0)}`,
         EXPORT_CONFIG.pdf.margins.left
       );
       doc.moveDown(0.5);

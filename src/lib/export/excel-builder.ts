@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { getProjectExportData, getMonthlyMetricsExport, getDashboardExportData } from '@/lib/export/queries';
 import { EXPORT_CONFIG } from '@/lib/export/config';
 import { formatDate } from '@/lib/export/utils';
+import type { ProjectWithAggregates, InvoiceAggregated, BillAggregated, MonthlyMetricsRow } from '@/types/export';
 
 export class ExcelBuilder {
   private workbook: ExcelJS.Workbook;
@@ -24,17 +25,15 @@ export class ExcelBuilder {
       ? await getProjectExportData(userId, projectId)
       : await getProjectExportData(userId);
 
-    // Type cast the result to access rows
-    const data = result as any;
 
     const sheet = this.workbook.addWorksheet('Summary', {
       properties: { tabColor: { argb: EXPORT_CONFIG.excel.primaryColor } },
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
     });
 
-    if (projectId && data.rows && data.rows.length > 0) {
+    if (projectId && result.rows && result.rows.length > 0) {
       // Single project summary
-      const project = data.rows[0];
+      const project = result.rows[0];
       sheet.columns = [
         { header: 'Metric', key: 'metric', width: 25 },
         { header: 'Value', key: 'value', width: 30 },
@@ -49,8 +48,10 @@ export class ExcelBuilder {
         fgColor: { argb: EXPORT_CONFIG.excel.primaryColor },
       };
 
-      const profit = (project.revenue || 0) - (project.costs || 0);
-      const margin = project.revenue > 0 ? (profit / project.revenue) : 0;
+      const revenue = Number(project.revenue) || 0;
+      const costs = Number(project.costs) || 0;
+      const profit = revenue - costs;
+      const margin = revenue > 0 ? (profit / revenue) : 0;
 
       sheet.addRows([
         { metric: 'Project Name', value: project.name },
@@ -58,8 +59,8 @@ export class ExcelBuilder {
         { metric: 'Status', value: project.status || 'Active' },
         { metric: 'Start Date', value: formatDate(project.start_date) },
         { metric: 'End Date', value: formatDate(project.end_date) },
-        { metric: 'Revenue', value: project.revenue || 0 },
-        { metric: 'Costs', value: project.costs || 0 },
+        { metric: 'Revenue', value: revenue },
+        { metric: 'Costs', value: costs },
         { metric: 'Net Profit', value: profit },
         { metric: 'Margin %', value: `${(margin * 100).toFixed(1)}%` },
       ]);
@@ -96,7 +97,7 @@ export class ExcelBuilder {
 
         invoiceSheet.columns = [
           { header: 'Invoice Number', key: 'invoice_number', width: 20 },
-          { header: 'Issue Date', key: 'issue_date', width: 15 },
+          { header: 'Invoice Date', key: 'invoice_date', width: 15 },
           { header: 'Due Date', key: 'due_date', width: 15 },
           { header: 'Amount', key: 'total', width: 15 },
           { header: 'Status', key: 'status', width: 15 },
@@ -110,12 +111,12 @@ export class ExcelBuilder {
           fgColor: { argb: EXPORT_CONFIG.excel.headerColor },
         };
 
-        project.invoices.forEach((invoice: any) => {
+        project.invoices.forEach((invoice: InvoiceAggregated) => {
           invoiceSheet.addRow({
             invoice_number: invoice.invoice_number || 'N/A',
-            issue_date: formatDate(invoice.issue_date),
+            invoice_date: formatDate(invoice.invoice_date),
             due_date: formatDate(invoice.due_date),
-            total: invoice.total || 0,
+            total: Number(invoice.total) || 0,
             status: invoice.status || 'N/A',
           });
         });
@@ -137,7 +138,7 @@ export class ExcelBuilder {
 
         billSheet.columns = [
           { header: 'Bill Number', key: 'bill_number', width: 20 },
-          { header: 'Date', key: 'date', width: 15 },
+          { header: 'Bill Date', key: 'bill_date', width: 15 },
           { header: 'Due Date', key: 'due_date', width: 15 },
           { header: 'Amount', key: 'total', width: 15 },
           { header: 'Status', key: 'status', width: 15 },
@@ -151,12 +152,12 @@ export class ExcelBuilder {
           fgColor: { argb: EXPORT_CONFIG.excel.headerColor },
         };
 
-        project.bills.forEach((bill: any) => {
+        project.bills.forEach((bill: BillAggregated) => {
           billSheet.addRow({
             bill_number: bill.bill_number || 'N/A',
-            date: formatDate(bill.date),
+            bill_date: formatDate(bill.bill_date),
             due_date: formatDate(bill.due_date),
-            total: bill.total || 0,
+            total: Number(bill.total) || 0,
             status: bill.status || 'N/A',
           });
         });
@@ -190,15 +191,17 @@ export class ExcelBuilder {
       };
       headerRow.height = 20;
 
-      (data.rows || []).forEach((project: any) => {
-        const profit = (project.revenue || 0) - (project.costs || 0);
-        const margin = project.revenue > 0 ? (profit / project.revenue) : 0;
+      (result.rows || []).forEach((project: ProjectWithAggregates) => {
+        const revenue = Number(project.revenue) || 0;
+        const costs = Number(project.costs) || 0;
+        const profit = revenue - costs;
+        const margin = revenue > 0 ? (profit / revenue) : 0;
 
         sheet.addRow({
           name: project.name || 'Unnamed',
           client: project.client_name || 'N/A',
-          revenue: project.revenue || 0,
-          costs: project.costs || 0,
+          revenue: revenue,
+          costs: costs,
           profit: profit,
           margin: `${(margin * 100).toFixed(1)}%`,
         });
@@ -238,9 +241,9 @@ export class ExcelBuilder {
       const totalRow = sheet.addRow({
         name: 'TOTAL',
         client: '',
-        revenue: data.rows.reduce((sum: number, p: any) => sum + (p.revenue || 0), 0),
-        costs: data.rows.reduce((sum: number, p: any) => sum + (p.costs || 0), 0),
-        profit: data.rows.reduce((sum: number, p: any) => sum + ((p.revenue || 0) - (p.costs || 0)), 0),
+        revenue: result.rows.reduce((sum: number, p: ProjectWithAggregates) => sum + (Number(p.revenue) || 0), 0),
+        costs: result.rows.reduce((sum: number, p: ProjectWithAggregates) => sum + (Number(p.costs) || 0), 0),
+        profit: result.rows.reduce((sum: number, p: ProjectWithAggregates) => sum + ((Number(p.revenue) || 0) - (Number(p.costs) || 0)), 0),
         margin: '',
       });
 
@@ -269,7 +272,6 @@ export class ExcelBuilder {
 
     // Add monthly trends sheet
     const monthlyResult = await getMonthlyMetricsExport(userId, 12);
-    const monthlyData = monthlyResult as any;
     const trendSheet = this.workbook.addWorksheet('Monthly Trends', {
       properties: { tabColor: { argb: '6366F1' } },
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
@@ -292,13 +294,13 @@ export class ExcelBuilder {
       fgColor: { argb: '6366F1' },
     };
 
-    (monthlyData.rows || []).forEach((month: any) => {
+    (monthlyResult.rows || []).forEach((month: MonthlyMetricsRow) => {
       trendSheet.addRow({
         month: month.month ? format(new Date(month.month), 'MMM yyyy') : 'N/A',
-        revenue: month.revenue || 0,
-        costs: month.costs || 0,
-        profit: month.profit || 0,
-        margin: `${((month.margin || 0) * 100).toFixed(1)}%`,
+        revenue: Number(month.revenue) || 0,
+        costs: Number(month.costs) || 0,
+        profit: Number(month.profit) || 0,
+        margin: `${((Number(month.margin) || 0) * 100).toFixed(1)}%`,
         project_count: month.project_count || 0,
       });
     });
@@ -355,9 +357,9 @@ export class ExcelBuilder {
     const stats = dashboardData.stats;
     statsSheet.addRows([
       { metric: 'Total Projects', value: stats?.total_projects || 0 },
-      { metric: 'Total Revenue', value: stats?.total_revenue || 0 },
-      { metric: 'Total Costs', value: stats?.total_costs || 0 },
-      { metric: 'Total Profit', value: stats?.total_profit || 0 },
+      { metric: 'Total Revenue', value: Number(stats?.total_revenue) || 0 },
+      { metric: 'Total Costs', value: Number(stats?.total_costs) || 0 },
+      { metric: 'Total Profit', value: Number(stats?.total_profit) || 0 },
       { metric: 'Profitable Projects', value: stats?.profitable_projects || 0 },
       { metric: 'Success Rate', value: `${((stats?.profitable_projects || 0) / (stats?.total_projects || 1) * 100).toFixed(1)}%` },
     ]);

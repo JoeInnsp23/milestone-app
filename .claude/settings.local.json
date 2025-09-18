@@ -18,7 +18,8 @@
       "mcp__context7__resolve-library-id",
       "Bash(npm install:*)",
       "Bash(npx shadcn@latest add dropdown-menu:*)",
-      "Bash(npx shadcn@latest add radio-group:*)"
+      "Bash(npx shadcn@latest add radio-group:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import type { ProjectWithAggregates, MonthlyMetricsRow, DashboardStats } from '@/types/export';
 
 export async function getProjectExportData(userId: string, projectId?: string) {
   const query = sql`
@@ -17,11 +18,11 @@ export async function getProjectExportData(userId: string, projectId?: string) {
           DISTINCT jsonb_build_object(
             'id', i.id,
             'invoice_number', i.invoice_number,
-            'issue_date', i.issue_date,
+            'invoice_date', i.invoice_date,
             'due_date', i.due_date,
             'total', i.total,
             'status', i.status
-          ) ORDER BY i.issue_date DESC
+          ) ORDER BY i.invoice_date DESC
         ) FILTER (WHERE i.id IS NOT NULL),
         '[]'::json
       ) as invoices,
@@ -30,11 +31,11 @@ export async function getProjectExportData(userId: string, projectId?: string) {
           DISTINCT jsonb_build_object(
             'id', b.id,
             'bill_number', b.bill_number,
-            'date', b.date,
+            'bill_date', b.bill_date,
             'due_date', b.due_date,
             'total', b.total,
             'status', b.status
-          ) ORDER BY b.date DESC
+          ) ORDER BY b.bill_date DESC
         ) FILTER (WHERE b.id IS NOT NULL),
         '[]'::json
       ) as bills
@@ -49,14 +50,17 @@ export async function getProjectExportData(userId: string, projectId?: string) {
     ORDER BY p.start_date DESC
   `;
 
-  return await db.execute(query);
+  const result = await db.execute(query);
+  return {
+    rows: result as unknown as ProjectWithAggregates[]
+  };
 }
 
 export async function getMonthlyMetricsExport(userId: string, months = 12) {
   const query = sql`
     WITH monthly_data AS (
       SELECT
-        DATE_TRUNC('month', COALESCE(i.issue_date, b.date)) as month,
+        DATE_TRUNC('month', COALESCE(i.invoice_date, b.bill_date)) as month,
         SUM(i.total) as revenue,
         SUM(b.total) as costs,
         COUNT(DISTINCT p.id) as project_count
@@ -64,9 +68,9 @@ export async function getMonthlyMetricsExport(userId: string, months = 12) {
       LEFT JOIN invoices i ON p.id = i.project_id
       LEFT JOIN bills b ON p.id = b.project_id
       WHERE p.user_id = ${userId}
-        AND (i.issue_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months'
-             OR b.date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months')
-      GROUP BY DATE_TRUNC('month', COALESCE(i.issue_date, b.date))
+        AND (i.invoice_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months'
+             OR b.bill_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months')
+      GROUP BY DATE_TRUNC('month', COALESCE(i.invoice_date, b.bill_date))
       ORDER BY month DESC
     )
     SELECT
@@ -84,7 +88,10 @@ export async function getMonthlyMetricsExport(userId: string, months = 12) {
     WHERE month IS NOT NULL
   `;
 
-  return await db.execute(query);
+  const result = await db.execute(query);
+  return {
+    rows: result as unknown as MonthlyMetricsRow[]
+  };
 }
 
 export async function getDashboardExportData(userId: string) {
@@ -101,17 +108,14 @@ export async function getDashboardExportData(userId: string) {
   `;
 
   const statsResult = await db.execute(statsQuery);
+  const statsRows = statsResult as unknown as DashboardStats[];
   const projectsResult = await getProjectExportData(userId);
   const monthlyResult = await getMonthlyMetricsExport(userId, 12);
 
-  const stats = statsResult as any;
-  const projects = projectsResult as any;
-  const monthlyData = monthlyResult as any;
-
   return {
-    stats: stats.rows?.[0],
-    projects: projects.rows || [],
-    monthlyData: monthlyData.rows || []
+    stats: statsRows?.[0],
+    projects: projectsResult.rows || [],
+    monthlyData: monthlyResult.rows || []
   };
 }
 
@@ -132,6 +136,5 @@ export async function getProjectsPaginated(userId: string, offset: number, limit
   `;
 
   const result = await db.execute(query);
-  const data = result as any;
-  return data.rows || [];
+  return result as unknown as ProjectWithAggregates[];
 }

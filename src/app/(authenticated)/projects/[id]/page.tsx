@@ -72,7 +72,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                   ' Date Range Not Set'}
               </div>
             </div>
-            <ExportButton projectId={resolvedParams.id} template="summary" />
+            <ExportButton projectId={resolvedParams.id} />
           </div>
         </div>
 
@@ -90,7 +90,6 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           costOfSales={totalCosts * 0.6}
           operatingExpenses={operatingExpenses}
           invoices={project.invoices as Invoice[]}
-          bills={project.bills as Bill[]}
         />
 
         {/* Tabs for Invoices, Bills, and Estimates */}
