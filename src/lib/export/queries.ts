@@ -39,10 +39,10 @@ export async function getProjectExportData(userId: string, projectId?: string) {
         ) FILTER (WHERE b.id IS NOT NULL),
         '[]'::json
       ) as bills
-    FROM projects p
-    LEFT JOIN project_metrics pm ON p.id = pm.project_id
-    LEFT JOIN invoices i ON p.id = i.project_id
-    LEFT JOIN bills b ON p.id = b.project_id
+    FROM milestone.projects p
+    LEFT JOIN milestone.project_metrics pm ON p.id = pm.project_id
+    LEFT JOIN milestone.invoices i ON p.id = i.project_id
+    LEFT JOIN milestone.bills b ON p.id = b.project_id
     WHERE p.user_id = ${userId}
     ${projectId ? sql`AND p.id = ${projectId}` : sql``}
     GROUP BY p.id, pm.project_id, pm.revenue, pm.costs, pm.profit, pm.margin,
@@ -64,9 +64,9 @@ export async function getMonthlyMetricsExport(userId: string, months = 12) {
         SUM(i.total) as revenue,
         SUM(b.total) as costs,
         COUNT(DISTINCT p.id) as project_count
-      FROM projects p
-      LEFT JOIN invoices i ON p.id = i.project_id
-      LEFT JOIN bills b ON p.id = b.project_id
+      FROM milestone.projects p
+      LEFT JOIN milestone.invoices i ON p.id = i.project_id
+      LEFT JOIN milestone.bills b ON p.id = b.project_id
       WHERE p.user_id = ${userId}
         AND (i.invoice_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months'
              OR b.bill_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months')
@@ -102,8 +102,8 @@ export async function getDashboardExportData(userId: string) {
       SUM(pm.costs) as total_costs,
       SUM(pm.profit) as total_profit,
       COUNT(DISTINCT CASE WHEN pm.profit > 0 THEN p.id END) as profitable_projects
-    FROM projects p
-    LEFT JOIN project_metrics pm ON p.id = pm.project_id
+    FROM milestone.projects p
+    LEFT JOIN milestone.project_metrics pm ON p.id = pm.project_id
     WHERE p.user_id = ${userId}
   `;
 
@@ -127,8 +127,8 @@ export async function getProjectsPaginated(userId: string, offset: number, limit
       pm.costs,
       pm.profit,
       pm.margin
-    FROM projects p
-    LEFT JOIN project_metrics pm ON p.id = pm.project_id
+    FROM milestone.projects p
+    LEFT JOIN milestone.project_metrics pm ON p.id = pm.project_id
     WHERE p.user_id = ${userId}
     ORDER BY p.start_date DESC
     LIMIT ${limit}
