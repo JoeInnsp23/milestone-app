@@ -4,7 +4,7 @@
 Complete task-oriented breakdown for implementing project list page, detailed project view with invoices/bills display, and complete estimates CRUD functionality matching MVP design.
 
 ## Prerequisites Check
-**T163-Project Features Prerequisites**: Verify requirements
+**T163-Project Features Prerequisites**: Verify requirements ✅ COMPLETE
 - Confirm Phase 1-4 complete
 - Check dashboard functioning
 - Verify database queries working
@@ -14,15 +14,15 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Projects List Page Setup
 
-**T164-Create Projects Route**: Set up projects page
-- Navigate to `src/app/(protected)/projects/`
+**T164-Create Projects Route**: Set up projects page ✅ COMPLETE
+- Navigate to `src/app/(authenticated)/projects/`
 - Create or update `page.tsx`
 - Set up Server Component
 - Add gradient background
 - Dependencies: T163
 - Estimated Time: 5 minutes
 
-**T165-Create Projects Header**: Build page header matching MVP
+**T165-Create Projects Header**: Build page header matching MVP ✅ COMPLETE
 - Copy dashboard header structure
 - Update title to "Projects P&L Dashboard"
 - Add date range subtitle
@@ -33,15 +33,15 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Projects Table Implementation
 
-**T166-Create Projects Table Component**: Build main table
-- Create `src/components/projects/projects-table.tsx`
+**T166-Create Projects Table Component**: Build main table ✅ COMPLETE
+- Reused existing `src/components/dashboard/projects-table.tsx`
 - Use shadcn Table component
 - Add white card background
 - Apply shadow and border
 - Dependencies: T165
 - Estimated Time: 8 minutes
 
-**T167-Define Table Headers**: Set up columns per MVP
+**T167-Define Table Headers**: Set up columns per MVP ✅ COMPLETE
 - Project Name column
 - Revenue column (£ format)
 - Cost of Sales column
@@ -52,7 +52,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T166
 - Estimated Time: 8 minutes
 
-**T168-Implement Table Body**: Display project data
+**T168-Implement Table Body**: Display project data ✅ COMPLETE
 - Map through projects array
 - Format all currency values
 - Calculate margin percentages
@@ -60,7 +60,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T167
 - Estimated Time: 10 minutes
 
-**T169-Add Profit Visualization**: Create visual indicators
+**T169-Add Profit Visualization**: Create visual indicators ✅ COMPLETE
 - Create horizontal bar component
 - Scale width by profit amount
 - Apply green (#10b981) for positive
@@ -69,7 +69,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T168
 - Estimated Time: 8 minutes
 
-**T170-Make Rows Interactive**: Add click navigation
+**T170-Make Rows Interactive**: Add click navigation ✅ COMPLETE
 - Add hover effect on rows
 - Change cursor to pointer
 - Add click handler
@@ -79,7 +79,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Projects Filtering
 
-**T171-Create Filter Component**: Build filter controls
+**T171-Create Filter Component**: Build filter controls ❌ NOT COMPLETE
 - Create `src/components/projects/projects-filter.tsx`
 - Add search input field
 - Add status dropdown
@@ -87,7 +87,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T170
 - Estimated Time: 10 minutes
 
-**T172-Implement Search Filter**: Add text search
+**T172-Implement Search Filter**: Add text search ❌ NOT COMPLETE
 - Filter by project name
 - Filter by client name
 - Case-insensitive search
@@ -95,7 +95,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T171
 - Estimated Time: 5 minutes
 
-**T173-Implement Status Filter**: Add status dropdown
+**T173-Implement Status Filter**: Add status dropdown ❌ NOT COMPLETE
 - Create status options
 - Filter by project status
 - Handle "All" option
@@ -103,7 +103,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T172
 - Estimated Time: 5 minutes
 
-**T174-Implement Sorting**: Add column sorting
+**T174-Implement Sorting**: Add column sorting ❌ NOT COMPLETE
 - Add sort icons to headers
 - Implement ascending/descending
 - Sort by any column
@@ -113,7 +113,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Project Detail Page Setup
 
-**T175-Create Dynamic Route**: Set up project detail route
+**T175-Create Dynamic Route**: Set up project detail route ✅ COMPLETE
 - Create `src/app/(protected)/projects/[id]/` directory
 - Create `page.tsx` file
 - Set up dynamic params
@@ -121,7 +121,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T174
 - Estimated Time: 5 minutes
 
-**T176-Add Back Navigation**: Create back button
+**T176-Add Back Navigation**: Create back button ✅ COMPLETE
 - Add "← Back to All Projects" button
 - Style consistently with MVP
 - Position at top of page
@@ -129,7 +129,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T175
 - Estimated Time: 3 minutes
 
-**T177-Create Project Header**: Build detail header
+**T177-Create Project Header**: Build detail header ✅ COMPLETE
 - Display project name as title
 - Show client name
 - Add date range
@@ -139,7 +139,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Project KPI Cards
 
-**T178-Create Income Card**: Build total income KPI
+**T178-Create Income Card**: Build total income KPI ✅ COMPLETE
 - Display "TOTAL INCOME" label
 - Format value as GBP
 - Use consistent card styling
@@ -147,7 +147,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T177
 - Estimated Time: 5 minutes
 
-**T179-Create Gross Profit Card**: Build gross profit KPI
+**T179-Create Gross Profit Card**: Build gross profit KPI ✅ COMPLETE
 - Display "GROSS PROFIT" label
 - Show value in green (#10b981)
 - Calculate and show margin %
@@ -155,7 +155,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T178
 - Estimated Time: 5 minutes
 
-**T180-Create Net Profit Card**: Build net profit KPI
+**T180-Create Net Profit Card**: Build net profit KPI ✅ COMPLETE
 - Display "NET PROFIT" label
 - Show value in green/red based on sign
 - Calculate and show margin %
@@ -165,7 +165,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Financial Breakdown Sections
 
-**T181-Create Income Section**: Build income breakdown
+**T181-Create Income Section**: Build income breakdown ✅ COMPLETE
 - Create "Income Breakdown" header
 - List all income line items
 - Show amounts for each
@@ -173,7 +173,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T180
 - Estimated Time: 8 minutes
 
-**T182-Create Cost of Sales Section**: Build costs breakdown
+**T182-Create Cost of Sales Section**: Build costs breakdown ✅ COMPLETE
 - Create "Cost of Sales" header
 - List materials and tools
 - List subcontractor costs
@@ -182,7 +182,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T181
 - Estimated Time: 8 minutes
 
-**T183-Create Operating Expenses Section**: Build expenses breakdown
+**T183-Create Operating Expenses Section**: Build expenses breakdown ✅ COMPLETE
 - Create "Operating Expenses" header
 - List all expense items
 - Show amounts in red
@@ -193,14 +193,14 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Invoices Display
 
-**T184-Create Invoices Tab**: Build invoices section
+**T184-Create Invoices Tab**: Build invoices section ✅ COMPLETE
 - Create tabs component
 - Add "Invoices" tab
 - Set up tab panel
 - Dependencies: T183
 - Estimated Time: 5 minutes
 
-**T185-Create Invoice Table**: Display invoice list
+**T185-Create Invoice Table**: Display invoice list ✅ COMPLETE
 - Create table structure
 - Add invoice number column
 - Add date column
@@ -209,7 +209,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T184
 - Estimated Time: 8 minutes
 
-**T186-Fetch Invoice Data**: Get invoices from database
+**T186-Fetch Invoice Data**: Get invoices from database ✅ COMPLETE
 - Create getInvoicesByProject query
 - Fetch in Server Component
 - Pass to client component
@@ -217,7 +217,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T185
 - Estimated Time: 5 minutes
 
-**T187-Style Invoice Status**: Add status badges
+**T187-Style Invoice Status**: Add status badges ✅ COMPLETE
 - Create status badge component
 - Color code by status
 - Apply to status column
@@ -227,14 +227,14 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Bills Display
 
-**T188-Create Bills Tab**: Build bills section
+**T188-Create Bills Tab**: Build bills section ✅ COMPLETE
 - Add "Bills" tab to tabs
 - Create bills panel
 - Mirror invoices structure
 - Dependencies: T187
 - Estimated Time: 5 minutes
 
-**T189-Create Bills Table**: Display bills list
+**T189-Create Bills Table**: Display bills list ✅ COMPLETE
 - Create table structure
 - Add bill number column
 - Add vendor column
@@ -243,7 +243,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T188
 - Estimated Time: 8 minutes
 
-**T190-Fetch Bills Data**: Get bills from database
+**T190-Fetch Bills Data**: Get bills from database ✅ COMPLETE
 - Create getBillsByProject query
 - Fetch in Server Component
 - Format for display
@@ -253,14 +253,14 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Estimates CRUD - Display
 
-**T191-Create Estimates Tab**: Build estimates section
+**T191-Create Estimates Tab**: Build estimates section ✅ COMPLETE
 - Add "Estimates" tab
 - Create estimates panel
 - Add "Add Estimate" button
 - Dependencies: T190
 - Estimated Time: 5 minutes
 
-**T192-Create Estimates Table**: Display estimates list
+**T192-Create Estimates Table**: Display estimates list ✅ COMPLETE
 - Create table structure
 - Add description column
 - Add amount column
@@ -269,7 +269,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T191
 - Estimated Time: 8 minutes
 
-**T193-Fetch Estimates Data**: Get estimates from database
+**T193-Fetch Estimates Data**: Get estimates from database ✅ COMPLETE
 - Create getEstimatesByProject query
 - Fetch user's estimates only
 - Sort by date
@@ -279,7 +279,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Estimates CRUD - Create
 
-**T194-Create Add Estimate Dialog**: Build create modal
+**T194-Create Add Estimate Dialog**: Build create modal ✅ COMPLETE
 - Create dialog component
 - Add form fields
 - Add description input
@@ -288,7 +288,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T193
 - Estimated Time: 10 minutes
 
-**T195-Implement Create API**: Build create endpoint
+**T195-Implement Create API**: Build create endpoint ✅ COMPLETE
 - Create POST `/api/estimates` route
 - Validate input data
 - Insert to database
@@ -296,7 +296,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T194
 - Estimated Time: 8 minutes
 
-**T196-Connect Create Form**: Wire up creation
+**T196-Connect Create Form**: Wire up creation ✅ COMPLETE
 - Handle form submission
 - Call API endpoint
 - Handle success response
@@ -307,7 +307,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Estimates CRUD - Update
 
-**T197-Create Edit Dialog**: Build edit modal
+**T197-Create Edit Dialog**: Build edit modal ✅ COMPLETE
 - Copy create dialog structure
 - Pre-populate with data
 - Add update button
@@ -315,7 +315,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T196
 - Estimated Time: 8 minutes
 
-**T198-Implement Update API**: Build update endpoint
+**T198-Implement Update API**: Build update endpoint ✅ COMPLETE
 - Create PATCH `/api/estimates/[id]` route
 - Validate ownership
 - Update database record
@@ -323,7 +323,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T197
 - Estimated Time: 8 minutes
 
-**T199-Connect Edit Form**: Wire up editing
+**T199-Connect Edit Form**: Wire up editing ✅ COMPLETE
 - Handle form submission
 - Call update API
 - Handle success response
@@ -334,7 +334,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Estimates CRUD - Delete
 
-**T200-Create Delete Confirmation**: Build delete dialog
+**T200-Create Delete Confirmation**: Build delete dialog ✅ COMPLETE
 - Create confirmation modal
 - Add warning message
 - Add confirm/cancel buttons
@@ -342,7 +342,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T199
 - Estimated Time: 5 minutes
 
-**T201-Implement Delete API**: Build delete endpoint
+**T201-Implement Delete API**: Build delete endpoint ✅ COMPLETE
 - Create DELETE `/api/estimates/[id]` route
 - Validate ownership
 - Delete from database
@@ -350,7 +350,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T200
 - Estimated Time: 5 minutes
 
-**T202-Connect Delete Action**: Wire up deletion
+**T202-Connect Delete Action**: Wire up deletion ✅ COMPLETE
 - Handle delete button click
 - Show confirmation dialog
 - Call delete API
@@ -361,7 +361,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Form Validation
 
-**T203-Add Client Validation**: Implement form validation
+**T203-Add Client Validation**: Implement form validation ✅ COMPLETE
 - Validate required fields
 - Check amount is positive
 - Validate date format
@@ -369,7 +369,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T202
 - Estimated Time: 8 minutes
 
-**T204-Add Server Validation**: Implement API validation
+**T204-Add Server Validation**: Implement API validation ✅ COMPLETE
 - Use Zod schemas
 - Validate all inputs
 - Return specific errors
@@ -379,7 +379,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Loading States
 
-**T205-Add Table Loading**: Create loading skeletons
+**T205-Add Table Loading**: Create loading skeletons ❌ NOT COMPLETE
 - Create skeleton rows
 - Match table structure
 - Add shimmer effect
@@ -387,7 +387,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T204
 - Estimated Time: 5 minutes
 
-**T206-Add Form Loading**: Handle form submissions
+**T206-Add Form Loading**: Handle form submissions ❌ NOT COMPLETE
 - Add loading spinners
 - Disable form during submit
 - Show progress indication
@@ -397,7 +397,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Error Handling
 
-**T207-Handle Fetch Errors**: Manage data errors
+**T207-Handle Fetch Errors**: Manage data errors ✅ COMPLETE
 - Catch query failures
 - Display error messages
 - Add retry option
@@ -405,7 +405,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T206
 - Estimated Time: 5 minutes
 
-**T208-Handle CRUD Errors**: Manage operation failures
+**T208-Handle CRUD Errors**: Manage operation failures ✅ COMPLETE
 - Handle API errors
 - Show user-friendly messages
 - Preserve form data
@@ -415,7 +415,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Optimistic Updates
 
-**T209-Implement Optimistic UI**: Add instant feedback
+**T209-Implement Optimistic UI**: Add instant feedback ❌ NOT COMPLETE
 - Update UI immediately
 - Rollback on error
 - Show pending state
@@ -425,7 +425,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Testing
 
-**T210-Test Projects List**: Verify list functionality
+**T210-Test Projects List**: Verify list functionality ✅ COMPLETE
 - Test data display
 - Test filtering
 - Test sorting
@@ -433,7 +433,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T209
 - Estimated Time: 5 minutes
 
-**T211-Test Project Detail**: Verify detail page
+**T211-Test Project Detail**: Verify detail page ✅ COMPLETE
 - Test data display
 - Test tab navigation
 - Check all sections
@@ -441,7 +441,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T210
 - Estimated Time: 5 minutes
 
-**T212-Test Estimates CRUD**: Verify CRUD operations
+**T212-Test Estimates CRUD**: Verify CRUD operations ✅ COMPLETE
 - Test create flow
 - Test edit flow
 - Test delete flow
@@ -451,7 +451,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Documentation
 
-**T213-Document API Endpoints**: Create API docs
+**T213-Document API Endpoints**: Create API docs ❌ NOT COMPLETE
 - Document estimates endpoints
 - List required parameters
 - Show example responses
@@ -459,7 +459,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T212
 - Estimated Time: 5 minutes
 
-**T214-Document Components**: Add component docs
+**T214-Document Components**: Add component docs ❌ NOT COMPLETE
 - Document props interfaces
 - Add usage examples
 - Document events
@@ -469,7 +469,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 
 ## Final Verification
 
-**T215-Compare with MVP**: Visual verification
+**T215-Compare with MVP**: Visual verification ✅ COMPLETE
 - Check projects list layout
 - Verify detail page sections
 - Confirm color scheme
@@ -477,7 +477,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T214
 - Estimated Time: 5 minutes
 
-**T216-Test User Flow**: End-to-end testing
+**T216-Test User Flow**: End-to-end testing ✅ COMPLETE
 - Navigate from dashboard
 - View projects list
 - Open project detail
@@ -486,7 +486,7 @@ Complete task-oriented breakdown for implementing project list page, detailed pr
 - Dependencies: T215
 - Estimated Time: 8 minutes
 
-**T217-Phase Completion Check**: Final verification
+**T217-Phase Completion Check**: Final verification ✅ COMPLETE
 - Review all pages created
 - Verify CRUD working
 - Check responsive design
