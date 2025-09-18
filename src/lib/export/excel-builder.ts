@@ -22,8 +22,8 @@ export class ExcelBuilder {
 
   async addSummarySheet(userId: string, projectId?: string) {
     const result = projectId
-      ? await getProjectExportData(userId, projectId)
-      : await getProjectExportData(userId);
+      ? await getProjectExportData(projectId)
+      : await getProjectExportData();
 
 
     const sheet = this.workbook.addWorksheet('Summary', {
@@ -271,7 +271,7 @@ export class ExcelBuilder {
     await this.addSummarySheet(userId);
 
     // Add monthly trends sheet
-    const monthlyResult = await getMonthlyMetricsExport(userId, 12);
+    const monthlyResult = await getMonthlyMetricsExport(12);
     const trendSheet = this.workbook.addWorksheet('Monthly Trends', {
       properties: { tabColor: { argb: '6366F1' } },
       views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }],
@@ -336,7 +336,7 @@ export class ExcelBuilder {
     }
 
     // Add Dashboard Stats sheet
-    const dashboardData = await getDashboardExportData(userId);
+    const dashboardData = await getDashboardExportData();
     const statsSheet = this.workbook.addWorksheet('Dashboard Stats', {
       properties: { tabColor: { argb: '3b82f6' } },
     });

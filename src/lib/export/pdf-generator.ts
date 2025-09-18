@@ -9,7 +9,7 @@ export async function generateSummaryPDF(
   userId: string,
   projectId?: string
 ): Promise<Buffer> {
-  const result = await getProjectExportData(userId, projectId);
+  const result = await getProjectExportData(projectId);
 
   if (!result.rows || !result.rows.length) {
     throw new Error('No project data found');
@@ -145,7 +145,7 @@ export async function generateDetailedPDF(
   userId: string,
   includeAllProjects: boolean = false
 ): Promise<Buffer> {
-  const dashboardData = await getDashboardExportData(userId);
+  const dashboardData = await getDashboardExportData();
 
   const doc = new PDFDocument({
     margin: EXPORT_CONFIG.pdf.margins.top,

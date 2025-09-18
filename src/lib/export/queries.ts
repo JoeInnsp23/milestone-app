@@ -2,8 +2,8 @@ import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import type { ProjectWithAggregates, MonthlyMetricsRow, DashboardStats } from '@/types/export';
 
-export async function getProjectExportData(userId: string, projectId?: string) {
-  // Since projects table doesn't have user_id, we need to filter through invoices/bills
+export async function getProjectExportData(projectId?: string) {
+  // Single-tenant system - fetch all data without user filtering
   const query = sql`
     SELECT
       p.*,
@@ -42,13 +42,9 @@ export async function getProjectExportData(userId: string, projectId?: string) {
       ) as bills
     FROM milestone.projects p
     LEFT JOIN milestone.project_financial_summary pfs ON p.id = pfs.project_id
-    LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.user_id = ${userId}
-    LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.user_id = ${userId}
-    WHERE p.id IN (
-      SELECT DISTINCT project_id FROM milestone.invoices WHERE user_id = ${userId}
-      UNION
-      SELECT DISTINCT project_id FROM milestone.bills WHERE user_id = ${userId}
-    )
+    LEFT JOIN milestone.invoices i ON p.id = i.project_id
+    LEFT JOIN milestone.bills b ON p.id = b.project_id
+    WHERE p.is_active = true
     ${projectId ? sql`AND p.id = ${projectId}` : sql``}
     GROUP BY p.id, pfs.project_id, pfs.revenue, pfs.costs, pfs.profit, pfs.margin,
              pfs.invoice_count, pfs.bill_count, pfs.last_updated
@@ -61,7 +57,7 @@ export async function getProjectExportData(userId: string, projectId?: string) {
   };
 }
 
-export async function getMonthlyMetricsExport(userId: string, months = 12) {
+export async function getMonthlyMetricsExport(months = 12) {
   const query = sql`
     WITH monthly_data AS (
       SELECT
@@ -70,13 +66,9 @@ export async function getMonthlyMetricsExport(userId: string, months = 12) {
         SUM(b.total) as costs,
         COUNT(DISTINCT p.id) as project_count
       FROM milestone.projects p
-      LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.user_id = ${userId}
-      LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.user_id = ${userId}
-      WHERE p.id IN (
-        SELECT DISTINCT project_id FROM milestone.invoices WHERE user_id = ${userId}
-        UNION
-        SELECT DISTINCT project_id FROM milestone.bills WHERE user_id = ${userId}
-      )
+      LEFT JOIN milestone.invoices i ON p.id = i.project_id
+      LEFT JOIN milestone.bills b ON p.id = b.project_id
+      WHERE p.is_active = true
         AND (i.invoice_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months'
              OR b.bill_date >= CURRENT_DATE - INTERVAL '${sql.raw(months.toString())} months')
       GROUP BY DATE_TRUNC('month', COALESCE(i.invoice_date, b.bill_date))
@@ -103,7 +95,7 @@ export async function getMonthlyMetricsExport(userId: string, months = 12) {
   };
 }
 
-export async function getDashboardExportData(userId: string) {
+export async function getDashboardExportData() {
   const statsQuery = sql`
     SELECT
       COUNT(DISTINCT p.id) as total_projects,
@@ -113,17 +105,13 @@ export async function getDashboardExportData(userId: string) {
       COUNT(DISTINCT CASE WHEN pfs.profit > 0 THEN p.id END) as profitable_projects
     FROM milestone.projects p
     LEFT JOIN milestone.project_financial_summary pfs ON p.id = pfs.project_id
-    WHERE p.id IN (
-      SELECT DISTINCT project_id FROM milestone.invoices WHERE user_id = ${userId}
-      UNION
-      SELECT DISTINCT project_id FROM milestone.bills WHERE user_id = ${userId}
-    )
+    WHERE p.is_active = true
   `;
 
   const statsResult = await db.execute(statsQuery);
   const statsRows = statsResult as unknown as DashboardStats[];
-  const projectsResult = await getProjectExportData(userId);
-  const monthlyResult = await getMonthlyMetricsExport(userId, 12);
+  const projectsResult = await getProjectExportData();
+  const monthlyResult = await getMonthlyMetricsExport(12);
 
   return {
     stats: statsRows?.[0],
@@ -132,7 +120,7 @@ export async function getDashboardExportData(userId: string) {
   };
 }
 
-export async function getProjectsPaginated(userId: string, offset: number, limit: number) {
+export async function getProjectsPaginated(offset: number, limit: number) {
   const query = sql`
     SELECT
       p.*,
@@ -142,11 +130,7 @@ export async function getProjectsPaginated(userId: string, offset: number, limit
       pfs.margin
     FROM milestone.projects p
     LEFT JOIN milestone.project_financial_summary pfs ON p.id = pfs.project_id
-    WHERE p.id IN (
-      SELECT DISTINCT project_id FROM milestone.invoices WHERE user_id = ${userId}
-      UNION
-      SELECT DISTINCT project_id FROM milestone.bills WHERE user_id = ${userId}
-    )
+    WHERE p.is_active = true
     ORDER BY p.start_date DESC
     LIMIT ${limit}
     OFFSET ${offset}
