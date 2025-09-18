@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProviderWrapper } from '@/components/clerk-provider-wrapper';
+import { ThemeProvider } from '@/components/theme-provider';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,12 +17,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.className} antialiased gradient-bg-light dark:gradient-bg-dark min-h-screen`}>
-          {children}
+    <ClerkProviderWrapper>
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${inter.className} antialiased min-h-screen`}>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }

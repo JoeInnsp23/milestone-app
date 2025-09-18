@@ -47,7 +47,12 @@
       "WebFetch(domain:clerk.com)",
       "Bash(npx tsc:*)",
       "WebFetch(domain:github.com)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "WebFetch(domain:stackoverflow.com)",
+      "Bash(npx drizzle-kit migrate:list:*)",
+      "mcp__sequential-thinking__sequentialthinking"
     ],
     "deny": [],
     "ask": []

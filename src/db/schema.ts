@@ -1,5 +1,6 @@
 import {
   pgTable,
+  pgSchema,
   varchar,
   timestamp,
   boolean,
@@ -16,7 +17,8 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-// No schema needed - using dedicated database
+// Define milestone schema
+const milestone = pgSchema('milestone');
 
 // Enums
 export const invoiceStatusEnum = pgEnum('invoice_status', [
@@ -62,7 +64,7 @@ export const syncStatusEnum = pgEnum('sync_status', [
 ]);
 
 // Projects table (from Xero tracking category) - uses Xero IDs
-export const projects = pgTable(
+export const projects = milestone.table(
   'projects',
   {
     id: varchar('id', { length: 50 }).primaryKey(), // Xero project ID
@@ -88,7 +90,7 @@ export const projects = pgTable(
 );
 
 // Build phases table (from Xero tracking category) - uses Xero IDs
-export const buildPhases = pgTable('build_phases', {
+export const buildPhases = milestone.table('build_phases', {
   id: varchar('id', { length: 50 }).primaryKey(), // Xero phase ID
   xero_phase_id: varchar('xero_phase_id', { length: 50 }).notNull().unique(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -104,7 +106,7 @@ export const buildPhases = pgTable('build_phases', {
 });
 
 // Project estimates table (user-entered) - uses UUID for user-generated content
-export const projectEstimates = pgTable(
+export const projectEstimates = milestone.table(
   'project_estimates',
   {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -138,7 +140,7 @@ export const projectEstimates = pgTable(
 );
 
 // Invoices table (from Xero)
-export const invoices = pgTable(
+export const invoices = milestone.table(
   'invoices',
   {
     id: varchar('id', { length: 50 }).primaryKey(),
@@ -186,7 +188,7 @@ export const invoices = pgTable(
 );
 
 // Bills table (from Xero)
-export const bills = pgTable(
+export const bills = milestone.table(
   'bills',
   {
     id: varchar('id', { length: 50 }).primaryKey(),
@@ -231,7 +233,7 @@ export const bills = pgTable(
 );
 
 // Audit logs table (minimal - only logins, estimates, exports)
-export const auditLogs = pgTable(
+export const auditLogs = milestone.table(
   'audit_logs',
   {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -250,7 +252,7 @@ export const auditLogs = pgTable(
 );
 
 // User preferences table
-export const userPreferences = pgTable('user_preferences', {
+export const userPreferences = milestone.table('user_preferences', {
   user_id: varchar('user_id', { length: 255 }).primaryKey(),
   default_view: varchar('default_view', { length: 50 }).default('dashboard'),
   theme: varchar('theme', { length: 20 }).default('system'),
@@ -265,7 +267,7 @@ export const userPreferences = pgTable('user_preferences', {
 });
 
 // Export history table
-export const exportHistory = pgTable(
+export const exportHistory = milestone.table(
   'export_history',
   {
     id: uuid('id').primaryKey().defaultRandom(),
@@ -288,8 +290,8 @@ export const exportHistory = pgTable(
 );
 
 // Sync status table
-export const syncStatus = pgTable(
-  'sync_log',
+export const syncStatus = milestone.table(
+  'sync_status',
   {
     id: serial('id').primaryKey(),
     sync_type: varchar('sync_type', { length: 50 }).notNull(),

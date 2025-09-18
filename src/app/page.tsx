@@ -1,106 +1,149 @@
+'use client';
+
 import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
-import { BarChart3, DollarSign, Shield } from 'lucide-react';
+import { useTheme } from '@/components/theme-provider';
+import { Moon, Sun } from 'lucide-react';
 
 export default function Home() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <header className="bg-white/90 backdrop-blur-md shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg mr-3"></div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Milestone P&L Dashboard
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <SignedOut>
-                <Link href="/sign-in">
-                  <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg">
-                    Sign In
-                  </button>
-                </Link>
-              </SignedOut>
-              <SignedIn>
-                <Link href="/dashboard" className="text-gray-700 hover:text-gray-900 font-medium">
-                  Dashboard
-                </Link>
-                <UserButton />
-              </SignedIn>
-            </div>
+    <div className="min-h-screen dashboard-bg-gradient">
+      {/* Navigation Bar - Matching Dashboard */}
+      <div className="nav-bar">
+        <div className="nav-content">
+          <div className="nav-title">Projects P&L Dashboard</div>
+          <div className="nav-buttons">
+            <SignedOut>
+              <Link href="/sign-in">
+                <button className="nav-btn">Sign In</button>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard">
+                <button className="nav-btn active">Go to Dashboard</button>
+              </Link>
+            </SignedIn>
+            <button
+              onClick={toggleTheme}
+              className="nav-btn"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center p-2 bg-blue-100 rounded-full mb-6">
-            <div className="px-4 py-1 bg-white rounded-full">
-              <span className="text-sm font-semibold text-blue-600">Professional Services Edition</span>
-            </div>
-          </div>
-
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
-            Track Your Project<br />
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Profitability in Real-Time
-            </span>
-          </h2>
-
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Comprehensive P&L insights for construction and professional services.
-            Monitor project performance, track costs, and maximize margins.
+      {/* Main Content */}
+      <div className="container">
+        {/* Call to Action Section - Now at the top as hero */}
+        <div className="dashboard-card" style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)' }}>
+            Transform Your Project Management
+          </h1>
+          <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '18px' }}>
+            Professional P&L dashboard for construction and service companies.
+            Track profitability, monitor costs, and make data-driven decisions.
           </p>
-
           <SignedOut>
-            <div className="flex justify-center">
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
               <Link href="/sign-in">
-                <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5">
+                <button className="nav-btn active" style={{ padding: '12px 30px', fontSize: '16px' }}>
                   Access Dashboard
                 </button>
               </Link>
+              <button className="nav-btn" style={{ padding: '12px 30px', fontSize: '16px' }}>
+                Request Demo
+              </button>
             </div>
-            <p className="text-sm text-gray-500 mt-6">
+            <p style={{ color: 'var(--text-dim)', marginTop: '20px', fontSize: '14px' }}>
               Contact your administrator for access credentials
             </p>
           </SignedOut>
-
           <SignedIn>
             <Link href="/dashboard">
-              <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5">
-                Go to Dashboard
+              <button className="nav-btn active" style={{ padding: '12px 40px', fontSize: '16px' }}>
+                Open Dashboard
               </button>
             </Link>
           </SignedIn>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <BarChart3 className="w-6 h-6 text-blue-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-Time Analytics</h3>
-            <p className="text-gray-600">Live project performance metrics synchronized with Xero</p>
+        {/* Features Section - Professional Cards */}
+        <div className="chart-grid">
+          <div className="dashboard-card">
+            <div className="chart-title">Real-Time Analytics</div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Live project performance metrics synchronized with your accounting system for accurate, up-to-date financial insights.
+              Monitor revenue, costs, and profitability in real-time.
+            </p>
+            <ul style={{ color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '0' }}>
+              <li>Automatic data synchronization</li>
+              <li>Real-time updates</li>
+              <li>Historical trend analysis</li>
+            </ul>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <DollarSign className="w-6 h-6 text-green-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Profit Tracking</h3>
-            <p className="text-gray-600">Monitor margins and profitability by project and phase</p>
+          <div className="dashboard-card">
+            <div className="chart-title">Comprehensive Reporting</div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Generate detailed P&L reports by project, phase, or time period.
+              Export data in multiple formats for stakeholder presentations.
+            </p>
+            <ul style={{ color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '0' }}>
+              <li>PDF & Excel exports</li>
+              <li>Customizable date ranges</li>
+              <li>Drill-down capabilities</li>
+            </ul>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 text-purple-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Access</h3>
-            <p className="text-gray-600">Enterprise-grade authentication with role-based permissions</p>
+          <div className="dashboard-card">
+            <div className="chart-title">Project Performance Tracking</div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Track individual project profitability with detailed breakdowns of revenue,
+              costs, and margins. Identify profitable projects and optimization opportunities.
+            </p>
+            <ul style={{ color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '0' }}>
+              <li>Project-level P&L analysis</li>
+              <li>Cost breakdown by category</li>
+              <li>Margin trend tracking</li>
+            </ul>
+          </div>
+
+          <div className="dashboard-card">
+            <div className="chart-title">Enterprise Security</div>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Bank-grade security with enterprise authentication, ensuring your financial data
+              is protected. Role-based access control for team collaboration.
+            </p>
+            <ul style={{ color: 'var(--text-secondary)', paddingLeft: '20px', marginBottom: '0' }}>
+              <li>Secure authentication</li>
+              <li>Encrypted data storage</li>
+              <li>Audit trail logging</li>
+            </ul>
           </div>
         </div>
-      </main>
+
+        {/* Professional Footer */}
+        <div style={{
+          marginTop: '60px',
+          padding: '30px 0',
+          borderTop: '1px solid var(--border-color)',
+          textAlign: 'center'
+        }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+            © 2024 Professional P&L Dashboard. All rights reserved.
+          </p>
+          <p style={{ color: 'var(--text-dim)', fontSize: '12px', marginTop: '10px' }}>
+            Secure cloud infrastructure • Real-time data synchronization • Enterprise-grade security
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
