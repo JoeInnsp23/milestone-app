@@ -46,28 +46,22 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-content">
-        {/* Back Button */}
-        <div style={{ marginBottom: '20px' }}>
-          <Link href="/projects">
-            <button className="back-button">
+    <div className="min-h-screen dashboard-bg-gradient">
+      <div className="container">
+        {/* Header Card with Back Button */}
+        <div className="header-card">
+          <Link href="/projects" className="inline-block mb-4">
+            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
               ← Back to All Projects
             </button>
           </Link>
-        </div>
-
-        {/* Project Header */}
-        <div className="project-header">
           <h1>{project.name}</h1>
-          {project.client_name && (
-            <p className="project-subtitle">Client: {project.client_name}</p>
-          )}
-          {project.start_date && project.end_date && (
-            <p className="project-dates">
-              {new Date(project.start_date).toLocaleDateString('en-GB')} - {new Date(project.end_date).toLocaleDateString('en-GB')}
-            </p>
-          )}
+          <div className="subtitle">
+            {project.client_name || 'No Client'} -
+            {project.start_date && project.end_date ?
+              ` ${new Date(project.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} to ${new Date(project.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}` :
+              ' Date Range Not Set'}
+          </div>
         </div>
 
         {/* KPI Cards */}

@@ -1,15 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { ProjectSummary } from '@/types';
+import { FilterState } from '@/components/projects/projects-filter';
 
 interface ProjectsTableProps {
   projects: ProjectSummary[];
+  filters?: FilterState;
+  isLoading?: boolean;
 }
 
-export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps) {
-  const [projects] = useState(initialProjects);
+type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'profit' | 'profit_margin';
+type SortDirection = 'asc' | 'desc';
+
+export function ProjectsTable({ projects: initialProjects, filters, isLoading }: ProjectsTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey>('project_name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-GB', {
@@ -24,31 +31,174 @@ export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps)
     return `${value.toFixed(1)}%`;
   };
 
-  const getProfitBarWidth = (profit: number) => {
+  const getProfitBarWidth = (profit: number, projects: ProjectSummary[]) => {
     const absMaxProfit = Math.max(...projects.map(p => Math.abs(p.profit)));
     const percentage = (Math.abs(profit) / absMaxProfit) * 100;
     return Math.min(percentage, 100);
   };
 
+  // Filter projects based on filters
+  const filteredProjects = useMemo(() => {
+    let filtered = [...initialProjects];
+
+    if (filters) {
+      // Search filter
+      if (filters.search) {
+        const searchTerm = filters.search.toLowerCase();
+        filtered = filtered.filter(p =>
+          p.project_name.toLowerCase().includes(searchTerm) ||
+          (p.client_name && p.client_name.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      // Status filter
+      if (filters.status && filters.status !== 'all') {
+        filtered = filtered.filter(p => p.project_status === filters.status);
+      }
+
+      // Date range filter would need project dates in the data
+      // For now, this is a placeholder
+    }
+
+    return filtered;
+  }, [initialProjects, filters]);
+
+  // Sort projects
+  const sortedProjects = useMemo(() => {
+    const sorted = [...filteredProjects];
+
+    sorted.sort((a, b) => {
+      let aValue: string | number;
+      let bValue: string | number;
+
+      switch (sortKey) {
+        case 'project_name':
+          aValue = a.project_name.toLowerCase();
+          bValue = b.project_name.toLowerCase();
+          break;
+        case 'actual_revenue':
+          aValue = a.actual_revenue;
+          bValue = b.actual_revenue;
+          break;
+        case 'actual_costs':
+          aValue = a.actual_costs;
+          bValue = b.actual_costs;
+          break;
+        case 'profit':
+          aValue = a.profit;
+          bValue = b.profit;
+          break;
+        case 'profit_margin':
+          aValue = a.profit_margin;
+          bValue = b.profit_margin;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  }, [filteredProjects, sortKey, sortDirection]);
+
+  const handleSort = useCallback((key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  }, [sortKey]);
+
+  const getSortIcon = (key: SortKey) => {
+    if (sortKey !== key) {
+      return <span className="sort-icon">↕</span>;
+    }
+    return sortDirection === 'asc' ?
+      <span className="sort-icon active">↑</span> :
+      <span className="sort-icon active">↓</span>;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-card">
+        <div className="chart-title" style={{ marginBottom: '20px' }}>
+          Loading projects...
+        </div>
+        <div className="animate-pulse">
+          <div className="h-10 bg-gray-200 rounded mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded mb-2"></div>
+          <div className="h-10 bg-gray-200 rounded mb-2"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-card">
       <div className="chart-title" style={{ marginBottom: '20px' }}>
         All Projects Summary (Click project name for details)
+        {filteredProjects.length < initialProjects.length && (
+          <span className="text-sm text-gray-500 ml-2">
+            (Showing {filteredProjects.length} of {initialProjects.length} projects)
+          </span>
+        )}
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table className="dashboard-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th style={{
-                textAlign: 'left',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>Project Name</th>
+              <th
+                onClick={() => handleSort('project_name')}
+                style={{
+                  textAlign: 'left',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Project Name {getSortIcon('project_name')}
+              </th>
+              <th
+                onClick={() => handleSort('actual_revenue')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Revenue {getSortIcon('actual_revenue')}
+              </th>
+              <th
+                onClick={() => handleSort('actual_costs')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Cost of Sales {getSortIcon('actual_costs')}
+              </th>
               <th style={{
                 textAlign: 'right',
                 padding: '12px',
@@ -57,43 +207,41 @@ export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps)
                 textTransform: 'uppercase',
                 borderBottom: '2px solid var(--border-color)',
                 background: 'var(--border-light)'
-              }}>Revenue</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>Cost of Sales</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>Operating Exp.</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>Net Profit</th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>Margin %</th>
+              }}>
+                Operating Exp.
+              </th>
+              <th
+                onClick={() => handleSort('profit')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Net Profit {getSortIcon('profit')}
+              </th>
+              <th
+                onClick={() => handleSort('profit_margin')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Margin % {getSortIcon('profit_margin')}
+              </th>
               <th style={{
                 textAlign: 'center',
                 padding: '12px',
@@ -103,22 +251,26 @@ export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps)
                 borderBottom: '2px solid var(--border-color)',
                 background: 'var(--border-light)',
                 width: '200px'
-              }}>Visual</th>
+              }}>
+                Visual
+              </th>
             </tr>
           </thead>
           <tbody>
-            {projects.length === 0 ? (
+            {sortedProjects.length === 0 ? (
               <tr>
                 <td colSpan={7} style={{
                   padding: '48px',
                   textAlign: 'center',
                   borderBottom: '1px solid var(--border-color)'
                 }}>
-                  No projects found.
+                  {filteredProjects.length === 0 && initialProjects.length > 0
+                    ? 'No projects match your filters.'
+                    : 'No projects found.'}
                 </td>
               </tr>
             ) : (
-              projects.map((project) => (
+              sortedProjects.map((project) => (
                 <tr
                   key={project.project_id}
                   style={{
@@ -170,7 +322,7 @@ export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps)
                   <td style={{ padding: '12px' }}>
                     <span
                       className={`profit-bar ${project.profit >= 0 ? 'positive' : 'negative'}`}
-                      style={{ width: `${getProfitBarWidth(project.profit)}px` }}
+                      style={{ width: `${getProfitBarWidth(project.profit, sortedProjects)}px` }}
                     />
                   </td>
                 </tr>
@@ -179,6 +331,19 @@ export function ProjectsTable({ projects: initialProjects }: ProjectsTableProps)
           </tbody>
         </table>
       </div>
+
+      <style jsx>{`
+        .sort-icon {
+          display: inline-block;
+          margin-left: 4px;
+          opacity: 0.5;
+          transition: opacity 0.2s;
+        }
+        .sort-icon.active {
+          opacity: 1;
+          color: var(--primary);
+        }
+      `}</style>
     </div>
   );
 }

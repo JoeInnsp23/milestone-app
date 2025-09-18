@@ -14,6 +14,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
   const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
 
   const formatCurrency = (value: number | string) => {
@@ -51,6 +52,41 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
     const formData = new FormData(e.currentTarget);
     formData.append('project_id', projectId);
 
+    // Create optimistic estimate
+    const tempId = `temp-${Date.now()}`;
+    const optimisticEstimate: ProjectEstimate = {
+      id: editingEstimate?.id || tempId,
+      project_id: projectId,
+      description: formData.get('description') as string,
+      estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'hours' | 'materials',
+      amount: formData.get('amount') as string,
+      estimate_date: formData.get('estimate_date') as string,
+      confidence_level: Number(formData.get('confidence_level')),
+      notes: formData.get('notes') as string,
+      build_phase_id: null,
+      created_by: 'current-user',
+      created_at: new Date().toISOString(),
+      updated_by: null,
+      updated_at: null,
+    };
+
+    // Optimistic update
+    const previousEstimates = [...estimates];
+    const idToTrack = editingEstimate?.id || tempId;
+
+    if (editingEstimate) {
+      setEstimates(estimates.map(e =>
+        e.id === editingEstimate.id ? { ...e, ...optimisticEstimate, id: editingEstimate.id } : e
+      ));
+    } else {
+      setEstimates([...estimates, optimisticEstimate]);
+    }
+    setIsCreateOpen(false);
+    setEditingEstimate(null);
+
+    // Mark as pending
+    setPendingIds(prev => new Set(prev).add(idToTrack));
+
     startTransition(async () => {
       let result;
       if (editingEstimate) {
@@ -60,33 +96,63 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       }
 
       if (result.success && result.estimate) {
-        // Refresh estimates - in real app, would refetch from server
+        // Replace optimistic with real data
         if (editingEstimate) {
           setEstimates(estimates.map(e =>
-            e.id === result.estimate!.id ? result.estimate! : e
+            e.id === editingEstimate.id ? result.estimate! : e
           ));
         } else {
-          setEstimates([...estimates, result.estimate]);
+          setEstimates(prevEstimates =>
+            prevEstimates.map(e => e.id === tempId ? result.estimate! : e)
+          );
         }
-        setIsCreateOpen(false);
-        setEditingEstimate(null);
       } else {
+        // Rollback on error
+        setEstimates(previousEstimates);
         alert(result.error || 'Failed to save estimate');
+        // Reopen form with data
+        if (!editingEstimate) {
+          setIsCreateOpen(true);
+        } else {
+          setEditingEstimate(editingEstimate);
+          setIsCreateOpen(true);
+        }
       }
+      // Clear pending state
+      setPendingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(idToTrack);
+        return newSet;
+      });
     });
   };
 
   const handleDelete = async () => {
     if (!deletingEstimate) return;
 
+    // Optimistic delete
+    const previousEstimates = [...estimates];
+    const deletedId = deletingEstimate.id;
+    setEstimates(estimates.filter(e => e.id !== deletingEstimate.id));
+    const deletedEstimate = deletingEstimate;
+    setDeletingEstimate(null);
+
+    // Mark as pending
+    setPendingIds(prev => new Set(prev).add(deletedId));
+
     startTransition(async () => {
-      const result = await deleteEstimate(deletingEstimate.id);
-      if (result.success) {
-        setEstimates(estimates.filter(e => e.id !== deletingEstimate.id));
-        setDeletingEstimate(null);
-      } else {
+      const result = await deleteEstimate(deletedEstimate.id);
+      if (!result.success) {
+        // Rollback on error
+        setEstimates(previousEstimates);
         alert(result.error || 'Failed to delete estimate');
       }
+      // Clear pending state
+      setPendingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(deletedId);
+        return newSet;
+      });
     });
   };
 
@@ -164,8 +230,14 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         </div>
       ) : (
         <div className="estimates-list">
-          {estimates.map((estimate) => (
-            <div key={estimate.id} className="estimate-card">
+          {estimates.map((estimate) => {
+            const isPending = pendingIds.has(estimate.id);
+            return (
+            <div
+              key={estimate.id}
+              className="estimate-card"
+              style={{ opacity: isPending ? 0.6 : 1, transition: 'opacity 0.3s' }}
+            >
               <div className="estimate-header">
                 <span
                   className="estimate-type"
@@ -209,7 +281,8 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

@@ -10,7 +10,8 @@
       "Bash(docker exec:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { getDashboardStats, getProjectSummaries } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
-import { ProjectsTable } from '@/components/dashboard/projects-table';
+import { ProjectsPageClient } from '@/components/projects/projects-page-client';
 import { format } from 'date-fns';
 
 export default async function ProjectsPage() {
@@ -49,25 +49,28 @@ export default async function ProjectsPage() {
   const dateTo = statsTyped.date_to;
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-header">
-        <div className="header-content">
+    <div className="min-h-screen dashboard-bg-gradient">
+      {/* Navigation */}
+      <Navigation view="projects" />
+
+      {/* Main content */}
+      <div className="container">
+        {/* Header Card */}
+        <div className="header-card">
           <h1>Projects P&L Dashboard</h1>
-          <p className="header-subtitle">
+          <div className="subtitle">
             {companyName} - {dateFrom && dateTo ? (
               <>
-                {format(new Date(dateFrom), 'dd MMMM yyyy')} to {format(new Date(dateTo), 'dd MMMM yyyy')}
+                {format(new Date(dateFrom), 'd MMMM yyyy')} to {format(new Date(dateTo), 'd MMMM yyyy')}
               </>
             ) : (
               'All Time'
             )}
-          </p>
+          </div>
         </div>
-        <Navigation view="projects" />
-      </div>
 
-      <div className="dashboard-content">
-        <ProjectsTable projects={projects} />
+        {/* Projects Filter and Table */}
+        <ProjectsPageClient projects={projects} />
       </div>
     </div>
   );
