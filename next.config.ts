@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   basePath: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
   assetPrefix: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
 
+  // Treat pdfkit as external to avoid bundling issues with font files
+  serverExternalPackages: ['pdfkit'],
+
   // Allow any types in interfaces for database compatibility
   eslint: {
     ignoreDuringBuilds: true,
