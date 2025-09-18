@@ -1,7 +1,7 @@
-# Phase 6.1: Frontend UI Fixes and Data Validation - Implementation Prompt
+# Phase 7: Frontend UI Fixes and Data Validation - Implementation Prompt
 
 ## Context Initialization
-You are tasked with implementing Phase 6.1 of the Milestone P&L Dashboard project. This critical phase addresses UI inconsistencies, data accuracy issues, and user experience improvements identified during comprehensive frontend testing. All fixes must maintain consistency with the existing MVP design while ensuring accurate data display throughout the application.
+You are tasked with implementing Phase 7 of the Milestone P&L Dashboard project. This critical phase addresses UI inconsistencies, data accuracy issues, and user experience improvements identified during comprehensive frontend testing. All fixes must maintain consistency with the existing MVP design while ensuring accurate data display throughout the application.
 
 ## Critical Issues Being Addressed
 This phase resolves:
@@ -17,9 +17,9 @@ This phase resolves:
 
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
-1. `/root/projects/milestone-app/docs/032-phase-6.1-details.md` - Complete technical specification
-2. `/root/projects/milestone-app/docs/033-phase-6.1-tasks.md` - Study all 60 tasks (T300-T360)
-3. `/root/projects/milestone-app/docs/034-phase-6.1-QA.md` - Understand 55 validation requirements
+1. `/root/projects/milestone-app/docs/029-phase-7-details.md` - Complete technical specification
+2. `/root/projects/milestone-app/docs/030-phase-7-tasks.md` - Study all 60 tasks (T274-T334)
+3. `/root/projects/milestone-app/docs/031-phase-7-QA.md` - Understand 55 validation requirements
 4. Review issue list that prompted these fixes
 5. Study `.reference` folder for MVP design consistency requirements
 
@@ -40,7 +40,7 @@ Before starting implementation:
 ### 3. Environment Setup
 ```bash
 # Create feature branch
-git checkout -b phase-6.1-ui-fixes
+git checkout -b phase-7-ui-fixes
 
 # Verify development server running
 npm run dev
@@ -73,7 +73,7 @@ npm run dev
 git status
 
 # Create safety backup
-git checkout -b phase-6.1-ui-fixes
+git checkout -b phase-7-ui-fixes
 
 # Start validation logging
 console.log('Phase 6.1 UI Fixes Starting');
