@@ -17,37 +17,37 @@ export function ProjectKPICards({
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
   return (
-    <div className="kpi-grid" style={{ marginTop: '30px', marginBottom: '30px' }}>
-      <div className="kpi-card">
-        <div className="kpi-label">TOTAL INCOME</div>
-        <div className="kpi-value">{formatCurrency(totalIncome)}</div>
+    <div className="stats-grid-3">
+      <div className="stat-card-dark">
+        <div className="stat-label-light">TOTAL INCOME</div>
+        <div className="stat-value-light">{formatCurrency(totalIncome)}</div>
       </div>
 
-      <div className="kpi-card">
-        <div className="kpi-label">GROSS PROFIT</div>
-        <div className="kpi-value" style={{ color: grossProfit >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+      <div className="stat-card-dark">
+        <div className="stat-label-light">GROSS PROFIT</div>
+        <div className="stat-value-light" style={{ color: grossProfit >= 0 ? '#10b981' : '#ef4444' }}>
           {formatCurrency(grossProfit)}
         </div>
-        {grossProfit > 0 && totalIncome > 0 && (
-          <div className="kpi-subtitle">
+        {totalIncome > 0 && (
+          <div className="stat-subtitle">
             {((grossProfit / totalIncome) * 100).toFixed(1)}% margin
           </div>
         )}
       </div>
 
-      <div className="kpi-card">
-        <div className="kpi-label">NET PROFIT</div>
-        <div className="kpi-value" style={{ color: netProfit >= 0 ? 'var(--positive)' : 'var(--negative)' }}>
+      <div className="stat-card-dark">
+        <div className="stat-label-light">NET PROFIT</div>
+        <div className="stat-value-light" style={{ color: netProfit >= 0 ? '#10b981' : '#ef4444' }}>
           {formatCurrency(netProfit)}
         </div>
         {totalIncome > 0 && (
-          <div className="kpi-subtitle">
+          <div className="stat-subtitle">
             {profitMargin.toFixed(1)}% margin
           </div>
         )}

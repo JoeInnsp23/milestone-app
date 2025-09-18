@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProjectById } from '@/lib/queries';
+import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectKPICards } from '@/components/projects/project-kpi-cards';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
 import { ProjectTabs } from '@/components/projects/project-tabs';
@@ -47,14 +48,19 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
   return (
     <div className="min-h-screen dashboard-bg-gradient">
+      {/* Navigation */}
+      <Navigation view="projects" />
+
       <div className="container">
-        {/* Header Card with Back Button */}
+        {/* Back Button - Outside header card */}
+        <Link href="/projects" className="inline-block mb-4">
+          <button className="text-sm text-white/80 hover:text-white transition-colors">
+            ← Back to All Projects
+          </button>
+        </Link>
+
+        {/* Header Card */}
         <div className="header-card">
-          <Link href="/projects" className="inline-block mb-4">
-            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-              ← Back to All Projects
-            </button>
-          </Link>
           <h1>{project.name}</h1>
           <div className="subtitle">
             {project.client_name || 'No Client'} -

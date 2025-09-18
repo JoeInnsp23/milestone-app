@@ -346,6 +346,21 @@
     }
   }
 
+  /* Stats Grid - 3 columns variant for project detail */
+  .stats-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 35px;
+    width: 100%;
+  }
+
+  @media (min-width: 992px) {
+    .stats-grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   .stat-card {
     background: hsl(var(--card));
     border-radius: 15px;
@@ -383,6 +398,151 @@
 
   .stat-value.negative {
     color: var(--negative);
+  }
+
+  /* Dark KPI Cards for Project Detail */
+  .stat-card-dark {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .stat-card-dark:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+  }
+
+  .stat-label-light {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .stat-value-light {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+  }
+
+  .stat-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 5px;
+  }
+
+  /* Financial Breakdown Grid */
+  .financial-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin: 30px 0;
+  }
+
+  .breakdown-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .breakdown-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .breakdown-item:last-child {
+    border-bottom: none;
+  }
+
+  .item-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+
+  .item-value {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .item-value.negative {
+    color: var(--negative);
+  }
+
+  .breakdown-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 0;
+    margin-top: 8px;
+    border-top: 2px solid hsl(var(--border));
+  }
+
+  .total-label {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .total-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+
+  .total-value.negative {
+    color: var(--negative);
+  }
+
+  /* Tabs Styling */
+  .tabs-header {
+    display: flex;
+    border-bottom: 2px solid hsl(var(--border));
+    margin-bottom: 24px;
+  }
+
+  .tab-button {
+    padding: 16px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    margin-bottom: -2px;
+  }
+
+  .tab-button:hover {
+    color: var(--primary-blue-light);
+  }
+
+  .tab-button.active {
+    color: var(--primary-blue-light);
+    border-bottom-color: var(--primary-blue-light);
+  }
+
+  .tab-content {
+    padding: 0;
   }
 
   /* Chart Grid - 2x2 layout */

@@ -22,7 +22,7 @@ export function ProjectTabs({
   const [activeTab, setActiveTab] = useState<'invoices' | 'bills' | 'estimates'>('estimates');
 
   return (
-    <div className="project-tabs">
+    <div className="dashboard-card">
       <div className="tabs-header">
         <button
           className={`tab-button ${activeTab === 'invoices' ? 'active' : ''}`}
@@ -49,47 +49,6 @@ export function ProjectTabs({
         {activeTab === 'bills' && <ProjectBills bills={bills} />}
         {activeTab === 'estimates' && <ProjectEstimates projectId={projectId} estimates={estimates} />}
       </div>
-
-      <style jsx>{`
-        .project-tabs {
-          margin: 30px 0;
-          background: white;
-          border-radius: 8px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .tabs-header {
-          display: flex;
-          border-bottom: 2px solid var(--border-color);
-          padding: 0 20px;
-        }
-
-        .tab-button {
-          padding: 16px 24px;
-          background: none;
-          border: none;
-          border-bottom: 3px solid transparent;
-          cursor: pointer;
-          font-size: 14px;
-          font-weight: 500;
-          color: var(--text-secondary);
-          transition: all 0.2s ease;
-          margin-bottom: -2px;
-        }
-
-        .tab-button:hover {
-          color: var(--primary);
-        }
-
-        .tab-button.active {
-          color: var(--primary);
-          border-bottom-color: var(--primary);
-        }
-
-        .tab-content {
-          padding: 24px;
-        }
-      `}</style>
     </div>
   );
 }
