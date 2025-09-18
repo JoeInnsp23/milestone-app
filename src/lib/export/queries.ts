@@ -16,7 +16,7 @@ export async function getProjectExportData(projectId?: string) {
       pfs.last_updated,
       COALESCE(
         JSON_AGG(
-          DISTINCT jsonb_build_object(
+          jsonb_build_object(
             'id', i.id,
             'invoice_number', i.invoice_number,
             'invoice_date', i.invoice_date,
@@ -29,7 +29,7 @@ export async function getProjectExportData(projectId?: string) {
       ) as invoices,
       COALESCE(
         JSON_AGG(
-          DISTINCT jsonb_build_object(
+          jsonb_build_object(
             'id', b.id,
             'bill_number', b.bill_number,
             'bill_date', b.bill_date,
