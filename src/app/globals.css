@@ -334,9 +334,10 @@
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
+    gap: 1.5rem;
     width: 100%;
     margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   @media (min-width: 1200px) {
@@ -349,9 +350,10 @@
   .stats-grid-3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    margin-bottom: 1.5rem;
+    gap: 1.5rem;
     width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   @media (min-width: 992px) {
@@ -553,9 +555,10 @@
   .chart-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 30px;
+    gap: 1.5rem;
     width: 100%;
     margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
 
@@ -575,7 +578,6 @@
     min-width: 0;
     opacity: 1;
     box-sizing: border-box;
-    margin-bottom: 1.5rem;
   }
 
   .chart-title {
@@ -595,7 +597,8 @@
     width: 100%;
     opacity: 1;
     box-sizing: border-box;
-    margin-top: 0; /* First element, no top margin */
+    margin-top: 0;
+    margin-bottom: 1.5rem;
   }
 
   .header-card h1 {
@@ -627,20 +630,8 @@
     background: var(--negative);
   }
 
-  /* Standardized card spacing */
+  /* Dashboard card default spacing */
   .dashboard-card {
-    margin-bottom: 1.5rem; /* 24px consistent spacing */
-  }
-
-  .chart-grid > * {
-    margin-bottom: 1.5rem; /* Ensure grid items have same spacing */
-  }
-
-  .stats-grid {
-    margin-bottom: 1.5rem;
-  }
-
-  .header-card {
     margin-bottom: 1.5rem;
   }
 
