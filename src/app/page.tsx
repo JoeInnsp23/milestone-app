@@ -37,7 +37,7 @@ export default function Home() {
       {/* Main Content */}
       <div className="container">
         {/* Call to Action Section - Now at the top as hero */}
-        <div className="dashboard-card" style={{ textAlign: 'center' }}>
+        <div className="header-card" style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)', fontWeight: 'bold' }}>
             Transform Your Project Management
           </h1>
@@ -70,8 +70,8 @@ export default function Home() {
         </div>
 
         {/* Features Section - Professional Cards */}
-        <div className="chart-grid">
-          <div className="dashboard-card">
+        <div className="stats-grid">
+          <div className="stat-card">
             <div className="chart-title">Real-Time Analytics</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Live project performance metrics synchronized with your accounting system for accurate, up-to-date financial insights.
@@ -84,7 +84,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Comprehensive Reporting</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Generate detailed P&L reports by project, phase, or time period.
@@ -97,7 +97,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Project Performance Tracking</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Track individual project profitability with detailed breakdowns of revenue,
@@ -110,7 +110,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Enterprise Security</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Bank-grade security with enterprise authentication, ensuring your financial data
