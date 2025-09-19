@@ -52,6 +52,11 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
     const formData = new FormData(e.currentTarget);
     formData.append('project_id', projectId);
 
+    // Clean the amount value (remove any non-numeric characters except .)
+    const rawAmount = formData.get('amount') as string;
+    const cleanedAmount = rawAmount.replace(/[^0-9.]/g, '');
+    formData.set('amount', cleanedAmount);
+
     // Create optimistic estimate
     const tempId = `temp-${Date.now()}`;
     const optimisticEstimate: ProjectEstimate = {
@@ -59,7 +64,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       project_id: projectId,
       description: formData.get('description') as string,
       estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'hours' | 'materials',
-      amount: formData.get('amount') as string,
+      amount: cleanedAmount,
       estimate_date: formData.get('estimate_date') as string,
       confidence_level: Number(formData.get('confidence_level')),
       notes: formData.get('notes') as string,
@@ -322,15 +327,19 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
                 <div className="form-group">
                   <label htmlFor="amount">Amount *</label>
-                  <input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    step="0.01"
-                    min="0.01"
-                    defaultValue={editingEstimate?.amount}
-                    required
-                  />
+                  <div className="amount-input-wrapper">
+                    <span className="currency-symbol">£</span>
+                    <input
+                      type="text"
+                      id="amount"
+                      name="amount"
+                      inputMode="decimal"
+                      pattern="^\d+(\.\d{0,2})?$"
+                      placeholder="0.00"
+                      defaultValue={editingEstimate?.amount}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -621,6 +630,64 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           font-size: 14px;
           background: hsl(var(--background));
           color: hsl(var(--foreground));
+        }
+
+        /* Amount input with currency symbol */
+        .amount-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .currency-symbol {
+          position: absolute;
+          left: 10px;
+          color: hsl(var(--muted-foreground));
+          font-weight: 500;
+          pointer-events: none;
+        }
+
+        .amount-input-wrapper input {
+          padding-left: 25px;
+        }
+
+        /* Remove number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+
+        /* Fix date picker calendar icon in dark mode */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+          opacity: 0.7;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
+        }
+
+        /* Light mode - revert the invert */
+        @media (prefers-color-scheme: light) {
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: none;
+          }
+        }
+
+        /* Handle light theme class */
+        :global(.light) input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: none;
+        }
+
+        /* Handle dark theme class */
+        :global(.dark) input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
         }
 
         .form-row {
