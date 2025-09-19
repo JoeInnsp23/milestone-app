@@ -138,7 +138,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <div className="flex-1">
                   <h1>{stats.company_name || 'Company Ltd'}</h1>
                   <div className="subtitle">
-                    Project Hub -
                     {stats.date_from && stats.date_to ?
                       ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
                       ' All Time'}

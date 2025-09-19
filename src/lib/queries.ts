@@ -56,7 +56,7 @@ async function _getDashboardStats() {
       r.overdue_invoices,
       LEAST(r.min_invoice_date, c.min_bill_date) as date_from,
       GREATEST(r.max_invoice_date, c.max_bill_date) as date_to,
-      'Build By Milestone Ltd' as company_name
+      'Company Ltd' as company_name
     FROM revenue_data r, cost_data c, project_data p
   `);
 
@@ -77,7 +77,7 @@ async function _getDashboardStats() {
     overdue_invoices: '0',
     date_from: null,
     date_to: null,
-    company_name: 'Build By Milestone Ltd'
+    company_name: 'Company Ltd'
   };
 
   // Convert decimal strings to numbers
