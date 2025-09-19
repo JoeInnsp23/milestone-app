@@ -19,6 +19,7 @@ import { exportPDF, exportExcel } from '@/app/actions/export';
 
 interface ExportDialogProps {
   projectId?: string;
+  context?: 'dashboard' | 'projects' | 'project-detail';
   triggerClassName?: string;
   triggerVariant?: 'default' | 'outline' | 'ghost';
   triggerSize?: 'sm' | 'default' | 'lg';
@@ -26,6 +27,7 @@ interface ExportDialogProps {
 
 export function ExportDialog({
   projectId,
+  context,
   triggerClassName,
   triggerVariant = 'outline',
   triggerSize = 'default'
@@ -35,13 +37,16 @@ export function ExportDialog({
   const [format, setFormat] = useState<'pdf' | 'excel'>('pdf');
   const [template, setTemplate] = useState<'summary' | 'detailed'>('summary');
 
+  // Auto-detect context if not provided
+  const exportContext = context || (projectId ? 'project-detail' : 'dashboard');
+
   const handleExport = async () => {
     setIsExporting(true);
 
     try {
       const result = format === 'pdf'
-        ? await exportPDF(template, projectId)
-        : await exportExcel(template, projectId);
+        ? await exportPDF(template, projectId, exportContext)
+        : await exportExcel(template, projectId, exportContext);
 
       if (!result.success) {
         throw new Error(result.error || 'Export failed');

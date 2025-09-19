@@ -42,10 +42,29 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       return sum + (total || 0);
     }, 0);
 
-  const grossProfit = totalRevenue - (totalCosts * 0.6); // 60% as cost of sales
-  const operatingExpenses = totalCosts * 0.4; // 40% as operating expenses
-  const netProfit = totalRevenue - totalCosts;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+  // Calculate estimate totals
+  const estimatedRevenue = (project.estimates || [])
+    .filter(est => est.estimate_type === 'revenue')
+    .reduce((sum, est) => {
+      const amount = typeof est.amount === 'string' ? parseFloat(est.amount) : Number(est.amount);
+      return sum + (amount || 0);
+    }, 0);
+
+  const estimatedCosts = (project.estimates || [])
+    .filter(est => est.estimate_type === 'cost' || est.estimate_type === 'materials')
+    .reduce((sum, est) => {
+      const amount = typeof est.amount === 'string' ? parseFloat(est.amount) : Number(est.amount);
+      return sum + (amount || 0);
+    }, 0);
+
+  // Include estimates in calculations
+  const totalRevenueWithEstimates = totalRevenue + estimatedRevenue;
+  const totalCostsWithEstimates = totalCosts + estimatedCosts;
+
+  const grossProfit = totalRevenueWithEstimates - (totalCostsWithEstimates * 0.6); // 60% as cost of sales
+  const operatingExpenses = totalCostsWithEstimates * 0.4; // 40% as operating expenses
+  const netProfit = totalRevenueWithEstimates - totalCostsWithEstimates;
+  const profitMargin = totalRevenueWithEstimates > 0 ? (netProfit / totalRevenueWithEstimates) * 100 : 0;
 
   return (
     <div className="min-h-screen dashboard-bg-gradient">
@@ -78,18 +97,18 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
         {/* Main content with consistent spacing */}
         <div className="space-y-6">
-          {/* KPI Cards */}
+          {/* KPI Cards - Including Estimates */}
           <ProjectKPICards
-            totalIncome={totalRevenue}
+            totalIncome={totalRevenueWithEstimates}
             grossProfit={grossProfit}
             netProfit={netProfit}
             profitMargin={profitMargin}
           />
 
-          {/* Financial Breakdown */}
+          {/* Financial Breakdown - Including Estimates */}
           <ProjectFinancialBreakdown
-            revenue={totalRevenue}
-            costOfSales={totalCosts * 0.6}
+            revenue={totalRevenueWithEstimates}
+            costOfSales={totalCostsWithEstimates * 0.6}
             operatingExpenses={operatingExpenses}
             invoices={project.invoices as Invoice[]}
           />

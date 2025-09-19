@@ -6,6 +6,7 @@ import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
 import { ExportDialog } from '@/components/export/export-dialog';
+import { DashboardValidator } from '@/components/dashboard/dashboard-validator';
 import { format } from 'date-fns';
 
 interface DashboardPageProps {
@@ -120,12 +121,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   };
 
   return (
-    <div className="min-h-screen dashboard-bg-gradient">
-      {/* Navigation */}
-      <Navigation view={view} />
+    <DashboardValidator
+      expectedRevenue={stats.total_revenue || 0}
+      expectedCosts={stats.total_costs || 0}
+      expectedProfit={stats.total_profit || 0}
+    >
+      <div className="min-h-screen dashboard-bg-gradient">
+        {/* Navigation */}
+        <Navigation view={view} />
 
-      {/* Main content */}
-      <div className="container">
+        {/* Main content */}
+        <div className="container">
         {view === 'overview' ? (
           <>
             {/* Header Card */}
@@ -209,7 +215,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </DashboardValidator>
   );
 }

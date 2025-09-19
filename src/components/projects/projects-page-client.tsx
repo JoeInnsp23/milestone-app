@@ -4,29 +4,27 @@ import { useState, useMemo } from 'react';
 import { ProjectSummary } from '@/types';
 import { ProjectsFilter, FilterState } from '@/components/projects/projects-filter';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
+import { useProjectCountValidation } from '@/hooks/useDataValidation';
 
 interface ProjectsPageClientProps {
   projects: ProjectSummary[];
 }
 
 export function ProjectsPageClient({ projects }: ProjectsPageClientProps) {
+  // Run validation in development
+  useProjectCountValidation();
+
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: 'all',
   });
 
-  // Sort projects by latest activity by default
+  // Sort projects by profit (descending) as default
   const sortedProjects = useMemo(() => {
-    const getLatestActivity = (project: ProjectSummary) => {
-      // For now, we'll use the project name as a fallback
-      // In a real implementation, we'd have invoice/bill dates
-      return 0;
-    };
-
     return [...projects].sort((a, b) => {
-      // Default sort by project name for now
-      // This would be replaced with actual activity date sorting
-      return a.project_name.localeCompare(b.project_name);
+      // Sort by profit descending as a more useful default
+      // Projects with higher profit appear first
+      return b.profit - a.profit;
     });
   }, [projects]);
 

@@ -71,7 +71,7 @@ export default async function ProjectsPage() {
                 )}
               </div>
             </div>
-            <ExportDialog />
+            <ExportDialog context="projects" />
           </div>
         </div>
 
