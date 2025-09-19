@@ -631,36 +631,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           color: hsl(var(--foreground));
         }
 
-        /* Light mode - white background */
-        @media (prefers-color-scheme: light) {
-          .form-group input,
-          .form-group select,
-          .form-group textarea {
-            background: hsl(0 0% 100%);
-          }
-        }
-
-        /* Dark mode - use halfway color between background and card */
-        @media (prefers-color-scheme: dark) {
-          .form-group input,
-          .form-group select,
-          .form-group textarea {
-            background: hsl(220 32% 14%);
-          }
-        }
-
-        :global(.light) .form-group input,
-        :global(.light) .form-group select,
-        :global(.light) .form-group textarea {
-          background: hsl(0 0% 100%);
-        }
-
-        :global(.dark) .form-group input,
-        :global(.dark) .form-group select,
-        :global(.dark) .form-group textarea {
-          background: hsl(220 32% 14%);
-        }
-
         /* Amount input with currency symbol */
         .amount-input-wrapper {
           position: relative;
@@ -794,6 +764,35 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         .delete-button:disabled {
           opacity: 0.5;
           cursor: not-allowed;
+        }
+      `}</style>
+
+      {/* Global styles for form inputs to fix dark mode background */}
+      <style jsx global>{`
+        .modal-content .form-group input,
+        .modal-content .form-group select,
+        .modal-content .form-group textarea {
+          background: white;
+        }
+
+        @media (prefers-color-scheme: dark) {
+          .modal-content .form-group input,
+          .modal-content .form-group select,
+          .modal-content .form-group textarea {
+            background: hsl(220 32% 14%);
+          }
+        }
+
+        .dark .modal-content .form-group input,
+        .dark .modal-content .form-group select,
+        .dark .modal-content .form-group textarea {
+          background: hsl(220 32% 14%);
+        }
+
+        .light .modal-content .form-group input,
+        .light .modal-content .form-group select,
+        .light .modal-content .form-group textarea {
+          background: white;
         }
       `}</style>
     </div>
