@@ -628,8 +628,23 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
-          background: hsl(var(--muted));
+          background: hsl(210 20% 93%); /* Light mode */
           color: hsl(var(--foreground));
+        }
+
+        /* Dark mode - use halfway color between background and card */
+        @media (prefers-color-scheme: dark) {
+          .form-group input,
+          .form-group select,
+          .form-group textarea {
+            background: hsl(220 58% 11%);
+          }
+        }
+
+        :global(.dark) .form-group input,
+        :global(.dark) .form-group select,
+        :global(.dark) .form-group textarea {
+          background: hsl(220 58% 11%);
         }
 
         /* Amount input with currency symbol */
