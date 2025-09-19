@@ -3,13 +3,6 @@
 import { useState, useTransition } from 'react';
 import { MonthlyTrendChart } from './monthly-trend-chart';
 import { fetchMonthlyRevenue, type TimePeriod } from '@/app/actions/dashboard';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 interface MonthlyTrendWrapperProps {
   initialData: Array<{
@@ -33,8 +26,7 @@ export function MonthlyTrendWrapper({ initialData }: MonthlyTrendWrapperProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('6m');
   const [isPending, startTransition] = useTransition();
 
-  const handlePeriodChange = (value: string) => {
-    const period = value as TimePeriod;
+  const handlePeriodChange = (period: TimePeriod) => {
     setSelectedPeriod(period);
     startTransition(async () => {
       try {
@@ -50,22 +42,27 @@ export function MonthlyTrendWrapper({ initialData }: MonthlyTrendWrapperProps) {
     <div className="chart-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <div className="chart-title">Monthly Revenue Trend</div>
-        <Select
+        <select
           value={selectedPeriod}
-          onValueChange={handlePeriodChange}
+          onChange={(e) => handlePeriodChange(e.target.value as TimePeriod)}
           disabled={isPending}
+          style={{
+            padding: '0.25rem 0.75rem',
+            fontSize: '0.875rem',
+            borderRadius: '0.375rem',
+            border: '1px solid var(--border)',
+            background: 'var(--background)',
+            color: 'var(--text)',
+            cursor: 'pointer',
+            opacity: isPending ? 0.5 : 1,
+          }}
         >
-          <SelectTrigger className="w-32" style={{ opacity: isPending ? 0.5 : 1 }}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {periodOptions.map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {periodOptions.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
       {isPending ? (
         <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
