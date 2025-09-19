@@ -625,4 +625,21 @@
   .profit-bar.negative {
     background: var(--negative);
   }
+
+  /* Standardized card spacing */
+  .dashboard-card {
+    margin-bottom: 1.5rem; /* 24px consistent spacing */
+  }
+
+  .chart-grid > * {
+    margin-bottom: 1.5rem; /* Ensure grid items have same spacing */
+  }
+
+  .stats-grid {
+    margin-bottom: 1.5rem;
+  }
+
+  .header-card {
+    margin-bottom: 1.5rem;
+  }
 }

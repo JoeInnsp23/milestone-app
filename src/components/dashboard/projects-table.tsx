@@ -9,14 +9,20 @@ interface ProjectsTableProps {
   projects: ProjectSummary[];
   filters?: FilterState;
   isLoading?: boolean;
+  defaultSortKey?: string;
 }
 
-type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'profit' | 'profit_margin';
+type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'operating_expenses' | 'profit' | 'profit_margin';
 type SortDirection = 'asc' | 'desc';
 
-export function ProjectsTable({ projects: initialProjects, filters, isLoading }: ProjectsTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('project_name');
+export function ProjectsTable({ projects: initialProjects, filters, isLoading, defaultSortKey }: ProjectsTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  const clearSort = useCallback(() => {
+    setSortKey(null);
+    setSortDirection('asc');
+  }, []);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-GB', {
@@ -67,6 +73,9 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
   const sortedProjects = useMemo(() => {
     const sorted = [...filteredProjects];
 
+    // If no sort key is set, return unsorted (preserves default order)
+    if (!sortKey) return sorted;
+
     sorted.sort((a, b) => {
       let aValue: string | number;
       let bValue: string | number;
@@ -83,6 +92,11 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
         case 'actual_costs':
           aValue = a.actual_costs;
           bValue = b.actual_costs;
+          break;
+        case 'operating_expenses':
+          // Assuming operating expenses is 40% of costs (as per dashboard calculation)
+          aValue = a.actual_costs * 0.4;
+          bValue = b.actual_costs * 0.4;
           break;
         case 'profit':
           aValue = a.profit;
@@ -139,12 +153,29 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
 
   return (
     <div className="dashboard-card">
-      <div className="chart-title" style={{ marginBottom: '20px' }}>
-        All Projects Summary (Click project name for details)
-        {filteredProjects.length < initialProjects.length && (
-          <span className="text-sm text-gray-500 ml-2">
-            (Showing {filteredProjects.length} of {initialProjects.length} projects)
-          </span>
+      <div className="chart-title" style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          All Projects Summary (Click project name for details)
+          {filteredProjects.length < initialProjects.length && (
+            <span className="text-sm text-gray-500 ml-2">
+              (Showing {filteredProjects.length} of {initialProjects.length} projects)
+            </span>
+          )}
+        </div>
+        {sortKey && (
+          <button
+            onClick={clearSort}
+            className="text-sm text-muted-foreground hover:text-foreground"
+            style={{
+              padding: '4px 8px',
+              border: '1px solid var(--border)',
+              borderRadius: '4px',
+              background: 'transparent',
+              cursor: 'pointer'
+            }}
+          >
+            Clear Sort
+          </button>
         )}
       </div>
       <div style={{ overflowX: 'auto' }}>
@@ -199,16 +230,21 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
               >
                 Cost of Sales {getSortIcon('actual_costs')}
               </th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>
-                Operating Exp.
+              <th
+                onClick={() => handleSort('operating_expenses')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Operating Exp. {getSortIcon('operating_expenses')}
               </th>
               <th
                 onClick={() => handleSort('profit')}

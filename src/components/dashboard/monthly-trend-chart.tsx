@@ -35,10 +35,10 @@ export function MonthlyTrendChart({ data }: MonthlyTrendChartProps) {
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="chart-tooltip">
-          <p className="font-medium">{label}</p>
+        <div className="bg-card border rounded-lg shadow-lg p-3">
+          <p className="text-sm font-medium text-foreground mb-1">{label}</p>
           {payload.map((entry, index: number) => (
-            <p key={index} style={{ color: entry.color }}>
+            <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: {formatCurrency(entry.value)}
             </p>
           ))}

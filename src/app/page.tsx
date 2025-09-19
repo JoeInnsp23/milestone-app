@@ -13,18 +13,13 @@ export default function Home() {
       {/* Navigation Bar - Matching Dashboard */}
       <div className="nav-bar">
         <div className="nav-content">
-          <div className="nav-title">Projects P&L Dashboard</div>
+          <div className="nav-title">Project Hub</div>
           <div className="nav-buttons">
             <SignedOut>
               <Link href="/sign-in">
                 <button className="nav-btn">Sign In</button>
               </Link>
             </SignedOut>
-            <SignedIn>
-              <Link href="/dashboard">
-                <button className="nav-btn active">Go to Dashboard</button>
-              </Link>
-            </SignedIn>
             <button
               onClick={toggleTheme}
               className="nav-btn"
@@ -43,7 +38,7 @@ export default function Home() {
       <div className="container">
         {/* Call to Action Section - Now at the top as hero */}
         <div className="dashboard-card" style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)' }}>
+          <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)', fontWeight: 'bold' }}>
             Transform Your Project Management
           </h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '18px' }}>

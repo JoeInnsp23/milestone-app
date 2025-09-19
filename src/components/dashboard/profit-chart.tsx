@@ -63,12 +63,12 @@ export const ProfitChart = memo(function ProfitChart({ data }: ProfitChartProps)
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <div className="bg-card border rounded-lg shadow-lg p-3">
           <div className="flex flex-col">
             <span className="text-[0.70rem] uppercase text-muted-foreground">
               Project
             </span>
-            <span className="font-bold text-muted-foreground">
+            <span className="font-bold text-foreground">
               {label}
             </span>
           </div>
@@ -76,7 +76,7 @@ export const ProfitChart = memo(function ProfitChart({ data }: ProfitChartProps)
             <span className="text-[0.70rem] uppercase text-muted-foreground">
               Net Profit
             </span>
-            <span className="font-bold">
+            <span className="font-bold text-foreground">
               {formatCurrency(payload[0].value)}
             </span>
           </div>
@@ -84,7 +84,7 @@ export const ProfitChart = memo(function ProfitChart({ data }: ProfitChartProps)
             <span className="text-[0.70rem] uppercase text-muted-foreground">
               Margin
             </span>
-            <span className="font-bold">
+            <span className="font-bold text-foreground">
               {payload[0].payload.margin.toFixed(1)}%
             </span>
           </div>

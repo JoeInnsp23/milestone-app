@@ -630,3 +630,79 @@ export async function getTopProjects(limit: number = 10) {
     return [];
   }
 }
+
+// Data Validation Queries
+export async function validateDashboardData() {
+  try {
+    // Get actual project count from database
+    const actualProjectCount = await db
+      .select({ count: sql<number>`COUNT(DISTINCT id)` })
+      .from(projects)
+      .where(eq(projects.is_active, true));
+
+    // Get displayed stats
+    const displayedStats = await getDashboardStats();
+
+    // Compare counts
+    const actualCount = Number(actualProjectCount[0]?.count || 0);
+    const displayedCount = Number(displayedStats.active_projects || 0);
+    const isValid = actualCount === displayedCount;
+
+    if (!isValid) {
+      console.error(`DATA MISMATCH: DB has ${actualCount} active projects, displaying ${displayedCount}`);
+    }
+
+    return {
+      actualProjects: actualCount,
+      displayedProjects: displayedCount,
+      isValid
+    };
+  } catch (error) {
+    console.error('Error validating dashboard data:', error);
+    return {
+      actualProjects: 0,
+      displayedProjects: 0,
+      isValid: false
+    };
+  }
+}
+
+export async function validateFinancialTotals(projectId?: string) {
+  try {
+    if (projectId) {
+      // Validate single project financials
+      const projectData = await db.execute(sql`
+        SELECT
+          p.id,
+          COALESCE(SUM(i.total), 0) as actual_revenue,
+          COALESCE(SUM(b.total), 0) as actual_costs,
+          COALESCE(SUM(i.total), 0) - COALESCE(SUM(b.total), 0) as actual_profit
+        FROM milestone.projects p
+        LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.status IN ('AUTHORISED', 'PAID')
+        LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.status IN ('AUTHORISED', 'PAID')
+        WHERE p.id = ${projectId}
+        GROUP BY p.id
+      `);
+
+      return projectData[0] || null;
+    } else {
+      // Validate company-wide financials
+      const totals = await db.execute(sql`
+        SELECT
+          COALESCE(SUM(i.total), 0) as total_revenue,
+          COALESCE(SUM(b.total), 0) as total_costs,
+          COALESCE(SUM(i.total), 0) - COALESCE(SUM(b.total), 0) as total_profit,
+          COUNT(DISTINCT p.id) as project_count
+        FROM milestone.projects p
+        LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.status IN ('AUTHORISED', 'PAID')
+        LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.status IN ('AUTHORISED', 'PAID')
+        WHERE p.is_active = true
+      `);
+
+      return totals[0] || null;
+    }
+  } catch (error) {
+    console.error('Error validating financial totals:', error);
+    return null;
+  }
+}

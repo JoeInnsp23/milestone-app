@@ -107,13 +107,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     },
   ];
 
+  const profitableProjectsCount = uniqueProjects.filter(p => p.profit > 0).length;
+  const totalUniqueProjects = uniqueProjects.length;
+
   const formattedStats = {
     totalRevenue: stats.total_revenue || 0,
     totalCosts: stats.total_costs || 0,
     totalProfit: stats.total_profit || 0,
     profitMargin: stats.profit_margin || 0,
-    activeProjects: stats.active_projects || 0,
-    profitableProjects: uniqueProjects.filter(p => p.profit > 0).length,
+    activeProjects: totalUniqueProjects, // Use actual unique project count
+    profitableProjects: profitableProjectsCount,
   };
 
   return (
@@ -129,7 +132,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <div className="header-card">
               <div className="flex justify-between items-center">
                 <div className="flex-1">
-                  <h1>Projects P&L Dashboard</h1>
+                  <h1>Project Hub</h1>
                   <div className="subtitle">
                     {stats.company_name || 'Build By Milestone Ltd'} -
                     {stats.date_from && stats.date_to ?
@@ -159,7 +162,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </div>
               <div className="stat-card">
                 <div className="stat-label">PROFITABLE PROJECTS</div>
-                <div className="stat-value">{formattedStats.profitableProjects} / {formattedStats.activeProjects}</div>
+                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects} Projects Profitable</div>
               </div>
             </div>
 
@@ -189,9 +192,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </div>
               </div>
             </div>
-
-            {/* Projects Table */}
-            <ProjectsTable projects={uniqueProjects.slice(0, 10)} />
           </>
         ) : (
           /* All Projects View */

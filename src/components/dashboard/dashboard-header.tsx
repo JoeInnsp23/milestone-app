@@ -20,7 +20,7 @@ export function DashboardHeader({ stats, view }: DashboardHeaderProps) {
         <div className="py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              Projects P&L Dashboard
+              {String(stats.company_name || 'Build By Milestone Ltd')} Dashboard
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {String(stats.company_name || 'Build By Milestone Ltd')} -{' '}

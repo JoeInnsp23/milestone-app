@@ -60,7 +60,7 @@ export default async function ProjectsPage() {
         <div className="header-card">
           <div className="flex justify-between items-center">
             <div className="flex-1">
-              <h1>Projects P&L Dashboard</h1>
+              <h1>Project Hub</h1>
               <div className="subtitle">
                 {companyName} - {dateFrom && dateTo ? (
                   <>
