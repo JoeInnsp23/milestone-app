@@ -10,7 +10,7 @@ export default function SignInPage() {
             <BarChart3 className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-            P&L Dashboard
+            Project Hub
           </h1>
           <p className="text-muted-foreground mt-2">Sign in to access your dashboard</p>
         </div>

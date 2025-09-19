@@ -132,7 +132,7 @@ export default function Home() {
           textAlign: 'center'
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            © 2024 Professional P&L Dashboard. All rights reserved.
+            © 2024 Project Hub. All rights reserved.
           </p>
           <p style={{ color: 'var(--text-dim)', fontSize: '12px', marginTop: '10px' }}>
             Secure cloud infrastructure • Real-time data synchronization • Enterprise-grade security

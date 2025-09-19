@@ -15,7 +15,7 @@ export function Navigation({ view }: NavigationProps) {
   return (
     <div className="nav-bar">
       <div className="nav-content">
-        <div className="nav-title">P&L Dashboard</div>
+        <div className="nav-title">Project Hub</div>
         <div className="nav-buttons">
           <Link href="/dashboard?view=overview">
             <button className={`nav-btn ${view === 'overview' ? 'active' : ''}`}>
