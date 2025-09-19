@@ -29,12 +29,20 @@ export function ExportButton({
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<string | null>(null);
+  const [exportProgress, setExportProgress] = useState<string>('');
 
   const handleExport = async (format: 'pdf' | 'excel', selectedTemplate: 'summary' | 'detailed') => {
     setIsExporting(true);
     setExportFormat(`${format}-${selectedTemplate}`);
+    setExportProgress('Preparing export...');
 
     try {
+      // Show preparing message
+      const toastId = toast.loading(`Generating ${format.toUpperCase()} export...`);
+      const startTime = Date.now();
+
+      // Perform export
+      setExportProgress('Generating file...');
       const result = format === 'pdf'
         ? await exportPDF(selectedTemplate, projectId)
         : await exportExcel(selectedTemplate, projectId);
@@ -44,6 +52,7 @@ export function ExportButton({
       }
 
       // Download the file using data URL
+      setExportProgress('Starting download...');
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = result.dataUrl;
@@ -52,13 +61,23 @@ export function ExportButton({
       a.click();
       document.body.removeChild(a);
 
-      toast.success(`${format.toUpperCase()} exported successfully`);
+      // Calculate file size for display
+      const base64Length = result.dataUrl.split(',')[1]?.length || 0;
+      const fileSizeKB = Math.round((base64Length * 0.75) / 1024);
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+
+      toast.success(
+        `${format.toUpperCase()} exported successfully (${fileSizeKB}KB in ${duration}s)`,
+        { id: toastId }
+      );
     } catch (error) {
       console.error('Export error:', error);
-      toast.error(`Failed to export ${format.toUpperCase()}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(errorMessage || `Failed to export ${format.toUpperCase()}`);
     } finally {
       setIsExporting(false);
       setExportFormat(null);
+      setExportProgress('');
     }
   };
 

@@ -293,30 +293,64 @@ export class ExcelBuilder {
       pattern: 'solid',
       fgColor: { argb: '6366F1' },
     };
+    trendHeaderRow.height = 25;
+
+    let totalRevenue = 0;
+    let totalCosts = 0;
+    let rowIndex = 2;
 
     (monthlyResult.rows || []).forEach((month: MonthlyMetricsRow) => {
-      trendSheet.addRow({
+      const revenue = Number(month.revenue) || 0;
+      const costs = Number(month.costs) || 0;
+      const profit = Number(month.profit) || 0;
+      const margin = Number(month.margin) || 0;
+
+      totalRevenue += revenue;
+      totalCosts += costs;
+
+      const row = trendSheet.addRow({
         month: month.month ? format(new Date(month.month), 'MMM yyyy') : 'N/A',
-        revenue: Number(month.revenue) || 0,
-        costs: Number(month.costs) || 0,
-        profit: Number(month.profit) || 0,
-        margin: `${((Number(month.margin) || 0) * 100).toFixed(1)}%`,
+        revenue: revenue,
+        costs: costs,
+        profit: profit,
+        margin: `${(margin * 100).toFixed(1)}%`,
         project_count: month.project_count || 0,
       });
+      rowIndex++;
     });
+
+    // Add totals row with formulas
+    const totalRow = trendSheet.addRow({
+      month: 'TOTAL',
+      revenue: { formula: `SUM(B2:B${rowIndex - 1})` },
+      costs: { formula: `SUM(C2:C${rowIndex - 1})` },
+      profit: { formula: `SUM(D2:D${rowIndex - 1})` },
+      margin: { formula: `IF(B${rowIndex}=0,0,D${rowIndex}/B${rowIndex})`, result: 0 },
+      project_count: { formula: `SUM(F2:F${rowIndex - 1})` },
+    });
+    totalRow.font = { bold: true };
+    totalRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: EXPORT_CONFIG.excel.headerColor },
+    };
 
     // Format currency columns
     ['B', 'C', 'D'].forEach(col => {
       for (let row = 2; row <= trendSheet.rowCount; row++) {
         const cell = trendSheet.getCell(`${col}${row}`);
-        if (typeof cell.value === 'number') {
+        if (typeof cell.value === 'number' || (typeof cell.value === 'object' && cell.value !== null && 'formula' in cell.value)) {
           cell.numFmt = '£#,##0.00';
         }
       }
     });
 
-    // Color code profit column
-    for (let row = 2; row <= trendSheet.rowCount; row++) {
+    // Format margin column
+    const marginCol = trendSheet.getCell(`E${rowIndex}`);
+    marginCol.numFmt = '0.0%';
+
+    // Color code profit column with conditional formatting
+    for (let row = 2; row <= trendSheet.rowCount - 1; row++) {
       const profitCell = trendSheet.getCell(`D${row}`);
       if (typeof profitCell.value === 'number') {
         if (profitCell.value > 0) {
@@ -344,6 +378,7 @@ export class ExcelBuilder {
     statsSheet.columns = [
       { header: 'Metric', key: 'metric', width: 30 },
       { header: 'Value', key: 'value', width: 20 },
+      { header: 'Details', key: 'details', width: 40 },
     ];
 
     const statsHeaderRow = statsSheet.getRow(1);
@@ -353,20 +388,92 @@ export class ExcelBuilder {
       pattern: 'solid',
       fgColor: { argb: EXPORT_CONFIG.excel.primaryColor },
     };
+    statsHeaderRow.height = 25;
 
     const stats = dashboardData.stats;
-    statsSheet.addRows([
-      { metric: 'Total Projects', value: stats?.total_projects || 0 },
-      { metric: 'Total Revenue', value: Number(stats?.total_revenue) || 0 },
-      { metric: 'Total Costs', value: Number(stats?.total_costs) || 0 },
-      { metric: 'Total Profit', value: Number(stats?.total_profit) || 0 },
-      { metric: 'Profitable Projects', value: stats?.profitable_projects || 0 },
-      { metric: 'Success Rate', value: `${((stats?.profitable_projects || 0) / (stats?.total_projects || 1) * 100).toFixed(1)}%` },
+    const totalProfit = Number(stats?.total_profit) || 0;
+    const successRate = (stats?.profitable_projects || 0) / (stats?.total_projects || 1) * 100;
+
+    const metricsRows = [
+      {
+        metric: 'Total Projects',
+        value: stats?.total_projects || 0,
+        details: `${stats?.profitable_projects || 0} profitable, ${(stats?.total_projects || 0) - (stats?.profitable_projects || 0)} unprofitable`
+      },
+      {
+        metric: 'Total Revenue',
+        value: Number(stats?.total_revenue) || 0,
+        details: 'Sum of all project revenues'
+      },
+      {
+        metric: 'Total Costs',
+        value: Number(stats?.total_costs) || 0,
+        details: 'Sum of all project costs'
+      },
+      {
+        metric: 'Total Profit',
+        value: totalProfit,
+        details: totalProfit >= 0 ? 'Net positive performance' : 'Net negative performance'
+      },
+      {
+        metric: 'Profitable Projects',
+        value: stats?.profitable_projects || 0,
+        details: `${successRate.toFixed(1)}% success rate`
+      },
+      {
+        metric: 'Average Margin',
+        value: `${((Number(stats?.total_profit) || 0) / (Number(stats?.total_revenue) || 1) * 100).toFixed(1)}%`,
+        details: 'Overall profit margin across all projects'
+      },
+    ];
+
+    metricsRows.forEach((row, index) => {
+      const addedRow = statsSheet.addRow(row);
+
+      // Format specific cells
+      if (index >= 1 && index <= 3 && typeof row.value === 'number') {
+        const cell = statsSheet.getCell(`B${addedRow.number}`);
+        cell.numFmt = '£#,##0.00';
+
+        // Color code profit row
+        if (index === 3) {
+          if (row.value > 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: EXPORT_CONFIG.excel.profitColor },
+            };
+          } else if (row.value < 0) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: EXPORT_CONFIG.excel.lossColor },
+            };
+          }
+        }
+      }
+    });
+
+    // Add chart data preparation sheet
+    const chartSheet = this.workbook.addWorksheet('Chart Data', {
+      properties: { tabColor: { argb: '10b981' } },
+      state: 'hidden', // Hide this sheet as it's for chart creation
+    });
+
+    chartSheet.columns = [
+      { header: 'Category', key: 'category', width: 20 },
+      { header: 'Value', key: 'value', width: 15 },
+    ];
+
+    chartSheet.addRows([
+      { category: 'Revenue', value: Number(stats?.total_revenue) || 0 },
+      { category: 'Costs', value: Number(stats?.total_costs) || 0 },
+      { category: 'Profit', value: Number(stats?.total_profit) || 0 },
     ]);
 
-    // Format currency cells
-    for (let row = 3; row <= 5; row++) {
-      const cell = statsSheet.getCell(`B${row}`);
+    // Format the chart data
+    for (let row = 2; row <= 4; row++) {
+      const cell = chartSheet.getCell(`B${row}`);
       if (typeof cell.value === 'number') {
         cell.numFmt = '£#,##0.00';
       }

@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { getProjectExportData, getDashboardExportData } from '@/lib/export/queries';
 import { formatCurrency, formatPercentage, formatDate } from '@/lib/export/utils';
 import { EXPORT_CONFIG } from '@/lib/export/config';
-import type { InvoiceAggregated, ProjectWithAggregates } from '@/types/export';
+import type { InvoiceAggregated, BillAggregated, ProjectWithAggregates } from '@/types/export';
 
 export async function generateSummaryPDF(
   userId: string,
@@ -102,21 +102,103 @@ export async function generateSummaryPDF(
     doc.moveDown(0.5);
   });
 
-  // Invoices section if exists
-  if (project.invoices && Array.isArray(project.invoices) && project.invoices.length > 0) {
-    doc.addPage();
-    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
-       .text('Invoices', EXPORT_CONFIG.pdf.margins.left, EXPORT_CONFIG.pdf.margins.top, { underline: true });
-    doc.moveDown();
+  // Income Breakdown Section
+  doc.moveDown();
+  doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
+     .text('Income Breakdown', EXPORT_CONFIG.pdf.margins.left, doc.y, { underline: true });
+  doc.moveDown();
 
-    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small);
+  if (project.invoices && Array.isArray(project.invoices) && project.invoices.length > 0) {
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+       .fillColor(EXPORT_CONFIG.pdf.colors.muted)
+       .text('Invoice #', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .text('Date', EXPORT_CONFIG.pdf.margins.left + 120, doc.y)
+       .text('Amount', EXPORT_CONFIG.pdf.margins.left + 220, doc.y)
+       .text('Status', EXPORT_CONFIG.pdf.margins.left + 320, doc.y);
+
+    doc.moveDown();
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+
+    let totalIncome = 0;
     project.invoices.forEach((invoice: InvoiceAggregated) => {
-      doc.text(
-        `${invoice.invoice_number || 'N/A'} - ${formatDate(invoice.invoice_date)} - ${formatCurrency(Number(invoice.total) || 0)} - ${invoice.status || 'N/A'}`,
-        EXPORT_CONFIG.pdf.margins.left
-      );
+      const amount = Number(invoice.total) || 0;
+      totalIncome += amount;
+
+      doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+         .text(invoice.invoice_number || 'N/A', EXPORT_CONFIG.pdf.margins.left, doc.y)
+         .text(formatDate(invoice.invoice_date), EXPORT_CONFIG.pdf.margins.left + 120, doc.y)
+         .text(formatCurrency(amount), EXPORT_CONFIG.pdf.margins.left + 220, doc.y)
+         .text(invoice.status || 'N/A', EXPORT_CONFIG.pdf.margins.left + 320, doc.y);
       doc.moveDown(0.5);
     });
+
+    // Total row
+    doc.moveTo(EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .lineTo(doc.page.width - EXPORT_CONFIG.pdf.margins.right, doc.y)
+       .stroke();
+    doc.moveDown(0.5);
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.body)
+       .text('Total Income:', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .fillColor(EXPORT_CONFIG.pdf.colors.success)
+       .text(formatCurrency(totalIncome), EXPORT_CONFIG.pdf.margins.left + 220, doc.y);
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+  } else {
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+       .fillColor(EXPORT_CONFIG.pdf.colors.muted)
+       .text('No invoices recorded', EXPORT_CONFIG.pdf.margins.left);
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+  }
+
+  // Cost Breakdown Section
+  doc.moveDown(2);
+  doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
+     .text('Cost Breakdown', EXPORT_CONFIG.pdf.margins.left, doc.y, { underline: true });
+  doc.moveDown();
+
+  if (project.bills && Array.isArray(project.bills) && project.bills.length > 0) {
+    // Cost of Sales
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.body)
+       .text('Cost of Sales', EXPORT_CONFIG.pdf.margins.left, doc.y);
+    doc.moveDown();
+
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+       .fillColor(EXPORT_CONFIG.pdf.colors.muted)
+       .text('Bill #', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .text('Date', EXPORT_CONFIG.pdf.margins.left + 120, doc.y)
+       .text('Amount', EXPORT_CONFIG.pdf.margins.left + 220, doc.y)
+       .text('Status', EXPORT_CONFIG.pdf.margins.left + 320, doc.y);
+
+    doc.moveDown();
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+
+    let totalCosts = 0;
+    project.bills.forEach((bill: BillAggregated) => {
+      const amount = Number(bill.total) || 0;
+      totalCosts += amount;
+
+      doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+         .text(bill.bill_number || 'N/A', EXPORT_CONFIG.pdf.margins.left, doc.y)
+         .text(formatDate(bill.bill_date), EXPORT_CONFIG.pdf.margins.left + 120, doc.y)
+         .text(formatCurrency(amount), EXPORT_CONFIG.pdf.margins.left + 220, doc.y)
+         .text(bill.status || 'N/A', EXPORT_CONFIG.pdf.margins.left + 320, doc.y);
+      doc.moveDown(0.5);
+    });
+
+    // Total row
+    doc.moveTo(EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .lineTo(doc.page.width - EXPORT_CONFIG.pdf.margins.right, doc.y)
+       .stroke();
+    doc.moveDown(0.5);
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.body)
+       .text('Total Costs:', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .fillColor(EXPORT_CONFIG.pdf.colors.danger)
+       .text(formatCurrency(totalCosts), EXPORT_CONFIG.pdf.margins.left + 220, doc.y);
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+  } else {
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+       .fillColor(EXPORT_CONFIG.pdf.colors.muted)
+       .text('No bills recorded', EXPORT_CONFIG.pdf.margins.left);
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
   }
 
   // Footer on last page
@@ -274,21 +356,65 @@ export async function generateDetailedPDF(
     });
   }
 
-  // Monthly trends
+  // Monthly trends with better formatting
   if (dashboardData.monthlyData.length > 0) {
     doc.addPage();
     doc.fontSize(EXPORT_CONFIG.pdf.fontSize.heading)
        .text('Monthly Trends', EXPORT_CONFIG.pdf.margins.left, EXPORT_CONFIG.pdf.margins.top, { underline: true });
     doc.moveDown();
 
-    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small);
+    // Table headers
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+       .fillColor(EXPORT_CONFIG.pdf.colors.muted)
+       .text('Month', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .text('Revenue', EXPORT_CONFIG.pdf.margins.left + 100, doc.y)
+       .text('Costs', EXPORT_CONFIG.pdf.margins.left + 200, doc.y)
+       .text('Profit', EXPORT_CONFIG.pdf.margins.left + 300, doc.y)
+       .text('Margin', EXPORT_CONFIG.pdf.margins.left + 400, doc.y);
+
+    doc.moveDown();
+    doc.fillColor(EXPORT_CONFIG.pdf.colors.text);
+
+    let totalMonthlyRevenue = 0;
+    let totalMonthlyCosts = 0;
+
     dashboardData.monthlyData.slice(0, 12).forEach((month) => {
-      doc.text(
-        `${format(new Date(month.month), 'MMM yyyy')}: Revenue ${formatCurrency(Number(month.revenue) || 0)}, Costs ${formatCurrency(Number(month.costs) || 0)}, Profit ${formatCurrency(Number(month.profit) || 0)}`,
-        EXPORT_CONFIG.pdf.margins.left
-      );
+      const revenue = Number(month.revenue) || 0;
+      const costs = Number(month.costs) || 0;
+      const profit = Number(month.profit) || 0;
+      const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+
+      totalMonthlyRevenue += revenue;
+      totalMonthlyCosts += costs;
+
+      doc.fontSize(EXPORT_CONFIG.pdf.fontSize.small)
+         .text(format(new Date(month.month), 'MMM yyyy'), EXPORT_CONFIG.pdf.margins.left, doc.y)
+         .text(formatCurrency(revenue), EXPORT_CONFIG.pdf.margins.left + 100, doc.y)
+         .text(formatCurrency(costs), EXPORT_CONFIG.pdf.margins.left + 200, doc.y)
+         .fillColor(profit >= 0 ? EXPORT_CONFIG.pdf.colors.success : EXPORT_CONFIG.pdf.colors.danger)
+         .text(formatCurrency(profit), EXPORT_CONFIG.pdf.margins.left + 300, doc.y)
+         .fillColor(EXPORT_CONFIG.pdf.colors.text)
+         .text(`${margin.toFixed(1)}%`, EXPORT_CONFIG.pdf.margins.left + 400, doc.y);
       doc.moveDown(0.5);
     });
+
+    // Totals
+    const totalProfit = totalMonthlyRevenue - totalMonthlyCosts;
+    const avgMargin = totalMonthlyRevenue > 0 ? (totalProfit / totalMonthlyRevenue) * 100 : 0;
+
+    doc.moveTo(EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .lineTo(doc.page.width - EXPORT_CONFIG.pdf.margins.right, doc.y)
+       .stroke();
+    doc.moveDown(0.5);
+
+    doc.fontSize(EXPORT_CONFIG.pdf.fontSize.body)
+       .text('Total', EXPORT_CONFIG.pdf.margins.left, doc.y)
+       .text(formatCurrency(totalMonthlyRevenue), EXPORT_CONFIG.pdf.margins.left + 100, doc.y)
+       .text(formatCurrency(totalMonthlyCosts), EXPORT_CONFIG.pdf.margins.left + 200, doc.y)
+       .fillColor(totalProfit >= 0 ? EXPORT_CONFIG.pdf.colors.success : EXPORT_CONFIG.pdf.colors.danger)
+       .text(formatCurrency(totalProfit), EXPORT_CONFIG.pdf.margins.left + 300, doc.y)
+       .fillColor(EXPORT_CONFIG.pdf.colors.text)
+       .text(`${avgMargin.toFixed(1)}%`, EXPORT_CONFIG.pdf.margins.left + 400, doc.y);
   }
 
   // Footer on last page
