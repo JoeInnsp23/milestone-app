@@ -1,510 +1,511 @@
-# Phase 7: Production Deployment with Coolify - Implementation Prompt
+# Phase 7: Frontend UI Fixes and Data Validation - Implementation Prompt
 
 ## Context Initialization
-You are tasked with implementing Phase 7 of the Milestone P&L Dashboard project. This phase deploys the application to production using Coolify on an Ubuntu server with Docker internal_net networking.
+You are tasked with implementing Phase 7 of the Milestone P&L Dashboard project. This critical phase addresses UI inconsistencies, data accuracy issues, and user experience improvements identified during comprehensive frontend testing. All fixes must maintain consistency with the existing MVP design while ensuring accurate data display throughout the application.
+
+## Critical Issues Being Addressed
+This phase resolves:
+- Landing page redundancy and typography issues
+- Dashboard data accuracy mismatches (project counts, ratios, calculations)
+- UI consistency problems (tooltips, spacing, chart displays)
+- Projects page sorting and filtering defects
+- Export functionality inconsistencies
+- Project details UI issues and missing estimate calculations
+- Overall professional polish and user experience
 
 ## Pre-Implementation Requirements
 
 ### 1. Document Review
 First, thoroughly read and understand these documents in this exact order:
-1. `/root/projects/milestone-app/project-plan.md` - Review deployment architecture
-2. `/root/projects/milestone-app/phase-7-details.md` - Deployment specification with Coolify
-3. `/root/projects/milestone-app/phase-7-tasks.md` - Study all 57 tasks (T274-T330)
-4. `/root/projects/milestone-app/phase-7-QA.md` - Understand validation requirements
+1. `/root/projects/milestone-app/docs/029-phase-7-details.md` - Complete technical specification
+2. `/root/projects/milestone-app/docs/030-phase-7-tasks.md` - Study all 60 tasks (T274-T334)
+3. `/root/projects/milestone-app/docs/031-phase-7-QA.md` - Understand 55 validation requirements
+4. Review issue list that prompted these fixes
+5. Study `.reference` folder for MVP design consistency requirements
 
 ### 2. Context Building
 Before starting implementation:
+- Use `mcp__context7__resolve-library-id` and `mcp__context7__get-library-docs` to research:
+  - React performance optimization techniques
+  - Data validation patterns in Next.js
+  - Recharts tooltip customization
+  - CSS spacing best practices
+  - Export template patterns
 - Use WebSearch to find:
-  - Coolify deployment documentation
-  - Docker internal networking best practices
-  - PostgreSQL in Docker containers
-  - Next.js production optimization
-  - Subdirectory deployment with basePath
+  - UI consistency guidelines
+  - Data accuracy validation methods
+  - Cross-browser testing strategies
+  - Accessibility best practices (2024)
 
-### 3. Infrastructure Understanding
-**CRITICAL**: Understand the deployment architecture:
-- Coolify manages deployments on Ubuntu server
-- PostgreSQL runs in Docker container
-- internal_net provides secure database access
-- NO external database exposure
-- Production URL: dashboard.innspiredaccountancy.com/milestone-app
+### 3. Environment Setup
+```bash
+# Create feature branch
+git checkout -b phase-7-ui-fixes
 
-## Server Prerequisites
+# Verify development server running
+npm run dev
 
-This phase requires access to:
-1. Ubuntu server with Coolify installed
-2. PostgreSQL running in Docker
-3. Docker internal_net network configured
-4. Domain pointing to server
+# Clear browser cache
+# Open browser developer tools
+# Prepare database query tool for validation
+```
 
-**Note**: If server access is not available, complete all preparation tasks and document the deployment steps.
+### 4. Critical Understanding
+**IMPORTANT**: This phase is about fixing existing features, NOT adding new ones:
+- Focus on accuracy over features
+- Maintain existing design patterns
+- Ensure no regressions
+- Validate every fix with data
 
 ## Implementation Instructions
 
-### Phase 7 Task Execution (T274-T330)
+### Phase 6.1 Task Execution (T300-T360)
 
-#### Infrastructure Verification (T275-T277):
+#### CRITICAL RULES:
+1. **Test after EVERY change** - Don't batch fixes without testing
+2. **Validate data accuracy** - Use console logs and database queries
+3. **Maintain consistency** - Follow existing patterns exactly
+4. **Document issues** - Note any problems for Phase 6.2
+
+#### Prerequisites & Setup (T300-T302):
 ```bash
-# If you have SSH access:
-ssh user@server
+# Verify all prior phases complete
+git status
 
-# Check Coolify status
-docker ps | grep coolify
+# Create safety backup
+git checkout -b phase-7-ui-fixes
 
-# Verify internal_net exists
-docker network ls | grep internal_net
-
-# Find PostgreSQL container
-docker ps | grep postgres
+# Start validation logging
+console.log('Phase 6.1 UI Fixes Starting');
 ```
 
-If no server access, document these checks for the DevOps team.
+#### Landing Page Improvements (T303-T306):
 
-#### Database Setup (T278-T281):
-```sql
--- Database creation script
--- Save as: scripts/production-db-setup.sql
-
--- Create database and user
-CREATE DATABASE milestone_db;
-CREATE USER milestone_app WITH ENCRYPTED PASSWORD 'secure_password_here';
-GRANT ALL PRIVILEGES ON DATABASE milestone_db TO milestone_app;
-
--- Enable UUID extension
-\c milestone_db
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- Create schema
-CREATE SCHEMA IF NOT EXISTS milestone;
-GRANT ALL ON SCHEMA milestone TO milestone_app;
-
--- Create read-only role for n8n
-CREATE ROLE xero_reader;
-GRANT USAGE ON SCHEMA milestone TO xero_reader;
-GRANT SELECT ON ALL TABLES IN SCHEMA milestone TO xero_reader;
-GRANT xero_reader TO milestone_app;
-
--- Performance indexes
-CREATE INDEX CONCURRENTLY idx_projects_user_status ON projects(user_id, status);
-CREATE INDEX CONCURRENTLY idx_invoices_project_date ON invoices(project_id, issue_date);
-CREATE INDEX CONCURRENTLY idx_bills_project_date ON bills(project_id, date);
-CREATE INDEX CONCURRENTLY idx_estimates_project ON estimates(project_id);
-```
-
-#### Environment Configuration (T282-T284):
-Create `.env.production`:
-```env
-# Database - using Docker internal hostname
-DATABASE_URL=postgresql://milestone_app:password@postgres-container:5432/milestone_db
-
-# Clerk Production
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
-CLERK_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/milestone-app/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/milestone-app/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/milestone-app/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/milestone-app/dashboard
-
-# Application
-NEXT_PUBLIC_APP_URL=https://dashboard.innspiredaccountancy.com/milestone-app
-NODE_ENV=production
-NEXT_PUBLIC_BASE_PATH=/milestone-app
-```
-
-#### Coolify Application Setup (T285-T288):
-
-**In Coolify Dashboard:**
-1. Create New Application
-2. Source: GitHub
-3. Repository: milestone-app
-4. Branch: main
-5. Auto-deploy: Enabled
-
-**Docker Network Configuration:**
-```yaml
-# Coolify configuration
-Networks:
-  - internal_net
-
-Environment Variables:
-  # Add all from .env.production
-  # DATABASE_URL uses internal hostname
-
-Build Configuration:
-  Install Command: npm ci --production=false
-  Build Command: npm run build
-  Start Command: npm run start
-  Health Check: /milestone-app/api/health
-```
-
-#### Production Configuration Files:
-
-**next.config.mjs Updates (T286):**
-```javascript
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Production subdirectory deployment
-  basePath: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
-
-  // Standalone output for Docker
-  output: 'standalone',
-
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin'
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          }
-        ]
-      }
-    ];
-  },
-
-  // Image optimization
-  images: {
-    domains: ['img.clerk.com'],
-    unoptimized: true, // For self-hosted
-  },
-};
-
-export default nextConfig;
-```
-
-**Dockerfile (if custom build needed):**
-```dockerfile
-FROM node:18-alpine AS base
-
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-COPY package.json package-lock.json* ./
-RUN npm ci
-
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
-ARG NEXT_PUBLIC_BASE_PATH=/milestone-app
-ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
-
-RUN npm run build
-
-FROM base AS runner
-WORKDIR /app
-
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
-
-EXPOSE 3000
-ENV PORT 3000
-
-CMD ["node", "server.js"]
-```
-
-#### Simple Monitoring Setup (T293-T295):
-
-**Logger Implementation:**
+**Remove Redundant Button:**
 ```typescript
-// src/lib/logger.ts
-export class Logger {
-  static error(message: string, error?: any) {
-    console.error(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level: 'ERROR',
-      message,
-      error: error?.stack || error
-    }));
+// src/app/page.tsx - Lines 23-26
+// DELETE this entire SignedIn block in header:
+<SignedIn>
+  <Link href="/dashboard">
+    <button className="nav-btn active">Go to Dashboard</button>
+  </Link>
+</SignedIn>
+// Keep only the button in main content area
+```
+
+**Make Text Bold:**
+```typescript
+// src/app/page.tsx - Line 47
+<h1 style={{
+  fontSize: '36px',
+  marginBottom: '15px',
+  color: 'var(--foreground)',
+  fontWeight: 'bold'  // ADD THIS
+}}>
+  Transform Your Project Management
+</h1>
+```
+
+**Global Name Change:**
+```bash
+# Search and replace globally
+grep -r "Projects P&L Dashboard" src/
+# Replace ALL instances with "Milestone Insights"
+```
+
+#### Dashboard Data Fixes (T307-T310):
+
+**Fix Company Title:**
+```typescript
+// src/components/dashboard/dashboard-header.tsx - Line 22-24
+<h1 className="text-2xl font-bold text-foreground">
+  {String(stats.company_name || 'Build By Milestone Ltd')} Dashboard
+</h1>
+```
+
+**Create Validation Query:**
+```typescript
+// src/lib/queries.ts - ADD:
+export async function validateDashboardData() {
+  const actualCount = await db
+    .select({ count: sql<number>`COUNT(DISTINCT id)` })
+    .from(projects)
+    .where(eq(projects.is_active, true));
+
+  const displayedStats = await getDashboardStats();
+
+  const isValid = actualCount[0].count === displayedStats.active_projects;
+
+  if (!isValid) {
+    console.error(`DATA MISMATCH: DB=${actualCount[0].count}, UI=${displayedStats.active_projects}`);
   }
 
-  static info(message: string, meta?: any) {
-    console.log(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level: 'INFO',
-      message,
-      ...meta
-    }));
-  }
+  return { isValid, actual: actualCount[0].count, displayed: displayedStats.active_projects };
 }
 ```
 
-**Health Check Endpoint:**
+**Fix Profitable Projects Ratio:**
 ```typescript
-// src/app/api/health/route.ts
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { sql } from 'drizzle-orm';
+// src/app/(authenticated)/dashboard/page.tsx - Lines 48-74
+// Ensure unique counting:
+const uniqueProjects = Array.from(projectsMap.values());
+const profitableCount = uniqueProjects.filter(p => p.profit > 0).length;
+const totalCount = uniqueProjects.length;
 
-export async function GET() {
-  try {
-    await db.execute(sql`SELECT 1`);
+// Display as: "12/20 Projects Profitable" NOT "12/20"
+```
 
-    return NextResponse.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      database: 'connected',
-    });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        status: 'unhealthy',
-        error: 'Database connection failed',
-      },
-      { status: 503 }
+#### Dashboard UI Consistency (T311-T315):
+
+**Add Tooltip Backgrounds:**
+```typescript
+// src/components/dashboard/revenue-chart.tsx
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-card border rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {entry.name}: {formatCurrency(entry.value)}
+          </p>
+        ))}
+      </div>
     );
   }
+  return null;
+};
+
+// Apply to: <Tooltip content={<CustomTooltip />} />
+```
+
+**Convert to Pie Chart:**
+```typescript
+// src/components/dashboard/revenue-chart.tsx
+<Pie
+  data={data}
+  cx="50%"
+  cy="50%"
+  outerRadius={80}
+  innerRadius={0}  // CHANGE from 50 to 0
+  fill="#8884d8"
+  paddingAngle={0}
+  dataKey="value"
+  stroke="none"     // CHANGE from stroke="#fff"
+>
+```
+
+**Standardize Spacing:**
+```css
+/* src/app/globals.css - ADD: */
+.dashboard-card {
+  margin-bottom: 1.5rem; /* 24px consistent spacing */
+}
+
+.chart-grid > * {
+  margin-bottom: 1.5rem;
 }
 ```
 
-#### Deployment Scripts (T297-T301):
+#### Projects Page Sorting (T316-T318):
 
-**Pre-deployment Script:**
-```bash
-#!/bin/bash
-# scripts/pre-deploy.sh
-
-echo "Running pre-deployment checks..."
-
-# Type checking
-npm run type-check || exit 1
-
-# Linting
-npm run lint || exit 1
-
-# Build test
-npm run build || exit 1
-
-echo "✅ All checks passed!"
-```
-
-**Database Backup Script (T308):**
-```bash
-#!/bin/bash
-# scripts/backup-database.sh
-
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-CONTAINER_NAME="postgres-container"
-BACKUP_FILE="/backups/milestone_backup_${TIMESTAMP}.sql"
-
-# Create backup from Docker container
-docker exec $CONTAINER_NAME pg_dump -U postgres milestone_db > $BACKUP_FILE
-
-# Compress
-gzip $BACKUP_FILE
-
-echo "Backup completed: ${BACKUP_FILE}.gz"
-```
-
-#### Simple Admin Dashboard (T295):
+**Default Sort by Latest Activity:**
 ```typescript
-// src/app/admin/page.tsx
-import { auth } from "@clerk/nextjs";
+// src/components/projects/projects-page-client.tsx
+const getLatestActivity = (project: any) => {
+  const invoiceDates = project.invoices?.map(i => new Date(i.invoice_date)) || [];
+  const billDates = project.bills?.map(b => new Date(b.bill_date)) || [];
+  const allDates = [...invoiceDates, ...billDates];
+  return allDates.length > 0 ? Math.max(...allDates.map(d => d.getTime())) : 0;
+};
 
-export default async function AdminDashboard() {
-  const { userId } = auth();
+// Apply as default:
+useEffect(() => {
+  const sorted = [...projects].sort((a, b) =>
+    getLatestActivity(b) - getLatestActivity(a)
+  );
+  setDisplayedProjects(sorted);
+}, [projects]);
+```
 
-  // Simple admin check
-  if (!userId || !process.env.ADMIN_USER_IDS?.includes(userId)) {
-    return <div>Unauthorized</div>;
+**Add Operating Expenses Sort:**
+```typescript
+// Add to sortable columns
+const sortableColumns = ['name', 'revenue', 'costs', 'operating_expenses', 'profit', 'margin'];
+
+// Handle sort click:
+if (column === 'operating_expenses') {
+  // Apply sort logic
+}
+```
+
+**Clear Sort Button:**
+```typescript
+<button
+  onClick={() => {
+    setSortConfig(null);
+    // Reset to default sort
+  }}
+  className="text-sm text-muted-foreground hover:text-foreground"
+>
+  Clear Sort
+</button>
+```
+
+#### Projects Page Filters (T319-T322):
+
+**Fix Search Card Visibility:**
+```typescript
+// src/app/(authenticated)/projects/page.tsx
+// REMOVE any conditional rendering:
+<ProjectsPageClient projects={projects} />
+// NOT: {someCondition && <ProjectsPageClient ... />}
+```
+
+**Remove Date Filter:**
+```typescript
+// src/components/projects/projects-filter.tsx
+// DELETE lines 41-47 (date inputs)
+// Remove from state and filter logic
+```
+
+**Fix Status Filter:**
+```typescript
+// src/db/seed.ts
+const statuses = ['active', 'completed', 'on_hold', 'planning'];
+// Assign to each project:
+status: statuses[Math.floor(Math.random() * statuses.length)]
+
+// Re-run: npm run db:seed
+```
+
+#### Export Consistency (T323-T331):
+
+**Unify Button Style:**
+```css
+/* src/app/globals.css */
+.export-button {
+  background-color: hsl(var(--primary) / 0.9);
+  color: hsl(var(--primary-foreground));
+}
+
+.export-button:hover {
+  background-color: hsl(var(--primary));
+}
+```
+
+**Replace Dropdown with Dialog:**
+```typescript
+// src/app/(authenticated)/dashboard/page.tsx
+// REPLACE:
+import { ExportButton } from '@/components/export/export-button';
+// WITH:
+import { ExportDialog } from '@/components/export/export-dialog';
+
+// Use: <ExportDialog />
+```
+
+**Fix Dialog Background:**
+```typescript
+// src/components/export/export-dialog.tsx
+<DialogContent className="sm:max-w-[500px] bg-background border">
+  {/* Ensure opaque background */}
+</DialogContent>
+```
+
+**Context-Specific Templates:**
+```typescript
+// src/app/actions/export.ts
+export async function exportPDF(template: string, projectId?: string) {
+  // Dashboard export - company-wide only
+  if (!projectId && location.pathname.includes('dashboard')) {
+    return generateCompanyReport(template);
   }
 
-  const stats = await db.query`
-    SELECT
-      (SELECT COUNT(*) FROM projects) as projects,
-      (SELECT COUNT(*) FROM estimates) as estimates,
-      (SELECT COUNT(DISTINCT user_id) FROM projects) as users
-  `;
+  // Projects list - all projects
+  if (!projectId && location.pathname.includes('projects')) {
+    return generateProjectsListReport(template);
+  }
 
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent>
-            <p>Total Projects</p>
-            <p className="text-2xl">{stats.projects}</p>
-          </CardContent>
-        </Card>
-        {/* More cards... */}
-      </div>
-      <p className="mt-6 text-gray-600">
-        View detailed metrics in Coolify dashboard
-      </p>
-    </div>
-  );
+  // Single project
+  if (projectId) {
+    return generateProjectReport(projectId, template);
+  }
 }
 ```
 
-### Deployment Process (T325-T327):
+#### Project Details UI (T332-T343):
 
-1. **Push to GitHub:**
-```bash
-git add .
-git commit -m "feat: prepare for Coolify deployment"
-git push origin main
+**Enhance Tab Highlighting:**
+```css
+/* src/app/globals.css */
+.tab-button.active {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-bottom: 3px solid hsl(var(--primary));
+  font-weight: 600;
+}
 ```
 
-2. **Coolify Auto-Deploy:**
-- Monitors main branch
-- Triggers build automatically
-- Deploys container
-- Runs health checks
-
-3. **Verify Deployment:**
-```bash
-# Test production URL
-curl https://dashboard.innspiredaccountancy.com/milestone-app/api/health
-
-# Check application
-# Visit: https://dashboard.innspiredaccountancy.com/milestone-app
+**Standardize Spacing:**
+```typescript
+// src/app/(authenticated)/projects/[id]/page.tsx
+<div className="space-y-6"> {/* Consistent 24px gaps */}
+  <ProjectKPICards ... />
+  <ProjectFinancialBreakdown ... />
+  <ProjectTabs ... />
+</div>
 ```
 
-## Quality Assurance Execution
-
-After completing ALL tasks (T274-T330), execute the QA validation:
-
-### Phase 7 QA Validation (QA301-QA350)
-
-Critical QA checks:
-- QA301-QA309: Build and environment validation
-- QA310-QA317: Coolify configuration testing
-- QA318-QA329: Performance and monitoring
-- QA330-QA339: Database and backups
-- QA340-QA350: Final production validation
-
-### Production Testing Checklist:
-```bash
-# 1. Access Testing
-- Visit https://dashboard.innspiredaccountancy.com/milestone-app
-- Verify redirect to sign-in
-- Complete authentication flow
-- Access dashboard
-
-# 2. Functionality Testing
-- Test all CRUD operations
-- Verify export functionality
-- Check data accuracy
-- Test responsiveness
-
-# 3. Performance Testing
-- Monitor response times
-- Check memory usage in Coolify
-- Verify no memory leaks
-- Test with concurrent users
-
-# 4. Security Testing
-- Verify HTTPS only
-- Check security headers
-- Test rate limiting
-- Verify database isolation
+**Fix Estimate Popup:**
+```typescript
+// src/components/projects/project-estimates.tsx
+<div className="bg-background text-foreground p-4 rounded-lg">
+  {/* Form content - ensure visible */}
+</div>
 ```
+
+**Include Estimates in Calculations:**
+```typescript
+// src/app/(authenticated)/projects/[id]/page.tsx
+const estimatedCosts = project.estimates
+  ?.filter(e => e.estimate_type === 'cost' || e.estimate_type === 'materials')
+  .reduce((sum, e) => sum + Number(e.amount), 0) || 0;
+
+const totalCostsWithEstimates = totalCosts + estimatedCosts;
+const netProfitWithEstimates = totalRevenue - totalCostsWithEstimates;
+```
+
+#### Data Validation System (T344-T347):
+
+**Create Validator:**
+```typescript
+// src/lib/validation/data-validator.ts
+export class DataValidator {
+  async validateProjectCounts() {
+    const dbCount = await db.select({ count: sql<number>`COUNT(*)` }).from(projects);
+    const uiCount = /* get from UI */;
+
+    if (dbCount[0].count !== uiCount) {
+      console.error(`MISMATCH: DB=${dbCount[0].count}, UI=${uiCount}`);
+      return false;
+    }
+    return true;
+  }
+
+  async validateFinancialTotals(projectId?: string) {
+    // Implement calculation validation
+  }
+}
+```
+
+**Add Validation Hook:**
+```typescript
+// src/hooks/useDataValidation.ts
+import { useEffect } from 'react';
+import { DataValidator } from '@/lib/validation/data-validator';
+
+export function useDataValidation() {
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      const validator = new DataValidator();
+      validator.validateProjectCounts();
+      validator.validateFinancialTotals();
+    }
+  }, []);
+}
+```
+
+### Testing & QA (T348-T360)
+
+#### Running QA Validation:
+```bash
+# Run through all 55 QA items in order
+# Document each result
+# Fix failures immediately
+# Re-test after fixes
+```
+
+#### Cross-Browser Testing:
+1. Chrome/Edge - Full functionality test
+2. Firefox - Check all fixes render
+3. Safari - Verify on macOS and iOS
+4. Mobile - Test responsive layouts
+
+#### Performance Check:
+```javascript
+// Add to each page:
+console.time('PageLoad');
+// ... page content
+console.timeEnd('PageLoad'); // Should be < 2s
+```
+
+## Common Pitfalls to Avoid
+
+### Data Accuracy Issues:
+- **DON'T** assume calculations are correct - validate everything
+- **DON'T** use cached data without verification
+- **DO** log mismatches for debugging
+
+### UI Consistency Problems:
+- **DON'T** use inline styles for spacing - use classes
+- **DON'T** forget dark mode testing
+- **DO** check every tooltip and dialog
+
+### Export Functionality:
+- **DON'T** export wrong context data
+- **DON'T** leave dialogs transparent
+- **DO** test all export formats
+
+### Performance Concerns:
+- **DON'T** add unnecessary re-renders
+- **DON'T** skip memoization for expensive operations
+- **DO** monitor console for warnings
+
+## Validation Steps
+
+### After Each Task Group:
+1. Run specific QA tests for that section
+2. Check browser console for errors
+3. Verify data accuracy with database queries
+4. Test in both light and dark modes
+5. Check mobile responsiveness
+
+### Final Validation Checklist:
+- [ ] All 60 tasks complete (T300-T360)
+- [ ] All 55 QA items pass (QA301-QA355)
+- [ ] No console errors or warnings
+- [ ] Data matches database exactly
+- [ ] UI consistent across all pages
+- [ ] All browsers tested
+- [ ] Performance benchmarks met
+- [ ] No regressions introduced
 
 ## Success Criteria
-Phase 7 is complete when:
-- [ ] All 57 tasks (T274-T330) completed
-- [ ] All 50 QA checks (QA301-QA350) pass
-- [ ] Application deployed via Coolify
-- [ ] Accessible at /milestone-app subdirectory
-- [ ] Database connected via internal_net
-- [ ] Auto-deploy from GitHub working
-- [ ] Health checks passing
-- [ ] Basic monitoring active
-- [ ] Backup script created
-- [ ] Production stable
 
-## Common Issues & Solutions
+Phase 6.1 is complete when:
+1. **Zero data mismatches** between UI and database
+2. **All UI elements** have consistent spacing (24px/1.5rem)
+3. **All tooltips/dialogs** have proper backgrounds
+4. **All sorting/filtering** functions work correctly
+5. **Export templates** are context-specific
+6. **Estimates** are included in calculations
+7. **All 55 QA items** pass validation
+8. **Cross-browser** compatibility confirmed
 
-1. **Database connection failing:**
-   - Verify internal_net network
-   - Check container names
-   - Ensure no external exposure
-   - Test with docker exec
+## Next Steps
 
-2. **Subdirectory routing broken:**
-   - Check basePath in next.config.mjs
-   - Verify environment variables
-   - Clear Next.js cache
-   - Check Coolify path configuration
+After completing Phase 6.1:
+1. Commit all changes with detailed message
+2. Create pull request with issue references
+3. Document any remaining issues for Phase 6.2
+4. Update project status documentation
+5. Prepare for Phase 6.2 (if additional issues found)
 
-3. **Container memory issues:**
-   - Set memory limit to 1GB
-   - Monitor in Coolify dashboard
-   - Optimize bundle size
-   - Enable swap if needed
+---
 
-4. **SSL certificate issues:**
-   - Verify domain DNS
-   - Check Coolify SSL settings
-   - Ensure port 443 open
+**CRITICAL REMINDER**: This phase is about fixing problems, not adding features. Focus on accuracy, consistency, and polish. Every fix should make the application more professional and reliable.
 
-## Verification Commands
-```bash
-# Check production build
-npm run build
-NODE_ENV=production npm run start
-
-# Test health endpoint locally
-curl http://localhost:3000/api/health
-
-# Verify Docker setup
-docker network inspect internal_net
-docker ps | grep milestone
-
-# Check logs in Coolify
-# Access Coolify dashboard → Application → Logs
-```
-
-## Critical Notes
-- DO NOT expose database externally
-- DO NOT skip security headers
-- DO NOT use complex monitoring (keep simple)
-- DO NOT forget basePath configuration
-- Keep deployment simple for 3-5 users
-- Use Coolify's built-in features
-
-## Post-Deployment
-
-Once deployed:
-1. Monitor Coolify dashboard for 24 hours
-2. Check container resource usage
-3. Verify backup script runs daily
-4. Document any issues
-5. Create runbook for operations team
-
-Upon completion, Phase 7 delivers a production-ready application deployed via Coolify with secure database access, automated deployments, and basic monitoring suitable for 3-5 users.
+*Estimated Time: 6-7 hours*
+*Priority: HIGH - Critical user-facing fixes*
+*Dependencies: Phases 1-5 must be complete*

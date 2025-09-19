@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { getDashboardStats, getProjectSummaries } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectsPageClient } from '@/components/projects/projects-page-client';
+import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
 
 export default async function ProjectsPage() {
@@ -57,15 +58,20 @@ export default async function ProjectsPage() {
       <div className="container">
         {/* Header Card */}
         <div className="header-card">
-          <h1>Projects P&L Dashboard</h1>
-          <div className="subtitle">
-            {companyName} - {dateFrom && dateTo ? (
-              <>
-                {format(new Date(dateFrom), 'd MMMM yyyy')} to {format(new Date(dateTo), 'd MMMM yyyy')}
-              </>
-            ) : (
-              'All Time'
-            )}
+          <div className="flex justify-between items-center">
+            <div className="flex-1">
+              <h1>Projects P&L Dashboard</h1>
+              <div className="subtitle">
+                {companyName} - {dateFrom && dateTo ? (
+                  <>
+                    {format(new Date(dateFrom), 'd MMMM yyyy')} to {format(new Date(dateTo), 'd MMMM yyyy')}
+                  </>
+                ) : (
+                  'All Time'
+                )}
+              </div>
+            </div>
+            <ExportDialog />
           </div>
         </div>
 

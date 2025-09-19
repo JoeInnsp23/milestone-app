@@ -1,13 +1,12 @@
 'use client';
 
-import { Invoice, Bill } from '@/types';
+import { Invoice } from '@/types';
 
 interface ProjectFinancialBreakdownProps {
   revenue: number;
   costOfSales: number;
   operatingExpenses: number;
   invoices: Invoice[];
-  bills: Bill[];
 }
 
 export function ProjectFinancialBreakdown({
@@ -15,7 +14,6 @@ export function ProjectFinancialBreakdown({
   costOfSales,
   operatingExpenses,
   invoices,
-  bills: _bills, // Not currently used but may be needed for future enhancements
 }: ProjectFinancialBreakdownProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-GB', {

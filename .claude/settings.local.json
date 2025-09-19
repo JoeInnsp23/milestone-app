@@ -13,7 +13,18 @@
       "Bash(npm run lint)",
       "Bash(npm run type-check:*)",
       "mcp__sequential-thinking__sequentialthinking",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git checkout:*)",
+      "mcp__context7__get-library-docs",
+      "mcp__context7__resolve-library-id",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add dropdown-menu:*)",
+      "Bash(npx shadcn@latest add radio-group:*)",
+      "WebSearch",
+      "Bash(npm run dev:*)",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*\")",
+      "Bash(pkill:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
