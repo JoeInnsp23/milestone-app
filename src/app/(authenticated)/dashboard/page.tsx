@@ -6,8 +6,8 @@ import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
 import { ExportDialog } from '@/components/export/export-dialog';
-import { DashboardValidator } from '@/components/dashboard/dashboard-validator';
 import { format } from 'date-fns';
+import { runDashboardValidation } from '@/lib/server-validation';
 
 interface DashboardPageProps {
   searchParams: Promise<{ view?: string }>;
@@ -29,6 +29,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     getMonthlyRevenue('6m'),
     getTopProjects(10),
   ]);
+
+  // Run server-side validation in development
+  await runDashboardValidation(statsRaw);
 
   // Type the stats object properly
   const stats = statsRaw as unknown as {
@@ -121,12 +124,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   };
 
   return (
-    <DashboardValidator
-      expectedRevenue={stats.total_revenue || 0}
-      expectedCosts={stats.total_costs || 0}
-      expectedProfit={stats.total_profit || 0}
-    >
-      <div className="min-h-screen dashboard-bg-gradient">
+    <div className="min-h-screen dashboard-bg-gradient">
         {/* Navigation */}
         <Navigation view={view} />
 
@@ -217,6 +215,5 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         )}
         </div>
       </div>
-    </DashboardValidator>
   );
 }

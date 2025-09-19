@@ -4,16 +4,12 @@ import { useState, useMemo } from 'react';
 import { ProjectSummary } from '@/types';
 import { ProjectsFilter, FilterState } from '@/components/projects/projects-filter';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
-import { useProjectCountValidation } from '@/hooks/useDataValidation';
 
 interface ProjectsPageClientProps {
   projects: ProjectSummary[];
 }
 
 export function ProjectsPageClient({ projects }: ProjectsPageClientProps) {
-  // Run validation in development
-  useProjectCountValidation();
-
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: 'all',

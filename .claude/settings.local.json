@@ -25,7 +25,12 @@
       "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*\")",
       "Bash(pkill:*)",
       "Bash(curl:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(docker logs:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker compose:*)",
+      "Bash(sudo rm:*)",
+      "Bash(npm run:*)"
     ],
     "deny": [],
     "ask": []

@@ -4,6 +4,7 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectsPageClient } from '@/components/projects/projects-page-client';
 import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
+import { runProjectCountValidation } from '@/lib/server-validation';
 
 export default async function ProjectsPage() {
   const { userId } = await auth();
@@ -38,6 +39,9 @@ export default async function ProjectsPage() {
   });
 
   const projects = Array.from(projectsMap.values());
+
+  // Run server-side validation in development
+  await runProjectCountValidation(projects.length);
 
   const statsTyped = stats as {
     company_name?: string;
