@@ -628,8 +628,16 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
-          background: hsl(var(--background));
           color: hsl(var(--foreground));
+        }
+
+        /* Light mode - white background */
+        @media (prefers-color-scheme: light) {
+          .form-group input,
+          .form-group select,
+          .form-group textarea {
+            background: hsl(0 0% 100%);
+          }
         }
 
         /* Dark mode - use halfway color between background and card */
@@ -639,6 +647,12 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           .form-group textarea {
             background: hsl(220 32% 14%);
           }
+        }
+
+        :global(.light) .form-group input,
+        :global(.light) .form-group select,
+        :global(.light) .form-group textarea {
+          background: hsl(0 0% 100%);
         }
 
         :global(.dark) .form-group input,
