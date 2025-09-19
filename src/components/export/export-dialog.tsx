@@ -78,7 +78,7 @@ export function ExportDialog({
           Export Data
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] bg-background border">
+      <DialogContent className="sm:max-w-[500px] dashboard-card">
         <DialogHeader>
           <DialogTitle>Export Data</DialogTitle>
           <DialogDescription>
@@ -148,7 +148,7 @@ export function ExportDialog({
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isExporting}>
             Cancel
           </Button>
-          <Button onClick={handleExport} disabled={isExporting}>
+          <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -30,7 +30,8 @@
       "Bash(docker restart:*)",
       "Bash(docker compose:*)",
       "Bash(sudo rm:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*; \\dv milestone.*; \\dm milestone.*;\")"
     ],
     "deny": [],
     "ask": []

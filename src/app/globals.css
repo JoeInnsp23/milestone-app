@@ -155,7 +155,6 @@
     transition: all 0.3s ease;
     box-sizing: border-box;
     width: 100%;
-    margin-bottom: 30px;
   }
 
   .dashboard-card:hover {
@@ -336,7 +335,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
-    margin-bottom: 35px;
     width: 100%;
   }
 
@@ -351,7 +349,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 25px;
-    margin-bottom: 35px;
+    margin-bottom: 1.5rem;
     width: 100%;
   }
 
@@ -579,7 +577,7 @@
     min-width: 0;
     opacity: 1;
     box-sizing: border-box;
-    margin-bottom: 30px;
+    margin-bottom: 1.5rem;
   }
 
   .chart-title {
@@ -594,7 +592,6 @@
     background: hsl(var(--card));
     border-radius: 15px;
     padding: 30px;
-    margin-bottom: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     width: 100%;
@@ -665,4 +662,21 @@
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
+
+  /* Dialog content with dashboard-card styling */
+  [data-state="open"][role="dialog"].dashboard-card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    border-radius: 15px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    padding: 25px !important;
+    border: none !important;
+  }
+
+  /* Dark mode dialog with dashboard-card styling */
+  .dark [data-state="open"][role="dialog"].dashboard-card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
 }
