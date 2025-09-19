@@ -63,7 +63,7 @@ export const ProfitChart = memo(function ProfitChart({ data }: ProfitChartProps)
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-card border rounded-lg shadow-lg p-3">
+        <div className="chart-tooltip">
           <div className="flex flex-col">
             <span className="text-[0.70rem] uppercase text-muted-foreground">
               Project

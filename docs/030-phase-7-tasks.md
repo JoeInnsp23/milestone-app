@@ -14,7 +14,7 @@ Complete task-oriented breakdown for fixing UI inconsistencies, data accuracy is
 - Estimated Time: 5 minutes
 
 ⚠️ **T275-Backup Current State**: Create safety backup
-- Create git branch `phase-6.1-ui-fixes`
+- Create git branch `phase-7-ui-fixes`
 - Commit any pending changes
 - Document current working state
 - Note any existing issues
@@ -58,7 +58,7 @@ Complete task-oriented breakdown for fixing UI inconsistencies, data accuracy is
 - Dependencies: T278
 - Estimated Time: 8 minutes
 
-⚠️ **T280-Test Landing Page**: Verify all landing changes
+✅ **T280-Test Landing Page**: Verify all landing changes
 - Load landing page signed out
 - Sign in and check button behavior
 - Verify bold text rendering
@@ -210,7 +210,7 @@ Complete task-oriented breakdown for fixing UI inconsistencies, data accuracy is
 - Dependencies: T294
 - Estimated Time: 8 minutes
 
-⚠️ **T296-Test Projects Filters**: Verify all filters work
+✅ **T296-Test Projects Filters**: Verify all filters work
 - Test search by name
 - Test search by client
 - Test status filter
@@ -317,7 +317,7 @@ Complete task-oriented breakdown for fixing UI inconsistencies, data accuracy is
 - Dependencies: T305
 - Estimated Time: 5 minutes
 
-⚠️ **T307-Test Tab Visibility**: Verify highlighting works
+✅ **T307-Test Tab Visibility**: Verify highlighting works
 - Navigate to project detail page
 - Click through all tabs
 - Verify active state clear
@@ -337,7 +337,7 @@ Complete task-oriented breakdown for fixing UI inconsistencies, data accuracy is
 - Dependencies: T307
 - Estimated Time: 5 minutes
 
-⚠️ **T309-Align Financial Cards**: Fix total rows
+✅ **T309-Align Financial Cards**: Fix total rows
 - Open `src/components/projects/project-financial-breakdown.tsx`
 - Add border-top to totals
 - Add padding-top spacing

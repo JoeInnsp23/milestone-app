@@ -635,6 +635,19 @@
     margin-bottom: 1.5rem;
   }
 
+  /* Chart tooltip styling for opacity fix */
+  .chart-tooltip {
+    background-color: hsl(var(--card));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
+    z-index: 50;
+    opacity: 1;
+  }
+
   /* Export button styling to match toggle buttons */
   .export-button {
     background-color: hsl(var(--primary) / 0.9);
