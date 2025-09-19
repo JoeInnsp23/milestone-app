@@ -24,14 +24,14 @@ export function ProjectKPICards({
 
   return (
     <div className="stats-grid-3">
-      <div className="stat-card-dark">
-        <div className="stat-label-light">TOTAL INCOME</div>
-        <div className="stat-value-light">{formatCurrency(totalIncome)}</div>
+      <div className="stat-card">
+        <div className="stat-label">TOTAL INCOME</div>
+        <div className="stat-value">{formatCurrency(totalIncome)}</div>
       </div>
 
-      <div className="stat-card-dark">
-        <div className="stat-label-light">GROSS PROFIT</div>
-        <div className="stat-value-light" style={{ color: grossProfit >= 0 ? '#10b981' : '#ef4444' }}>
+      <div className="stat-card">
+        <div className="stat-label">GROSS PROFIT</div>
+        <div className="stat-value" style={{ color: grossProfit >= 0 ? '#10b981' : '#ef4444' }}>
           {formatCurrency(grossProfit)}
         </div>
         {totalIncome > 0 && (
@@ -41,9 +41,9 @@ export function ProjectKPICards({
         )}
       </div>
 
-      <div className="stat-card-dark">
-        <div className="stat-label-light">NET PROFIT</div>
-        <div className="stat-value-light" style={{ color: netProfit >= 0 ? '#10b981' : '#ef4444' }}>
+      <div className="stat-card">
+        <div className="stat-label">NET PROFIT</div>
+        <div className="stat-value" style={{ color: netProfit >= 0 ? '#10b981' : '#ef4444' }}>
           {formatCurrency(netProfit)}
         </div>
         {totalIncome > 0 && (
