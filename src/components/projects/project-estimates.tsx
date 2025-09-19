@@ -769,30 +769,20 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
       {/* Global styles for form inputs to fix dark mode background */}
       <style jsx global>{`
-        .modal-content .form-group input,
-        .modal-content .form-group select,
-        .modal-content .form-group textarea {
-          background: white;
+        @media (prefers-color-scheme: light) {
+          .modal-content .form-group input,
+          .modal-content .form-group select,
+          .modal-content .form-group textarea {
+            background: white !important;
+          }
         }
 
         @media (prefers-color-scheme: dark) {
           .modal-content .form-group input,
           .modal-content .form-group select,
           .modal-content .form-group textarea {
-            background: hsl(220 32% 14%);
+            background: hsl(220 32% 14%) !important;
           }
-        }
-
-        .dark .modal-content .form-group input,
-        .dark .modal-content .form-group select,
-        .dark .modal-content .form-group textarea {
-          background: hsl(220 32% 14%);
-        }
-
-        .light .modal-content .form-group input,
-        .light .modal-content .form-group select,
-        .light .modal-content .form-group textarea {
-          background: white;
         }
       `}</style>
     </div>
