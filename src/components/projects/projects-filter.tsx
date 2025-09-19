@@ -1,6 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProjectsFilterProps {
   onFilterChange: (filters: FilterState) => void;
@@ -30,8 +37,8 @@ export function ProjectsFilter({ onFilterChange }: ProjectsFilterProps) {
     setFilters(prev => ({ ...prev, search: e.target.value }));
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setFilters(prev => ({ ...prev, status: e.target.value }));
+  const handleStatusChange = (value: string) => {
+    setFilters(prev => ({ ...prev, status: value }));
   };
 
 
@@ -66,18 +73,21 @@ export function ProjectsFilter({ onFilterChange }: ProjectsFilterProps) {
             <label htmlFor="status" className="block text-sm font-medium mb-2">
               Status
             </label>
-            <select
-              id="status"
+            <Select
               value={filters.status}
-              onChange={handleStatusChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onValueChange={handleStatusChange}
             >
-              <option value="all">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="ON_HOLD">On Hold</option>
-              <option value="DRAFT">Draft</option>
-            </select>
+              <SelectTrigger id="status" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+                <SelectItem value="ON_HOLD">On Hold</SelectItem>
+                <SelectItem value="DRAFT">Draft</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Clear Filters Button */}

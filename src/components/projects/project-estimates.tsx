@@ -3,6 +3,13 @@
 import { useState, useTransition } from 'react';
 import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authenticated)/projects/[id]/actions/estimates';
 import { ProjectEstimate } from '@/types';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface ProjectEstimatesProps {
   projectId: string;
@@ -16,6 +23,10 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
   const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
+
+  // Form state for Select components
+  const [estimateType, setEstimateType] = useState<string>('revenue');
+  const [confidenceLevel, setConfidenceLevel] = useState<string>('3');
 
   const formatCurrency = (value: number | string) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -51,6 +62,10 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.append('project_id', projectId);
+
+    // Add Select values to formData
+    formData.set('estimate_type', estimateType);
+    formData.set('confidence_level', confidenceLevel);
 
     // Create optimistic estimate
     const tempId = `temp-${Date.now()}`;
@@ -216,6 +231,8 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           className="add-button"
           onClick={() => {
             setEditingEstimate(null);
+            setEstimateType('revenue');
+            setConfidenceLevel('3');
             setIsCreateOpen(true);
           }}
         >
@@ -250,6 +267,8 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                     className="action-button edit"
                     onClick={() => {
                       setEditingEstimate(estimate);
+                      setEstimateType(estimate.estimate_type);
+                      setConfidenceLevel(estimate.confidence_level?.toString() || '3');
                       setIsCreateOpen(true);
                     }}
                   >
@@ -307,17 +326,21 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
               <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="estimate_type">Type *</label>
-                  <select
-                    id="estimate_type"
-                    name="estimate_type"
+                  <Select
+                    value={estimateType}
+                    onValueChange={setEstimateType}
                     defaultValue={editingEstimate?.estimate_type || 'revenue'}
-                    required
                   >
-                    <option value="revenue">Revenue</option>
-                    <option value="cost">Cost</option>
-                    <option value="hours">Hours</option>
-                    <option value="materials">Materials</option>
-                  </select>
+                    <SelectTrigger id="estimate_type">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="revenue">Revenue</SelectItem>
+                      <SelectItem value="cost">Cost</SelectItem>
+                      <SelectItem value="hours">Hours</SelectItem>
+                      <SelectItem value="materials">Materials</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="form-group">
@@ -348,17 +371,22 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
                 <div className="form-group">
                   <label htmlFor="confidence_level">Confidence Level</label>
-                  <select
-                    id="confidence_level"
-                    name="confidence_level"
-                    defaultValue={editingEstimate?.confidence_level || '3'}
+                  <Select
+                    value={confidenceLevel}
+                    onValueChange={setConfidenceLevel}
+                    defaultValue={editingEstimate?.confidence_level?.toString() || '3'}
                   >
-                    <option value="1">1 - Very Low</option>
-                    <option value="2">2 - Low</option>
-                    <option value="3">3 - Medium</option>
-                    <option value="4">4 - High</option>
-                    <option value="5">5 - Very High</option>
-                  </select>
+                    <SelectTrigger id="confidence_level">
+                      <SelectValue placeholder="Select confidence" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 - Very Low</SelectItem>
+                      <SelectItem value="2">2 - Low</SelectItem>
+                      <SelectItem value="3">3 - Medium</SelectItem>
+                      <SelectItem value="4">4 - High</SelectItem>
+                      <SelectItem value="5">5 - Very High</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -379,6 +407,8 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                   onClick={() => {
                     setIsCreateOpen(false);
                     setEditingEstimate(null);
+                    setEstimateType('revenue');
+                    setConfidenceLevel('3');
                   }}
                 >
                   Cancel
