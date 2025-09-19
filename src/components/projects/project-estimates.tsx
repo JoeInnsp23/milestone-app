@@ -462,16 +462,17 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
         .add-button {
           padding: 8px 16px;
-          background: var(--primary);
-          color: white;
+          background: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
           border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 500;
+          transition: all 0.2s;
         }
 
         .add-button:hover {
-          opacity: 0.9;
+          background: hsl(var(--primary) / 0.9);
         }
 
         .empty-state {
@@ -516,21 +517,34 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
         .action-button {
           padding: 4px 12px;
-          border: 1px solid var(--border-color);
-          background: white;
           border-radius: 4px;
           cursor: pointer;
           font-size: 12px;
+          transition: all 0.2s;
+        }
+
+        .action-button.edit {
+          background: hsl(var(--primary) / 0.1);
+          color: hsl(var(--primary));
+          border: 1px solid hsl(var(--primary) / 0.3);
         }
 
         .action-button.edit:hover {
-          background: var(--primary);
-          color: white;
+          background: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+          border-color: hsl(var(--primary));
+        }
+
+        .action-button.delete {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .action-button.delete:hover {
-          background: var(--negative);
+          background: #ef4444;
           color: white;
+          border-color: #ef4444;
         }
 
         .estimate-description {
@@ -569,17 +583,20 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         }
 
         .modal-content {
-          background: white;
+          background: hsl(var(--card));
+          color: hsl(var(--card-foreground));
           border-radius: 8px;
           padding: 24px;
           width: 90%;
           max-width: 500px;
           max-height: 90vh;
           overflow-y: auto;
+          border: 1px solid hsl(var(--border));
         }
 
         .modal-content h2 {
           margin-bottom: 20px;
+          color: hsl(var(--foreground));
         }
 
         .form-group {
@@ -591,6 +608,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           margin-bottom: 4px;
           font-size: 14px;
           font-weight: 500;
+          color: hsl(var(--foreground));
         }
 
         .form-group input,
@@ -598,9 +616,11 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         .form-group textarea {
           width: 100%;
           padding: 8px;
-          border: 1px solid var(--border-color);
+          border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
+          background: hsl(var(--background));
+          color: hsl(var(--foreground));
         }
 
         .form-row {
@@ -618,20 +638,31 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
         .cancel-button {
           padding: 8px 16px;
-          border: 1px solid var(--border-color);
-          background: white;
+          border: 1px solid hsl(var(--border));
+          background: hsl(var(--muted));
+          color: hsl(var(--muted-foreground));
           border-radius: 6px;
           cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cancel-button:hover {
+          background: hsl(var(--muted) / 0.8);
         }
 
         .submit-button {
           padding: 8px 16px;
-          background: var(--primary);
-          color: white;
+          background: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
           border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .submit-button:hover:not(:disabled) {
+          background: hsl(var(--primary) / 0.9);
         }
 
         .submit-button:disabled {
@@ -651,16 +682,17 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
         .delete-button {
           padding: 8px 16px;
-          background: var(--negative);
+          background: #ef4444;
           color: white;
           border: none;
           border-radius: 6px;
           cursor: pointer;
           font-weight: 500;
+          transition: all 0.2s;
         }
 
-        .delete-button:hover {
-          opacity: 0.9;
+        .delete-button:hover:not(:disabled) {
+          background: #dc2626;
         }
 
         .delete-button:disabled {
