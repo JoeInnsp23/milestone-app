@@ -5,7 +5,7 @@ import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
-import { ExportButton } from '@/components/export/export-button';
+import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
 
 interface DashboardPageProps {
@@ -140,7 +140,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                       ' All Time'}
                   </div>
                 </div>
-                <ExportButton />
+                <ExportDialog />
               </div>
             </div>
 

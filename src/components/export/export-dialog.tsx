@@ -68,12 +68,12 @@ export function ExportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName}>
+        <Button variant={triggerVariant} size={triggerSize} className={`export-button ${triggerClassName || ''}`}>
           <Download className="mr-2 h-4 w-4" />
           Export Data
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] bg-background border">
         <DialogHeader>
           <DialogTitle>Export Data</DialogTitle>
           <DialogDescription>

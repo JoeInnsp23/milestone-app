@@ -6,7 +6,7 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectKPICards } from '@/components/projects/project-kpi-cards';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
 import { ProjectTabs } from '@/components/projects/project-tabs';
-import { ExportButton } from '@/components/export/export-button';
+import { ExportDialog } from '@/components/export/export-dialog';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -72,33 +72,36 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                   ' Date Range Not Set'}
               </div>
             </div>
-            <ExportButton projectId={resolvedParams.id} />
+            <ExportDialog projectId={resolvedParams.id} />
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <ProjectKPICards
-          totalIncome={totalRevenue}
-          grossProfit={grossProfit}
-          netProfit={netProfit}
-          profitMargin={profitMargin}
-        />
+        {/* Main content with consistent spacing */}
+        <div className="space-y-6">
+          {/* KPI Cards */}
+          <ProjectKPICards
+            totalIncome={totalRevenue}
+            grossProfit={grossProfit}
+            netProfit={netProfit}
+            profitMargin={profitMargin}
+          />
 
-        {/* Financial Breakdown */}
-        <ProjectFinancialBreakdown
-          revenue={totalRevenue}
-          costOfSales={totalCosts * 0.6}
-          operatingExpenses={operatingExpenses}
-          invoices={project.invoices as Invoice[]}
-        />
+          {/* Financial Breakdown */}
+          <ProjectFinancialBreakdown
+            revenue={totalRevenue}
+            costOfSales={totalCosts * 0.6}
+            operatingExpenses={operatingExpenses}
+            invoices={project.invoices as Invoice[]}
+          />
 
-        {/* Tabs for Invoices, Bills, and Estimates */}
-        <ProjectTabs
+          {/* Tabs for Invoices, Bills, and Estimates */}
+          <ProjectTabs
           projectId={project.id}
           invoices={project.invoices as Invoice[]}
           bills={project.bills as Bill[]}
           estimates={project.estimates || []}
-        />
+          />
+        </div>
       </div>
     </div>
   );

@@ -13,8 +13,6 @@ export function ProjectsPageClient({ projects }: ProjectsPageClientProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: 'all',
-    dateFrom: '',
-    dateTo: '',
   });
 
   // Sort projects by latest activity by default

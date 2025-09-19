@@ -9,16 +9,12 @@ interface ProjectsFilterProps {
 export interface FilterState {
   search: string;
   status: string;
-  dateFrom: string;
-  dateTo: string;
 }
 
 export function ProjectsFilter({ onFilterChange }: ProjectsFilterProps) {
   const [filters, setFilters] = useState<FilterState>({
     search: '',
     status: 'all',
-    dateFrom: '',
-    dateTo: '',
   });
 
   // Debounced filter update
@@ -38,20 +34,11 @@ export function ProjectsFilter({ onFilterChange }: ProjectsFilterProps) {
     setFilters(prev => ({ ...prev, status: e.target.value }));
   };
 
-  const handleDateFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({ ...prev, dateFrom: e.target.value }));
-  };
-
-  const handleDateToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({ ...prev, dateTo: e.target.value }));
-  };
 
   const handleClearFilters = () => {
     setFilters({
       search: '',
       status: 'all',
-      dateFrom: '',
-      dateTo: '',
     });
   };
 
@@ -91,33 +78,6 @@ export function ProjectsFilter({ onFilterChange }: ProjectsFilterProps) {
               <option value="ON_HOLD">On Hold</option>
               <option value="DRAFT">Draft</option>
             </select>
-          </div>
-
-          {/* Date Range */}
-          <div className="lg:w-36">
-            <label htmlFor="dateFrom" className="block text-sm font-medium mb-2">
-              From Date
-            </label>
-            <input
-              type="date"
-              id="dateFrom"
-              value={filters.dateFrom}
-              onChange={handleDateFromChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="lg:w-36">
-            <label htmlFor="dateTo" className="block text-sm font-medium mb-2">
-              To Date
-            </label>
-            <input
-              type="date"
-              id="dateTo"
-              value={filters.dateTo}
-              onChange={handleDateToChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
           </div>
 
           {/* Clear Filters Button */}
