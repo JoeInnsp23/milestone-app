@@ -12,7 +12,8 @@
       "Bash(git commit:*)",
       "Bash(npm run lint)",
       "Bash(npm run type-check:*)",
-      "mcp__sequential-thinking__sequentialthinking"
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
