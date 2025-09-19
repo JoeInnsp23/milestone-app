@@ -637,14 +637,14 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           .form-group input,
           .form-group select,
           .form-group textarea {
-            background: hsl(220 58% 11%);
+            background: hsl(220 32% 14%);
           }
         }
 
         :global(.dark) .form-group input,
         :global(.dark) .form-group select,
         :global(.dark) .form-group textarea {
-          background: hsl(220 58% 11%);
+          background: hsl(220 32% 14%);
         }
 
         /* Amount input with currency symbol */
