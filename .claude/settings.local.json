@@ -31,7 +31,10 @@
       "Bash(docker compose:*)",
       "Bash(sudo rm:*)",
       "Bash(npm run:*)",
-      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*; \\dv milestone.*; \\dm milestone.*;\")"
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dt milestone.*; \\dv milestone.*; \\dm milestone.*;\")",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"\\dm+ milestone.project_phase_summary\")",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT pg_get_viewdef(''milestone.project_phase_summary''::regclass, true);\")",
+      "Bash(PGPASSWORD:*)"
     ],
     "deny": [],
     "ask": []

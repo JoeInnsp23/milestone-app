@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProjectById } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
-import { ProjectKPICards } from '@/components/projects/project-kpi-cards';
+import { ProjectKPISection } from '@/components/projects/project-kpi-section';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
 import { ProjectTabs } from '@/components/projects/project-tabs';
 import { ExportDialog } from '@/components/export/export-dialog';
@@ -57,14 +57,10 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       return sum + (amount || 0);
     }, 0);
 
-  // Include estimates in calculations
+  // Calculate values for financial breakdown (always includes estimates for now)
   const totalRevenueWithEstimates = totalRevenue + estimatedRevenue;
   const totalCostsWithEstimates = totalCosts + estimatedCosts;
-
-  const grossProfit = totalRevenueWithEstimates - (totalCostsWithEstimates * 0.6); // 60% as cost of sales
   const operatingExpenses = totalCostsWithEstimates * 0.4; // 40% as operating expenses
-  const netProfit = totalRevenueWithEstimates - totalCostsWithEstimates;
-  const profitMargin = totalRevenueWithEstimates > 0 ? (netProfit / totalRevenueWithEstimates) * 100 : 0;
 
   return (
     <div className="min-h-screen dashboard-bg-gradient">
@@ -97,12 +93,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 
         {/* Main content with consistent spacing */}
         <div className="space-y-6">
-          {/* KPI Cards - Including Estimates */}
-          <ProjectKPICards
-            totalIncome={totalRevenueWithEstimates}
-            grossProfit={grossProfit}
-            netProfit={netProfit}
-            profitMargin={profitMargin}
+          {/* KPI Cards with Estimates Toggle */}
+          <ProjectKPISection
+            actualRevenue={totalRevenue}
+            actualCosts={totalCosts}
+            estimatedRevenue={estimatedRevenue}
+            estimatedCosts={estimatedCosts}
           />
 
           {/* Financial Breakdown - Including Estimates */}

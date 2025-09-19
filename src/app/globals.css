@@ -648,6 +648,44 @@
     opacity: 1;
   }
 
+  /* Estimates toggle switch styling */
+  .estimates-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    appearance: none;
+    background-color: hsl(var(--muted));
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .estimates-toggle:checked {
+    background-color: hsl(var(--primary));
+  }
+
+  .estimates-toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .estimates-toggle:checked::after {
+    transform: translateX(20px);
+  }
+
+  .estimates-toggle:focus {
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
+
   /* Export button styling to match toggle buttons */
   .export-button {
     background-color: hsl(var(--primary) / 0.9);
