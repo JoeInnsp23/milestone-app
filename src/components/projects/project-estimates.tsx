@@ -628,7 +628,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
-          background: hsl(var(--card));
+          background: hsl(var(--muted));
           color: hsl(var(--foreground));
         }
 
