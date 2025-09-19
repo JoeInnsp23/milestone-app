@@ -19,19 +19,44 @@ export function ProjectsPageClient({ projects }: ProjectsPageClientProps) {
     status: 'all',
   });
 
-  // Sort projects by profit (descending) as default
+  // Helper function to get latest activity date from a project
+  const getLatestActivity = (project: ProjectSummary): Date => {
+    // Get all dates from invoices and bills
+    const dates: Date[] = [];
+
+    // Add invoice dates if available
+    if (project.latest_invoice_date) {
+      dates.push(new Date(project.latest_invoice_date));
+    }
+
+    // Add bill dates if available
+    if (project.latest_bill_date) {
+      dates.push(new Date(project.latest_bill_date));
+    }
+
+    // If no dates, use a very old date
+    if (dates.length === 0) {
+      return new Date('1900-01-01');
+    }
+
+    // Return the most recent date
+    return new Date(Math.max(...dates.map(d => d.getTime())));
+  };
+
+  // Sort projects by latest activity (most recent first) as default
   const sortedProjects = useMemo(() => {
     return [...projects].sort((a, b) => {
-      // Sort by profit descending as a more useful default
-      // Projects with higher profit appear first
-      return b.profit - a.profit;
+      // Sort by latest activity - most recent first
+      const aDate = getLatestActivity(a);
+      const bDate = getLatestActivity(b);
+      return bDate.getTime() - aDate.getTime();
     });
   }, [projects]);
 
   return (
     <>
       <ProjectsFilter onFilterChange={setFilters} />
-      <ProjectsTable projects={sortedProjects} filters={filters} defaultSortKey="latest_activity" />
+      <ProjectsTable projects={sortedProjects} filters={filters} />
     </>
   );
 }
