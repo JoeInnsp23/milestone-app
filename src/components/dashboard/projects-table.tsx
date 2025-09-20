@@ -9,13 +9,12 @@ interface ProjectsTableProps {
   projects: ProjectSummary[];
   filters?: FilterState;
   isLoading?: boolean;
-  defaultSortKey?: string;
 }
 
 type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'operating_expenses' | 'profit' | 'profit_margin';
 type SortDirection = 'asc' | 'desc';
 
-export function ProjectsTable({ projects: initialProjects, filters, isLoading, defaultSortKey }: ProjectsTableProps) {
+export function ProjectsTable({ projects: initialProjects, filters, isLoading }: ProjectsTableProps) {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 

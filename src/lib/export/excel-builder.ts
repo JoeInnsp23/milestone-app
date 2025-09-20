@@ -295,8 +295,6 @@ export class ExcelBuilder {
     };
     trendHeaderRow.height = 25;
 
-    let totalRevenue = 0;
-    let totalCosts = 0;
     let rowIndex = 2;
 
     (monthlyResult.rows || []).forEach((month: MonthlyMetricsRow) => {
@@ -305,10 +303,7 @@ export class ExcelBuilder {
       const profit = Number(month.profit) || 0;
       const margin = Number(month.margin) || 0;
 
-      totalRevenue += revenue;
-      totalCosts += costs;
-
-      const row = trendSheet.addRow({
+      trendSheet.addRow({
         month: month.month ? format(new Date(month.month), 'MMM yyyy') : 'N/A',
         revenue: revenue,
         costs: costs,

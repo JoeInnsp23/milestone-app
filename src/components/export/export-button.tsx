@@ -29,12 +29,10 @@ export function ExportButton({
 }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<string | null>(null);
-  const [exportProgress, setExportProgress] = useState<string>('');
 
   const handleExport = async (format: 'pdf' | 'excel', selectedTemplate: 'summary' | 'detailed') => {
     setIsExporting(true);
     setExportFormat(`${format}-${selectedTemplate}`);
-    setExportProgress('Preparing export...');
 
     try {
       // Show preparing message
@@ -42,7 +40,6 @@ export function ExportButton({
       const startTime = Date.now();
 
       // Perform export
-      setExportProgress('Generating file...');
       const result = format === 'pdf'
         ? await exportPDF(selectedTemplate, projectId)
         : await exportExcel(selectedTemplate, projectId);
@@ -52,7 +49,6 @@ export function ExportButton({
       }
 
       // Download the file using data URL
-      setExportProgress('Starting download...');
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = result.dataUrl;
@@ -77,7 +73,6 @@ export function ExportButton({
     } finally {
       setIsExporting(false);
       setExportFormat(null);
-      setExportProgress('');
     }
   };
 
