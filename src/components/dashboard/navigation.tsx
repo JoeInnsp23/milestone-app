@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
 import { UserButton } from '@clerk/nextjs';
 import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
   view: string;
@@ -17,23 +18,28 @@ export function Navigation({ view }: NavigationProps) {
       <div className="nav-content">
         <div className="nav-title">Project Hub</div>
         <div className="nav-buttons">
-          <Link href="/dashboard?view=overview">
-            <button className={`nav-btn ${view === 'overview' ? 'active' : ''}`}>
-              Overview
-            </button>
-          </Link>
-          <Link href="/dashboard?view=all">
-            <button className={`nav-btn ${view === 'all' ? 'active' : ''}`}>
-              All Projects
-            </button>
-          </Link>
-          <button
+          <Button
+            asChild
+            variant="header"
+            data-state={view === 'overview' ? 'active' : undefined}
+          >
+            <Link href="/dashboard?view=overview">Overview</Link>
+          </Button>
+          <Button
+            asChild
+            variant="header"
+            data-state={view === 'projects' ? 'active' : undefined}
+          >
+            <Link href="/projects">All Projects</Link>
+          </Button>
+          <Button
+            type="button"
             onClick={toggleTheme}
-            className="nav-btn"
+            variant="header"
             aria-label="Toggle theme"
           >
             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
+          </Button>
           <UserButton />
         </div>
       </div>

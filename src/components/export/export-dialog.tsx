@@ -21,7 +21,7 @@ interface ExportDialogProps {
   projectId?: string;
   context?: 'dashboard' | 'projects' | 'project-detail';
   triggerClassName?: string;
-  triggerVariant?: 'default' | 'outline' | 'ghost';
+  triggerVariant?: 'default' | 'outline' | 'ghost' | 'header';
   triggerSize?: 'sm' | 'default' | 'lg';
 }
 
@@ -29,7 +29,7 @@ export function ExportDialog({
   projectId,
   context,
   triggerClassName,
-  triggerVariant = 'outline',
+  triggerVariant = 'header',
   triggerSize = 'default'
 }: ExportDialogProps) {
   const [open, setOpen] = useState(false);
@@ -73,7 +73,7 @@ export function ExportDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} size={triggerSize} className={`export-button ${triggerClassName || ''}`}>
+        <Button variant={triggerVariant} size={triggerSize} className={triggerClassName}>
           <Download className="mr-2 h-4 w-4" />
           Export Data
         </Button>

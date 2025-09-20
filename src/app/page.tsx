@@ -4,6 +4,7 @@ import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
 import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -16,17 +17,18 @@ export default function Home() {
           <div className="nav-title">Project Hub</div>
           <div className="nav-buttons">
             <SignedOut>
-              <Link href="/sign-in">
-                <button className="nav-btn">Sign In</button>
-              </Link>
+              <Button asChild variant="header">
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
             </SignedOut>
-            <button
+            <Button
+              type="button"
               onClick={toggleTheme}
-              className="nav-btn"
+              variant="header"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
+            </Button>
             <SignedIn>
               <UserButton />
             </SignedIn>
@@ -47,25 +49,21 @@ export default function Home() {
           </p>
           <SignedOut>
             <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-              <Link href="/sign-in">
-                <button className="nav-btn active" style={{ padding: '12px 30px', fontSize: '16px' }}>
-                  Access Dashboard
-                </button>
-              </Link>
-              <button className="nav-btn" style={{ padding: '12px 30px', fontSize: '16px' }}>
+              <Button asChild variant="header" size="lg" data-state="active" className="text-base px-7 py-3">
+                <Link href="/sign-in">Access Dashboard</Link>
+              </Button>
+              <Button variant="header" size="lg" className="text-base px-7 py-3">
                 Request Demo
-              </button>
+              </Button>
             </div>
             <p style={{ color: 'var(--text-dim)', marginTop: '20px', fontSize: '14px' }}>
               Contact your administrator for access credentials
             </p>
           </SignedOut>
           <SignedIn>
-            <Link href="/dashboard">
-              <button className="nav-btn active" style={{ padding: '12px 40px', fontSize: '16px' }}>
-                Open Dashboard
-              </button>
-            </Link>
+            <Button asChild variant="header" size="lg" data-state="active" className="text-base px-10 py-3">
+              <Link href="/dashboard">Open Dashboard</Link>
+            </Button>
           </SignedIn>
         </div>
 

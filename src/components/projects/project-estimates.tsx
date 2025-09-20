@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authenticated)/projects/[id]/actions/estimates';
 import { ProjectEstimate } from '@/types';
+import { Button } from '@/components/ui/button';
 
 interface ProjectEstimatesProps {
   projectId: string;
@@ -217,15 +218,16 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       {/* Add Estimate Button */}
       <div className="estimates-header">
         <h3>Project Estimates</h3>
-        <button
-          className="add-button"
+        <Button
+          type="button"
+          variant="header"
           onClick={() => {
             setEditingEstimate(null);
             setIsCreateOpen(true);
           }}
         >
           + Add Estimate
-        </button>
+        </Button>
       </div>
 
       {/* Estimates List */}
@@ -469,21 +471,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           font-weight: 600;
         }
 
-        .add-button {
-          padding: 8px 16px;
-          background: hsl(var(--primary));
-          color: hsl(var(--primary-foreground));
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .add-button:hover {
-          background: hsl(var(--primary) / 0.9);
-        }
-
         .empty-state {
           text-align: center;
           padding: 40px;
@@ -628,7 +615,15 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
+          background: hsl(var(--card));
           color: hsl(var(--foreground));
+        }
+
+        :global(html.dark) .modal-content .form-group input,
+        :global(html.dark) .modal-content .form-group select,
+        :global(html.dark) .modal-content .form-group textarea {
+          background: hsl(220 32% 12%);
+          border-color: hsl(220 20% 24%);
         }
 
         /* Amount input with currency symbol */
@@ -767,24 +762,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         }
       `}</style>
 
-      {/* Global styles for form inputs to fix dark mode background */}
-      <style jsx global>{`
-        @media (prefers-color-scheme: light) {
-          .modal-content .form-group input,
-          .modal-content .form-group select,
-          .modal-content .form-group textarea {
-            background: white !important;
-          }
-        }
-
-        @media (prefers-color-scheme: dark) {
-          .modal-content .form-group input,
-          .modal-content .form-group select,
-          .modal-content .form-group textarea {
-            background: hsl(220 32% 14%) !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

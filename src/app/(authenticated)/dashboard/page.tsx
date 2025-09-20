@@ -4,10 +4,10 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
-import { ProjectsTable } from '@/components/dashboard/projects-table';
 import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
 import { runDashboardValidation } from '@/lib/server-validation';
+import { redirect } from 'next/navigation';
 
 interface DashboardPageProps {
   searchParams: Promise<{ view?: string }>;
@@ -20,7 +20,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     return null;
   }
 
-  const view = params?.view || 'overview';
+  if (params?.view === 'all') {
+    redirect('/projects');
+  }
+
+  const view = 'overview';
 
   // Fetch data using Server Component
   const [statsRaw, projectSummaries, monthlyRevenue, topProjects] = await Promise.all([
@@ -130,8 +134,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         {/* Main content */}
         <div className="container">
-        {view === 'overview' ? (
-          <>
+        <>
             {/* Header Card */}
             <div className="header-card">
               <div className="flex justify-between items-center">
@@ -195,11 +198,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </div>
               </div>
             </div>
-          </>
-        ) : (
-          /* All Projects View */
-          <ProjectsTable projects={uniqueProjects} />
-        )}
+        </>
 
         {/* Sync Status */}
         {stats.last_sync_time && (

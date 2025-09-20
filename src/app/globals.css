@@ -48,6 +48,7 @@
     --negative: #ef4444;
     --warning: #fb923c;
     --chart-grid: rgba(0, 0, 0, 0.1);
+    --separator: 214.3 31.8% 91.4%;
 
     /* Navigation colors */
     --nav-btn-bg: #667eea;
@@ -102,6 +103,7 @@
     --negative: #f87171;
     --warning: #fbbf24;
     --chart-grid: rgba(255, 255, 255, 0.1);
+    --separator: 215 27% 30%;
 
     /* Navigation colors */
     --nav-btn-bg: #334155;
@@ -165,25 +167,6 @@
   .dashboard-card-dark {
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(10px);
-  }
-
-  /* Button styling matching MVP */
-  .nav-button {
-    padding: 1rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 300ms;
-    background: var(--nav-btn-bg);
-    color: white;
-  }
-
-  .nav-button:hover {
-    background: var(--nav-btn-hover);
-    transform: translateY(-1px);
-  }
-
-  .nav-button.active {
-    background: var(--nav-btn-active);
   }
 
   /* Table styling matching MVP */
@@ -280,26 +263,6 @@
     display: flex;
     gap: 10px;
     align-items: center;
-  }
-
-  .nav-btn {
-    padding: 8px 16px;
-    background: var(--nav-btn-bg);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s;
-  }
-
-  .nav-btn:hover {
-    background: var(--nav-btn-hover);
-    transform: translateY(-1px);
-  }
-
-  .nav-btn.active {
-    background: var(--nav-btn-active);
   }
 
   /* Container styles for full-width layout */
@@ -447,6 +410,12 @@
     margin: 30px 0;
   }
 
+  .financial-breakdown-grid .dashboard-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .breakdown-title {
     font-size: 16px;
     font-weight: 600;
@@ -460,6 +429,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
   }
 
   .breakdown-item {
@@ -467,7 +437,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-    border-bottom: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--separator));
   }
 
   .breakdown-item:last-child {
@@ -494,8 +464,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 0 0;
-    margin-top: 8px;
-    border-top: 2px solid hsl(var(--border));
+    margin-top: auto;
+    border-top: 2px solid hsl(var(--separator));
   }
 
   .total-label {
@@ -685,24 +655,6 @@
 
   .estimates-toggle:focus {
     box-shadow: 0 0 0 2px hsl(var(--ring));
-  }
-
-  /* Export button styling to match toggle buttons */
-  .export-button {
-    background-color: hsl(var(--primary) / 0.9);
-    color: hsl(var(--primary-foreground));
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-  }
-
-  .export-button:hover {
-    background-color: hsl(var(--primary));
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
   /* Dialog content with dashboard-card styling */

@@ -35,33 +35,34 @@ export async function createEstimate(formData: FormData) {
       notes: formData.get('notes') || null,
     });
 
-    // Convert amount to Big.js string for decimal column
     const amountBig = new Big(data.amount);
+    const now = new Date();
 
-    // Create estimate with UUID (handled by database defaultRandom())
-    const [newEstimate] = await db.insert(projectEstimates).values({
-      project_id: data.project_id,
-      build_phase_id: data.build_phase_id,
-      description: data.description,
-      estimate_type: data.estimate_type,
-      amount: amountBig.toString(),
-      estimate_date: data.estimate_date,
-      confidence_level: data.confidence_level,
-      notes: data.notes,
-      created_by: userId,
-      updated_by: userId,
-      created_at: new Date(),
-      updated_at: new Date(),
-    }).returning();
+    const [newEstimate] = await db
+      .insert(projectEstimates)
+      .values({
+        project_id: data.project_id,
+        build_phase_id: data.build_phase_id,
+        description: data.description,
+        estimate_type: data.estimate_type,
+        amount: amountBig.toString(),
+        estimate_date: data.estimate_date,
+        confidence_level: data.confidence_level,
+        notes: data.notes,
+        created_by: userId,
+        updated_by: userId,
+        created_at: now,
+        updated_at: now,
+      })
+      .returning();
 
-    // Log the action
     await db.insert(auditLogs).values({
       event_type: 'estimate_change',
       event_action: 'create',
       entity_id: newEstimate.id,
       user_id: userId,
       metadata: { created: newEstimate },
-      created_at: new Date(),
+      created_at: now,
     });
 
     revalidatePath(`/projects/${data.project_id}`);
