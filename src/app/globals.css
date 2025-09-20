@@ -60,6 +60,10 @@
     --text-secondary: #4b5563;
     --text-muted: #6b7280;
     --text-dim: #9ca3af;
+
+    /* Table hover colors */
+    --table-hover: rgba(210, 210, 210, 0.5);
+    --muted-rgb: 210, 210, 210;
   }
 
   /* Dark Mode Theme Variables - Matching MVP */
@@ -115,6 +119,10 @@
     --text-secondary: #a8a8a8;
     --text-muted: #94a3b8;
     --text-dim: #64748b;
+
+    /* Table hover colors */
+    --table-hover: rgba(100, 100, 100, 0.3);
+    --muted-rgb: 100, 100, 100;
   }
 }
 
@@ -196,7 +204,7 @@
   }
 
   .dashboard-table tbody tr:hover {
-    background-color: rgba(var(--muted-rgb, 210, 210, 210), 0.5);
+    background-color: var(--table-hover) !important;
   }
 
   /* Chart container styling */

@@ -406,8 +406,6 @@ export function ProjectsTable({ projects: initialProjects, filters, onFilterChan
                     borderBottom: '1px solid var(--border-color)',
                     transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--table-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 >
                   <td style={{ padding: '12px' }}>
                     <Link
