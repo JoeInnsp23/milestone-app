@@ -195,7 +195,7 @@
     transition: background-color 150ms;
   }
 
-  .dashboard-table tr:hover {
+  .dashboard-table tbody tr:hover {
     background-color: rgba(var(--muted-rgb, 210, 210, 210), 0.5);
   }
 
