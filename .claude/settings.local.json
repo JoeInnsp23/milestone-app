@@ -36,7 +36,8 @@
       "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT pg_get_viewdef(''milestone.project_phase_summary''::regclass, true);\")",
       "Bash(PGPASSWORD:*)",
       "Bash(awk:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

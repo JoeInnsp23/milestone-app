@@ -1,3 +1,5 @@
+import type { ProjectEstimate } from './index';
+
 export interface ExportOptions {
   format: 'pdf' | 'excel';
   template: 'summary' | 'detailed';
@@ -118,6 +120,7 @@ export interface ProjectWithAggregates {
   last_updated?: string | Date;
   invoices?: InvoiceAggregated[] | string;
   bills?: BillAggregated[] | string;
+  estimates?: ProjectEstimate[] | string;
 }
 
 // Type for monthly metrics data

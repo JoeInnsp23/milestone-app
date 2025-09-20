@@ -11,6 +11,8 @@ interface ProjectTabsProps {
   invoices: Invoice[];
   bills: Bill[];
   estimates: ProjectEstimate[];
+  initialEstimateFormOpen?: boolean;
+  onEstimateFormClose?: () => void;
 }
 
 export function ProjectTabs({
@@ -18,6 +20,8 @@ export function ProjectTabs({
   invoices,
   bills,
   estimates,
+  initialEstimateFormOpen,
+  onEstimateFormClose,
 }: ProjectTabsProps) {
   const [activeTab, setActiveTab] = useState<'invoices' | 'bills' | 'estimates'>('estimates');
 
@@ -47,7 +51,14 @@ export function ProjectTabs({
       <div className="tab-content">
         {activeTab === 'invoices' && <ProjectInvoices invoices={invoices} />}
         {activeTab === 'bills' && <ProjectBills bills={bills} />}
-        {activeTab === 'estimates' && <ProjectEstimates projectId={projectId} estimates={estimates} />}
+        {activeTab === 'estimates' && (
+          <ProjectEstimates
+            projectId={projectId}
+            estimates={estimates}
+            initialFormOpen={initialEstimateFormOpen}
+            onFormClose={onEstimateFormClose}
+          />
+        )}
       </div>
     </div>
   );

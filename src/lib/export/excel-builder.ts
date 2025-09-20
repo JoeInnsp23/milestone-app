@@ -4,6 +4,7 @@ import { getProjectExportData, getMonthlyMetricsExport, getDashboardExportData }
 import { EXPORT_CONFIG } from '@/lib/export/config';
 import { formatDate } from '@/lib/export/utils';
 import type { ProjectWithAggregates, InvoiceAggregated, BillAggregated, MonthlyMetricsRow } from '@/types/export';
+import type { ProjectEstimate } from '@/types';
 
 export class ExcelBuilder {
   private workbook: ExcelJS.Workbook;
@@ -167,6 +168,57 @@ export class ExcelBuilder {
           const cell = billSheet.getCell(`D${row}`);
           if (typeof cell.value === 'number') {
             cell.numFmt = '£#,##0.00';
+          }
+        }
+      }
+
+      // Add estimates sheet if data exists
+      if (project.estimates && Array.isArray(project.estimates) && project.estimates.length > 0) {
+        const estimateSheet = this.workbook.addWorksheet('Estimates', {
+          properties: { tabColor: { argb: '8b5cf6' } },
+        });
+
+        estimateSheet.columns = [
+          { header: 'Description', key: 'description', width: 30 },
+          { header: 'Type', key: 'estimate_type', width: 15 },
+          { header: 'Amount', key: 'amount', width: 15 },
+          { header: 'Date', key: 'estimate_date', width: 15 },
+          { header: 'Confidence', key: 'confidence_level', width: 12 },
+          { header: 'Notes', key: 'notes', width: 25 },
+        ];
+
+        const estimateHeaderRow = estimateSheet.getRow(1);
+        estimateHeaderRow.font = { bold: true };
+        estimateHeaderRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: EXPORT_CONFIG.excel.headerColor },
+        };
+
+        project.estimates.forEach((estimate: ProjectEstimate) => {
+          estimateSheet.addRow({
+            description: estimate.description || 'N/A',
+            estimate_type: estimate.estimate_type || 'N/A',
+            amount: Number(estimate.amount) || 0,
+            estimate_date: formatDate(estimate.estimate_date),
+            confidence_level: estimate.confidence_level || 0,
+            notes: estimate.notes || '',
+          });
+        });
+
+        // Format amount column
+        for (let row = 2; row <= estimateSheet.rowCount; row++) {
+          const cell = estimateSheet.getCell(`C${row}`);
+          if (typeof cell.value === 'number') {
+            cell.numFmt = '£#,##0.00';
+          }
+        }
+
+        // Add confidence level formatting
+        for (let row = 2; row <= estimateSheet.rowCount; row++) {
+          const cell = estimateSheet.getCell(`E${row}`);
+          if (typeof cell.value === 'number') {
+            cell.value = `${cell.value}/5`;
           }
         }
       }

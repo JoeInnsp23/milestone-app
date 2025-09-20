@@ -87,7 +87,19 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
                   ' Date Range Not Set'}
               </div>
             </div>
-            <ExportDialog projectId={resolvedParams.id} />
+            <div className="flex gap-3">
+              <ExportDialog projectId={resolvedParams.id} />
+              <button
+                onClick={() => {
+                  // This will be handled by client component
+                  const event = new CustomEvent('open-estimate-form');
+                  window.dispatchEvent(event);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                + Add Estimate
+              </button>
+            </div>
           </div>
         </div>
 

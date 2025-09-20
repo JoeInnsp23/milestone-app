@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authenticated)/projects/[id]/actions/estimates';
 import { ProjectEstimate } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -8,15 +8,35 @@ import { Button } from '@/components/ui/button';
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
+  initialFormOpen?: boolean;
+  onFormClose?: () => void;
 }
 
-export function ProjectEstimates({ projectId, estimates: initialEstimates }: ProjectEstimatesProps) {
+export function ProjectEstimates({ projectId, estimates: initialEstimates, initialFormOpen, onFormClose }: ProjectEstimatesProps) {
   const [estimates, setEstimates] = useState(initialEstimates);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(initialFormOpen || false);
   const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
   const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
+
+  // Handle initial form open state and custom events
+  useEffect(() => {
+    if (initialFormOpen) {
+      setIsCreateOpen(true);
+    }
+
+    // Listen for custom event from header button
+    const handleOpenEstimateForm = () => {
+      setIsCreateOpen(true);
+      setEditingEstimate(null);
+    };
+
+    window.addEventListener('open-estimate-form', handleOpenEstimateForm);
+    return () => {
+      window.removeEventListener('open-estimate-form', handleOpenEstimateForm);
+    };
+  }, [initialFormOpen]);
 
   const formatCurrency = (value: number | string) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -295,7 +315,10 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
       {/* Create/Edit Modal */}
       {isCreateOpen && (
-        <div className="modal-overlay" onClick={() => setIsCreateOpen(false)}>
+        <div className="modal-overlay" onClick={() => {
+          setIsCreateOpen(false);
+          onFormClose?.();
+        }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
             <form onSubmit={handleSubmit}>
@@ -384,19 +407,25 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
               </div>
 
               <div className="form-actions">
-                <button
+                <Button
                   type="button"
-                  className="cancel-button"
+                  variant="outline"
                   onClick={() => {
                     setIsCreateOpen(false);
                     setEditingEstimate(null);
+                    onFormClose?.();
                   }}
+                  disabled={isPending}
                 >
                   Cancel
-                </button>
-                <button type="submit" className="submit-button" disabled={isPending}>
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isPending}
+                >
                   {isPending ? 'Saving...' : editingEstimate ? 'Update' : 'Create'}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -411,19 +440,20 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
             <p>Are you sure you want to delete this estimate?</p>
             <p className="delete-warning">This action cannot be undone.</p>
             <div className="form-actions">
-              <button
-                className="cancel-button"
+              <Button
+                variant="outline"
                 onClick={() => setDeletingEstimate(null)}
+                disabled={isPending}
               >
                 Cancel
-              </button>
-              <button
-                className="delete-button"
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={handleDelete}
                 disabled={isPending}
               >
                 {isPending ? 'Deleting...' : 'Delete'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -697,40 +727,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           margin-top: 24px;
         }
 
-        .cancel-button {
-          padding: 8px 16px;
-          border: 1px solid hsl(var(--border));
-          background: hsl(var(--muted));
-          color: hsl(var(--muted-foreground));
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .cancel-button:hover {
-          background: hsl(var(--muted) / 0.8);
-        }
-
-        .submit-button {
-          padding: 8px 16px;
-          background: hsl(var(--primary));
-          color: hsl(var(--primary-foreground));
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .submit-button:hover:not(:disabled) {
-          background: hsl(var(--primary) / 0.9);
-        }
-
-        .submit-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
         .delete-modal {
           max-width: 400px;
         }
@@ -739,26 +735,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           color: var(--negative);
           font-size: 14px;
           margin-top: 8px;
-        }
-
-        .delete-button {
-          padding: 8px 16px;
-          background: #ef4444;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-          transition: all 0.2s;
-        }
-
-        .delete-button:hover:not(:disabled) {
-          background: #dc2626;
-        }
-
-        .delete-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
         }
       `}</style>
 
