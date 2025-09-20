@@ -14,7 +14,11 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx src/db/seed.ts",
-    "db:seed:comprehensive": "tsx src/db/seed-comprehensive.ts"
+    "db:seed:comprehensive": "tsx src/db/seed-comprehensive.ts",
+    "db:setup": "docker exec milestone-postgres psql -U milestone_user -d milestone -c 'CREATE SCHEMA IF NOT EXISTS milestone;' && npm run db:push && tsx scripts/apply-views.ts && npm run db:seed",
+    "db:setup:comprehensive": "docker exec milestone-postgres psql -U milestone_user -d milestone -c 'CREATE SCHEMA IF NOT EXISTS milestone;' && npm run db:push && tsx scripts/apply-views.ts && npm run db:seed:comprehensive",
+    "db:reset": "docker exec milestone-postgres psql -U milestone_user -d postgres -c 'DROP DATABASE IF EXISTS milestone;' && docker exec milestone-postgres psql -U milestone_user -d postgres -c 'CREATE DATABASE milestone;' && npm run db:setup",
+    "db:reset:comprehensive": "docker exec milestone-postgres psql -U milestone_user -d postgres -c 'DROP DATABASE IF EXISTS milestone;' && docker exec milestone-postgres psql -U milestone_user -d postgres -c 'CREATE DATABASE milestone;' && npm run db:setup:comprehensive"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",

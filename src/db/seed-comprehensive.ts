@@ -7,7 +7,8 @@ import {
   projectEstimates,
   syncStatus,
   auditLogs,
-  userPreferences
+  userPreferences,
+  phaseProgress
 } from './schema';
 import { sql } from 'drizzle-orm';
 
@@ -217,8 +218,21 @@ async function seedComprehensive() {
       // Each project gets 3-5 invoices
       const numInvoices = Math.floor(Math.random() * 3) + 3;
 
+      // Determine how far the project has progressed (which phases are active)
+      // Projects typically progress through phases sequentially
+      const maxPhaseIndex = Math.min(
+        Math.floor(Math.random() * 8) + 2, // Projects are in phases 2-9 typically
+        phasesData.length - 1
+      );
+
       for (let j = 0; j < numInvoices; j++) {
-        const phase = phasesData[j % phasesData.length];
+        // Assign invoices to phases that make sense for project progress
+        // Earlier invoices go to earlier phases
+        const phaseIndex = Math.min(
+          Math.floor(j * maxPhaseIndex / numInvoices),
+          maxPhaseIndex
+        );
+        const phase = phasesData[phaseIndex];
         const invoiceDate = randomDate(
           new Date(project.start_date),
           new Date(project.end_date)
@@ -285,8 +299,19 @@ async function seedComprehensive() {
       // Each project gets 2-4 bills
       const numBills = Math.floor(Math.random() * 3) + 2;
 
+      // Use similar phase progression as invoices
+      const maxPhaseIndex = Math.min(
+        Math.floor(Math.random() * 8) + 2,
+        phasesData.length - 1
+      );
+
       for (let j = 0; j < numBills; j++) {
-        const phase = phasesData[j % phasesData.length];
+        // Bills also follow sequential phase progression
+        const phaseIndex = Math.min(
+          Math.floor(j * maxPhaseIndex / numBills),
+          maxPhaseIndex
+        );
+        const phase = phasesData[phaseIndex];
         const billDate = randomDate(
           new Date(project.start_date),
           new Date(project.end_date)
@@ -427,9 +452,72 @@ async function seedComprehensive() {
     await db.insert(userPreferences).values(preferencesData);
     console.log('✅ Inserted user preferences\n');
 
+    // Generate phase progress data based on actual work
+    console.log('📊 Generating phase progress data...');
+    const phaseProgressData = [];
+
+    // Get unique project-phase combinations that have work
+    const projectPhaseWork = new Map();
+
+    // Track phases with invoices
+    for (const invoice of invoicesData) {
+      const key = `${invoice.project_id}-${invoice.build_phase_id}`;
+      if (!projectPhaseWork.has(key)) {
+        projectPhaseWork.set(key, {
+          project_id: invoice.project_id,
+          build_phase_id: invoice.build_phase_id,
+          hasInvoice: true,
+          hasBill: false
+        });
+      } else {
+        projectPhaseWork.get(key).hasInvoice = true;
+      }
+    }
+
+    // Track phases with bills
+    for (const bill of billsData) {
+      const key = `${bill.project_id}-${bill.build_phase_id}`;
+      if (!projectPhaseWork.has(key)) {
+        projectPhaseWork.set(key, {
+          project_id: bill.project_id,
+          build_phase_id: bill.build_phase_id,
+          hasInvoice: false,
+          hasBill: true
+        });
+      } else {
+        projectPhaseWork.get(key).hasBill = true;
+      }
+    }
+
+    // Generate progress for phases with work
+    for (const work of projectPhaseWork.values()) {
+      // Determine progress based on what work exists
+      let progress = 0;
+      if (work.hasInvoice && work.hasBill) {
+        progress = Math.floor(Math.random() * 30) + 70; // 70-100% if both invoice and bill
+      } else if (work.hasInvoice) {
+        progress = Math.floor(Math.random() * 30) + 40; // 40-70% if only invoice
+      } else if (work.hasBill) {
+        progress = Math.floor(Math.random() * 30) + 10; // 10-40% if only bill
+      }
+
+      phaseProgressData.push({
+        project_id: work.project_id,
+        build_phase_id: work.build_phase_id,
+        progress_percentage: progress,
+        last_updated_by: 'comprehensive_seed'
+      });
+    }
+
+    // Insert phase progress data
+    for (const progress of phaseProgressData) {
+      await db.insert(phaseProgress).values(progress);
+    }
+    console.log(`✅ Inserted ${phaseProgressData.length} phase progress records\n`);
+
     // Refresh materialized view
     console.log('🔄 Refreshing materialized view...');
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY milestone.project_phase_summary`);
+    await db.execute(sql`REFRESH MATERIALIZED VIEW milestone.project_phase_summary`);
     console.log('✅ Materialized view refreshed\n');
 
     // Calculate statistics

@@ -54,6 +54,7 @@ export interface Invoice {
   type: string | null;
   contact_name: string | null;
   project_id: string | null;
+  build_phase_id?: string | null;
   line_items?: Array<{ description?: string; amount?: number }>;
   // Additional properties from database are allowed via type assertion
 }
@@ -70,6 +71,7 @@ export interface Bill {
   type: string | null;
   contact_name: string | null;
   project_id: string | null;
+  build_phase_id?: string | null;
   // Additional properties from database are allowed via type assertion
 }
 
@@ -114,4 +116,41 @@ export interface BuildPhase {
   description: string | null;
   display_order: number;
   is_active: boolean;
+  color?: string;
+  icon?: string;
+}
+
+export interface PhaseSummary {
+  id: string;
+  name: string;
+  color: string;
+  icon: string;
+  projectId: string;
+  revenue: number;
+  costs: number;
+  profit: number;
+  margin: number;
+  itemCount: number;
+  progress: number;
+  invoiceCount: number;
+  billCount: number;
+  estimateCount: number;
+}
+
+export interface PhaseProgress {
+  id: string;
+  project_id: string;
+  build_phase_id: string;
+  progress_percentage: number;
+  last_updated_by: string | null;
+  updated_at: Date | string;
+}
+
+export interface PhaseAssignmentProps {
+  itemId: string;
+  itemType: 'invoice' | 'bill' | 'estimate';
+  currentPhaseId: string | null;
+  currentProjectId: string;
+  phases: BuildPhase[];
+  projects: Project[];
 }

@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1758139384224,
-      "tag": "0000_powerful_blizzard",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1758209311475,
-      "tag": "0001_yummy_the_professor",
+      "when": 1758410917648,
+      "tag": "0000_init",
       "breakpoints": true
     }
   ]

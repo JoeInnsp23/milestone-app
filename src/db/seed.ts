@@ -7,7 +7,8 @@ import {
   projectEstimates,
   syncStatus,
   auditLogs,
-  userPreferences
+  userPreferences,
+  phaseProgress
 } from './schema';
 import { sql } from 'drizzle-orm';
 
@@ -542,9 +543,33 @@ async function seed() {
     await db.insert(userPreferences).values(preferencesData);
     console.log('✅ Inserted user preferences\n');
 
+    // Insert phase progress data - ONLY for phases that have actual work (invoices/bills)
+    console.log('📊 Inserting phase progress data...');
+    const phaseProgressData = [
+      // PROJ001 has work in BP001 (Demolition), BP002 (Groundworks), BP004 (Roofing)
+      { project_id: 'PROJ001', build_phase_id: 'BP001', progress_percentage: 100 }, // Demolition complete (has invoice & bill)
+      { project_id: 'PROJ001', build_phase_id: 'BP002', progress_percentage: 75 },  // Groundworks in progress (has invoice & bill)
+      { project_id: 'PROJ001', build_phase_id: 'BP004', progress_percentage: 30 },  // Roofing started (has bill only)
+
+      // PROJ002 has work only in BP001 (Demolition)
+      { project_id: 'PROJ002', build_phase_id: 'BP001', progress_percentage: 100 }, // Demolition complete (has invoice & bill)
+
+      // Note: We do NOT add progress for phases without any invoices/bills
+      // BP003 (Masonry) has no work yet, so no progress record
+      // PROJ003 and PROJ004 have no invoices/bills, so no progress records
+    ];
+
+    for (const progress of phaseProgressData) {
+      await db.insert(phaseProgress).values({
+        ...progress,
+        last_updated_by: 'system_seed',
+      });
+    }
+    console.log(`✅ Inserted ${phaseProgressData.length} phase progress records\n`);
+
     // Refresh materialized view
     console.log('🔄 Refreshing materialized view...');
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY milestone.project_phase_summary`);
+    await db.execute(sql`REFRESH MATERIALIZED VIEW milestone.project_phase_summary`);
     console.log('✅ Materialized view refreshed\n');
 
     console.log('🎉 Database seeding completed successfully!');
