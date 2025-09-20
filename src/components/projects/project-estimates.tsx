@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authenticated)/projects/[id]/actions/estimates';
 import { ProjectEstimate } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -10,56 +11,99 @@ interface ProjectEstimatesProps {
   estimates: ProjectEstimate[];
 }
 
-export function ProjectEstimates({ projectId, estimates: initialEstimates }: ProjectEstimatesProps) {
-  const [estimates, setEstimates] = useState(initialEstimates);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
-  const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [isPending, startTransition] = useTransition();
+export interface ProjectEstimatesHandle {
+  openCreateModal: () => void;
+}
 
-  // Listen for custom event from header button
-  useEffect(() => {
-    const handleOpenEstimateForm = () => {
+export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstimatesProps>(
+  function ProjectEstimates(
+    { projectId, estimates: initialEstimates }: ProjectEstimatesProps,
+    ref
+  ) {
+    const [estimates, setEstimates] = useState(initialEstimates);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
+    const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
+    const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+    const [isPending, startTransition] = useTransition();
+    const modalContainerRef = useRef<HTMLDivElement | null>(null);
+    const previousBodyOverflowRef = useRef<string | null>(null);
+
+    const openModal = (nextEditing: ProjectEstimate | null) => {
+      setEditingEstimate(nextEditing);
       setIsCreateOpen(true);
-      setEditingEstimate(null);
     };
 
-    window.addEventListener('open-estimate-form', handleOpenEstimateForm);
-    return () => {
-      window.removeEventListener('open-estimate-form', handleOpenEstimateForm);
+    useEffect(() => {
+      if (typeof document === 'undefined') return;
+
+      const container = document.createElement('div');
+      container.className = 'project-estimates-modal-root';
+      modalContainerRef.current = container;
+      document.body.appendChild(container);
+
+      return () => {
+        document.body.removeChild(container);
+        modalContainerRef.current = null;
+      };
+    }, []);
+
+    useEffect(() => {
+      if (typeof document === 'undefined') return;
+
+      if (isCreateOpen) {
+        if (previousBodyOverflowRef.current === null) {
+          previousBodyOverflowRef.current = document.body.style.overflow;
+        }
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+          document.body.style.overflow = previousBodyOverflowRef.current ?? '';
+          previousBodyOverflowRef.current = null;
+        };
+      }
+
+      if (previousBodyOverflowRef.current !== null) {
+        document.body.style.overflow = previousBodyOverflowRef.current;
+        previousBodyOverflowRef.current = null;
+      }
+
+      return;
+    }, [isCreateOpen]);
+
+    useImperativeHandle(ref, () => ({
+      openCreateModal: () => {
+        openModal(null);
+      },
+    }));
+
+    const formatCurrency = (value: number | string) => {
+      const numValue = typeof value === 'string' ? parseFloat(value) : value;
+      if (isNaN(numValue)) return '£0';
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(numValue);
     };
-  }, []);
 
-  const formatCurrency = (value: number | string) => {
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(numValue)) return '£0';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(numValue);
-  };
+    const formatDate = (date: Date | string) => {
+      return new Date(date).toLocaleDateString('en-GB');
+    };
 
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('en-GB');
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'revenue':
-        return '#10b981';
-      case 'cost':
-        return '#ef4444';
-      case 'hours':
-        return '#3b82f6';
-      case 'materials':
-        return '#8b5cf6';
-      default:
-        return '#6b7280';
-    }
-  };
+    const getTypeColor = (type: string) => {
+      switch (type) {
+        case 'revenue':
+          return '#10b981';
+        case 'cost':
+          return '#ef4444';
+        case 'materials':
+          return '#8b5cf6';
+        default:
+          return '#6b7280';
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,11 +117,12 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
     // Create optimistic estimate
     const tempId = `temp-${Date.now()}`;
+    const editingTarget = editingEstimate;
     const optimisticEstimate: ProjectEstimate = {
-      id: editingEstimate?.id || tempId,
+      id: editingTarget?.id || tempId,
       project_id: projectId,
       description: formData.get('description') as string,
-      estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'hours' | 'materials',
+      estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'materials',
       amount: cleanedAmount,
       estimate_date: formData.get('estimate_date') as string,
       confidence_level: Number(formData.get('confidence_level')),
@@ -91,14 +136,16 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
     // Optimistic update
     const previousEstimates = [...estimates];
-    const idToTrack = editingEstimate?.id || tempId;
+    const idToTrack = editingTarget?.id || tempId;
 
-    if (editingEstimate) {
-      setEstimates(estimates.map(e =>
-        e.id === editingEstimate.id ? { ...e, ...optimisticEstimate, id: editingEstimate.id } : e
-      ));
+    if (editingTarget) {
+      setEstimates((prev) =>
+        prev.map((e) =>
+          e.id === editingTarget.id ? { ...e, ...optimisticEstimate, id: editingTarget.id } : e
+        )
+      );
     } else {
-      setEstimates([...estimates, optimisticEstimate]);
+      setEstimates((prev) => [...prev, optimisticEstimate]);
     }
     setIsCreateOpen(false);
     setEditingEstimate(null);
@@ -108,36 +155,44 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
     startTransition(async () => {
       let result;
-      if (editingEstimate) {
-        result = await updateEstimate(editingEstimate.id, formData);
+      if (editingTarget) {
+        result = await updateEstimate(editingTarget.id, formData);
       } else {
         result = await createEstimate(formData);
       }
 
       if (result.success && result.estimate) {
-        // Replace optimistic with real data
-        if (editingEstimate) {
-          setEstimates(estimates.map(e =>
-            e.id === editingEstimate.id ? result.estimate! : e
-          ));
-        } else {
-          setEstimates(prevEstimates =>
-            prevEstimates.map(e => e.id === tempId ? result.estimate! : e)
+        const resolvedEstimate = result.estimate;
+
+        if (editingTarget) {
+          setEstimates((prev) =>
+            prev.map((e) => (e.id === editingTarget.id ? resolvedEstimate : e))
           );
+        } else {
+          setEstimates((prev) => {
+            let replaced = false;
+            const next = prev.map((e) => {
+              if (e.id === tempId) {
+                replaced = true;
+                return resolvedEstimate;
+              }
+              return e;
+            });
+            return replaced ? next : [...next, resolvedEstimate];
+          });
         }
       } else {
         // Rollback on error
         setEstimates(previousEstimates);
         alert(result.error || 'Failed to save estimate');
         // Reopen form with data
-        if (!editingEstimate) {
-          setIsCreateOpen(true);
+        if (!editingTarget) {
+          openModal(null);
         } else {
-          setEditingEstimate(editingEstimate);
-          setIsCreateOpen(true);
+          openModal(editingTarget);
         }
       }
-      // Clear pending state
+
       setPendingIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(idToTrack);
@@ -176,30 +231,26 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
   };
 
   // Group and calculate totals
-  const totals = {
-    revenue: estimates.filter(e => e.estimate_type === 'revenue').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    cost: estimates.filter(e => e.estimate_type === 'cost').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    hours: estimates.filter(e => e.estimate_type === 'hours').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    materials: estimates.filter(e => e.estimate_type === 'materials').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-  };
+    const totals = {
+      revenue: estimates.filter(e => e.estimate_type === 'revenue').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+      cost: estimates.filter(e => e.estimate_type === 'cost').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+      materials: estimates.filter(e => e.estimate_type === 'materials').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+    };
 
-  const estimatedProfit = totals.revenue - totals.cost - totals.materials;
-  const estimatedMargin = totals.revenue > 0 ? (estimatedProfit / totals.revenue) * 100 : 0;
+    const estimatedProfit = totals.revenue - totals.cost - totals.materials;
+    const estimatedMargin = totals.revenue > 0 ? (estimatedProfit / totals.revenue) * 100 : 0;
 
-  return (
-    <div className="estimates-section">
+    return (
+      <div className="estimates-section">
       {/* Summary Cards */}
       <div className="summary-cards">
         <div className="summary-card">
@@ -234,10 +285,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         <Button
           type="button"
           variant="header"
-          onClick={() => {
-            setEditingEstimate(null);
-            setIsCreateOpen(true);
-          }}
+          onClick={() => openModal(null)}
         >
           + Add Estimate
         </Button>
@@ -268,10 +316,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                 <div className="estimate-actions">
                   <button
                     className="action-button edit"
-                    onClick={() => {
-                      setEditingEstimate(estimate);
-                      setIsCreateOpen(true);
-                    }}
+                    onClick={() => openModal(estimate)}
                   >
                     Edit
                   </button>
@@ -286,9 +331,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
               <div className="estimate-content">
                 <div className="estimate-description">{estimate.description}</div>
                 <div className="estimate-amount">
-                  {estimate.estimate_type === 'hours'
-                    ? `${estimate.amount} hours`
-                    : formatCurrency(estimate.amount)}
+                  {formatCurrency(estimate.amount)}
                 </div>
                 {estimate.notes && (
                   <div className="estimate-notes">{estimate.notes}</div>
@@ -307,13 +350,18 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       )}
 
       {/* Create/Edit Modal */}
-      {isCreateOpen && (
-        <div className="modal-overlay" onClick={() => {
-          setIsCreateOpen(false);
-        }}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
-            <form onSubmit={handleSubmit}>
+      {isCreateOpen && modalContainerRef.current
+        ? createPortal(
+            <div
+              className="modal-overlay"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setEditingEstimate(null);
+              }}
+            >
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
+                <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="description">Description *</label>
                 <input
@@ -337,7 +385,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                   >
                     <option value="revenue">Revenue</option>
                     <option value="cost">Cost</option>
-                    <option value="hours">Hours</option>
                     <option value="materials">Materials</option>
                   </select>
                 </div>
@@ -419,10 +466,12 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                   {isPending ? 'Saving...' : editingEstimate ? 'Update' : 'Create'}
                 </Button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+                </form>
+              </div>
+            </div>,
+            modalContainerRef.current
+          )
+        : null}
 
       {/* Delete Confirmation Modal */}
       {deletingEstimate && (
@@ -731,6 +780,9 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         }
       `}</style>
 
-    </div>
-  );
-}
+      </div>
+    );
+  }
+);
+
+ProjectEstimates.displayName = 'ProjectEstimates';

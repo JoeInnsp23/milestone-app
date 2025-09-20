@@ -78,7 +78,7 @@ export interface ProjectEstimate {
   project_id: string;
   build_phase_id: string | null;
   description: string;
-  estimate_type: 'revenue' | 'cost' | 'hours' | 'materials';
+  estimate_type: 'revenue' | 'cost' | 'materials';
   amount: number | string;
   estimate_date: Date | string;
   confidence_level: number | null;

@@ -3,7 +3,7 @@ CREATE SCHEMA "milestone";
 CREATE TYPE "public"."audit_action" AS ENUM('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXPORT');--> statement-breakpoint
 CREATE TYPE "public"."bill_status" AS ENUM('DRAFT', 'SUBMITTED', 'AUTHORISED', 'PAID', 'VOIDED');--> statement-breakpoint
 CREATE TYPE "public"."bill_type" AS ENUM('BILL', 'PURCHASEORDER');--> statement-breakpoint
-CREATE TYPE "public"."estimate_type" AS ENUM('revenue', 'cost', 'hours', 'materials');--> statement-breakpoint
+CREATE TYPE "public"."estimate_type" AS ENUM('revenue', 'cost', 'materials');--> statement-breakpoint
 CREATE TYPE "public"."export_type" AS ENUM('PDF', 'EXCEL', 'CSV');--> statement-breakpoint
 CREATE TYPE "public"."invoice_status" AS ENUM('DRAFT', 'SUBMITTED', 'AUTHORISED', 'PAID', 'VOIDED');--> statement-breakpoint
 CREATE TYPE "public"."invoice_type" AS ENUM('ACCREC', 'ACCPAY');--> statement-breakpoint
@@ -201,7 +201,6 @@ CREATE INDEX "idx_invoices_status" ON "milestone"."invoices" USING btree ("statu
 CREATE INDEX "idx_inv_proj_date" ON "milestone"."invoices" USING btree ("project_id","invoice_date") WHERE "milestone"."invoices"."status" IN ('AUTHORISED', 'PAID');--> statement-breakpoint
 CREATE INDEX "idx_estimates_project" ON "milestone"."project_estimates" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "idx_estimates_project_phase" ON "milestone"."project_estimates" USING btree ("project_id","build_phase_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "ux_estimates_current" ON "milestone"."project_estimates" USING btree ("project_id","estimate_type") WHERE "milestone"."project_estimates"."valid_until" IS NULL;--> statement-breakpoint
 CREATE INDEX "idx_projects_active" ON "milestone"."projects" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "idx_projects_client" ON "milestone"."projects" USING btree ("client_name");--> statement-breakpoint
 CREATE INDEX "idx_sync_status_type" ON "milestone"."sync_status" USING btree ("sync_type","status");

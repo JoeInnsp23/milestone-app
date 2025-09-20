@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ExportDialog } from '@/components/export/export-dialog';
+import { Button } from '@/components/ui/button';
 
 interface ProjectHeaderClientProps {
   projectId: string;
@@ -10,6 +11,7 @@ interface ProjectHeaderClientProps {
   clientName?: string;
   startDate?: Date;
   endDate?: Date;
+  onAddEstimate: () => void;
 }
 
 export function ProjectHeaderClient({
@@ -18,12 +20,8 @@ export function ProjectHeaderClient({
   clientName,
   startDate,
   endDate,
+  onAddEstimate,
 }: ProjectHeaderClientProps) {
-  const handleOpenEstimateForm = () => {
-    // Dispatch custom event for ProjectEstimates component
-    const event = new CustomEvent('open-estimate-form');
-    window.dispatchEvent(event);
-  };
 
   const formatDate = (date?: Date) => {
     if (!date) return null;
@@ -48,14 +46,11 @@ export function ProjectHeaderClient({
                 : ' Date Range Not Set'}
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-2">
             <ExportDialog projectId={projectId} />
-            <button
-              onClick={handleOpenEstimateForm}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-            >
+            <Button onClick={onAddEstimate} variant="header">
               + Add Estimate
-            </button>
+            </Button>
           </div>
         </div>
       </div>

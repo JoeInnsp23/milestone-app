@@ -1182,7 +1182,7 @@ import { format } from 'date-fns'
 
 const estimateSchema = z.object({
   build_phase_id: z.string().nullable(),
-  estimate_type: z.enum(['revenue', 'cost', 'hours', 'materials']),
+  estimate_type: z.enum(['revenue', 'cost', 'materials']),
   amount: z.string().min(1, 'Amount is required'),
   confidence_level: z.string().optional(),
   notes: z.string().optional(),
@@ -1224,8 +1224,6 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
         return <TrendingUp className="h-4 w-4 text-green-600" />
       case 'cost':
         return <TrendingDown className="h-4 w-4 text-red-600" />
-      case 'hours':
-        return <Clock className="h-4 w-4 text-blue-600" />
       case 'materials':
         return <Package className="h-4 w-4 text-purple-600" />
       default:
@@ -1239,8 +1237,6 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
         return 'text-green-600'
       case 'cost':
         return 'text-red-600'
-      case 'hours':
-        return 'text-blue-600'
       case 'materials':
         return 'text-purple-600'
       default:
@@ -1358,9 +1354,6 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
     cost: estimates
       .filter(e => e.estimate_type === 'cost')
       .reduce((sum, e) => sum + e.amount, 0),
-    hours: estimates
-      .filter(e => e.estimate_type === 'hours')
-      .reduce((sum, e) => sum + e.amount, 0),
     materials: estimates
       .filter(e => e.estimate_type === 'materials')
       .reduce((sum, e) => sum + e.amount, 0),
@@ -1443,7 +1436,7 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
                     {editingEstimate ? 'Edit Estimate' : 'Create Estimate'}
                   </DialogTitle>
                   <DialogDescription>
-                    Add estimates for revenue, costs, hours, or materials for this project.
+                    Add estimates for revenue, costs, or materials for this project.
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -1490,7 +1483,6 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
                             <SelectContent>
                               <SelectItem value="revenue">Revenue</SelectItem>
                               <SelectItem value="cost">Cost</SelectItem>
-                              <SelectItem value="hours">Hours</SelectItem>
                               <SelectItem value="materials">Materials</SelectItem>
                             </SelectContent>
                           </Select>
@@ -1513,7 +1505,7 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
                             />
                           </FormControl>
                           <FormDescription>
-                            Enter the amount in GBP (or hours if type is Hours)
+                            Enter the amount in GBP
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -1607,10 +1599,7 @@ export function ProjectEstimates({ projectId, buildPhases, estimates: initialEst
                         <div className="flex-1">
                           <div className="flex items-center space-x-4">
                             <span className={`text-lg font-semibold ${getTypeColor(type)}`}>
-                              {type === 'hours'
-                                ? `${estimate.amount} hours`
-                                : formatCurrency(estimate.amount)
-                              }
+                              {formatCurrency(estimate.amount)}
                             </span>
                             {estimate.confidence_level && (
                               <span className="text-xs text-muted-foreground">
@@ -1697,7 +1686,7 @@ import { z } from 'zod'
 const estimateSchema = z.object({
   project_id: z.string(),
   build_phase_id: z.string().nullable(),
-  estimate_type: z.enum(['revenue', 'cost', 'hours', 'materials']),
+  estimate_type: z.enum(['revenue', 'cost', 'materials']),
   amount: z.number(),
   confidence_level: z.number().min(1).max(5).nullable(),
   notes: z.string().nullable(),

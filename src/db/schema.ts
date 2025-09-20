@@ -41,7 +41,6 @@ export const billTypeEnum = pgEnum('bill_type', ['BILL', 'PURCHASEORDER']);
 export const estimateTypeEnum = pgEnum('estimate_type', [
   'revenue',
   'cost',
-  'hours',
   'materials',
 ]);
 

@@ -2,10 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
 import { getProjectById } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
-import { ProjectKPISection } from '@/components/projects/project-kpi-section';
-import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
-import { ProjectTabs } from '@/components/projects/project-tabs';
-import { ProjectHeaderClient } from '@/components/projects/project-header-client';
+import { ProjectDetailClient } from '@/components/projects/project-detail-client';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -67,41 +64,23 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       <Navigation view="projects" />
 
       <div className="container">
-        {/* Client-Side Header with Interactive Elements */}
-        <ProjectHeaderClient
+        <ProjectDetailClient
           projectId={resolvedParams.id}
           projectName={project.name}
           clientName={project.client_name || undefined}
           startDate={project.start_date ? new Date(project.start_date) : undefined}
           endDate={project.end_date ? new Date(project.end_date) : undefined}
-        />
-
-        {/* Main content with consistent spacing */}
-        <div className="space-y-6">
-          {/* KPI Cards with Estimates Toggle */}
-          <ProjectKPISection
-            actualRevenue={totalRevenue}
-            actualCosts={totalCosts}
-            estimatedRevenue={estimatedRevenue}
-            estimatedCosts={estimatedCosts}
-          />
-
-          {/* Financial Breakdown - Including Estimates */}
-          <ProjectFinancialBreakdown
-            revenue={totalRevenueWithEstimates}
-            costOfSales={totalCostsWithEstimates * 0.6}
-            operatingExpenses={operatingExpenses}
-            invoices={project.invoices as Invoice[]}
-          />
-
-          {/* Tabs for Invoices, Bills, and Estimates */}
-          <ProjectTabs
-          projectId={project.id}
+          actualRevenue={totalRevenue}
+          actualCosts={totalCosts}
+          estimatedRevenue={estimatedRevenue}
+          estimatedCosts={estimatedCosts}
+          totalRevenueWithEstimates={totalRevenueWithEstimates}
+          totalCostsWithEstimates={totalCostsWithEstimates}
+          operatingExpenses={operatingExpenses}
           invoices={project.invoices as Invoice[]}
           bills={project.bills as Bill[]}
           estimates={project.estimates || []}
-          />
-        </div>
+        />
       </div>
     </div>
   );

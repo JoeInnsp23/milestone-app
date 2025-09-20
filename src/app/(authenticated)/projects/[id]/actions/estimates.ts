@@ -14,7 +14,7 @@ const estimateSchema = z.object({
   estimate_date: z.string(),
   project_id: z.string(),
   build_phase_id: z.string().optional().nullable(),
-  estimate_type: z.enum(['revenue', 'cost', 'hours', 'materials']).default('revenue'),
+  estimate_type: z.enum(['revenue', 'cost', 'materials']).default('revenue'),
   confidence_level: z.number().min(1).max(5).optional().nullable(),
   notes: z.string().optional().nullable(),
 });
@@ -38,7 +38,7 @@ export async function createEstimate(formData: FormData) {
     const amountBig = new Big(data.amount);
     const now = new Date();
 
-    const [newEstimate] = await db
+    const [created] = await db
       .insert(projectEstimates)
       .values({
         project_id: data.project_id,
@@ -59,14 +59,14 @@ export async function createEstimate(formData: FormData) {
     await db.insert(auditLogs).values({
       event_type: 'estimate_change',
       event_action: 'create',
-      entity_id: newEstimate.id,
+      entity_id: created.id,
       user_id: userId,
-      metadata: { created: newEstimate },
+      metadata: { created },
       created_at: now,
     });
 
     revalidatePath(`/projects/${data.project_id}`);
-    return { success: true, estimate: newEstimate };
+    return { success: true, estimate: created };
   } catch (error) {
     console.error('Error creating estimate:', error);
     return { success: false, error: 'Failed to create estimate' };
