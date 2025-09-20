@@ -64,9 +64,9 @@ export default async function ProjectsPage() {
         <div className="header-card">
           <div className="flex justify-between items-center">
             <div className="flex-1">
-              <h1>Project Hub</h1>
+              <h1>{companyName}</h1>
               <div className="subtitle">
-                {companyName} - {dateFrom && dateTo ? (
+                {dateFrom && dateTo ? (
                   <>
                     {format(new Date(dateFrom), 'd MMMM yyyy')} to {format(new Date(dateTo), 'd MMMM yyyy')}
                   </>
