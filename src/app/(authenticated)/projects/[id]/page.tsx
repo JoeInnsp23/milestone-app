@@ -1,12 +1,11 @@
 import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { getProjectById } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectKPISection } from '@/components/projects/project-kpi-section';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
 import { ProjectTabs } from '@/components/projects/project-tabs';
-import { ExportDialog } from '@/components/export/export-dialog';
+import { ProjectHeaderClient } from '@/components/projects/project-header-client';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -68,40 +67,14 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       <Navigation view="projects" />
 
       <div className="container">
-        {/* Back Button - Outside header card */}
-        <Link href="/projects" className="inline-block mb-4">
-          <button className="text-sm text-white/80 hover:text-white transition-colors">
-            ← Back to All Projects
-          </button>
-        </Link>
-
-        {/* Header Card */}
-        <div className="header-card">
-          <div className="flex justify-between items-center">
-            <div className="flex-1">
-              <h1>{project.name}</h1>
-              <div className="subtitle">
-                {project.client_name || 'No Client'} -
-                {project.start_date && project.end_date ?
-                  ` ${new Date(project.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} to ${new Date(project.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}` :
-                  ' Date Range Not Set'}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <ExportDialog projectId={resolvedParams.id} />
-              <button
-                onClick={() => {
-                  // This will be handled by client component
-                  const event = new CustomEvent('open-estimate-form');
-                  window.dispatchEvent(event);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                + Add Estimate
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Client-Side Header with Interactive Elements */}
+        <ProjectHeaderClient
+          projectId={resolvedParams.id}
+          projectName={project.name}
+          clientName={project.client_name || undefined}
+          startDate={project.start_date ? new Date(project.start_date) : undefined}
+          endDate={project.end_date ? new Date(project.end_date) : undefined}
+        />
 
         {/* Main content with consistent spacing */}
         <div className="space-y-6">

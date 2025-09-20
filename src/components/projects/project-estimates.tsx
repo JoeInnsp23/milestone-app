@@ -8,25 +8,18 @@ import { Button } from '@/components/ui/button';
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
-  initialFormOpen?: boolean;
-  onFormClose?: () => void;
 }
 
-export function ProjectEstimates({ projectId, estimates: initialEstimates, initialFormOpen, onFormClose }: ProjectEstimatesProps) {
+export function ProjectEstimates({ projectId, estimates: initialEstimates }: ProjectEstimatesProps) {
   const [estimates, setEstimates] = useState(initialEstimates);
-  const [isCreateOpen, setIsCreateOpen] = useState(initialFormOpen || false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
   const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [isPending, startTransition] = useTransition();
 
-  // Handle initial form open state and custom events
+  // Listen for custom event from header button
   useEffect(() => {
-    if (initialFormOpen) {
-      setIsCreateOpen(true);
-    }
-
-    // Listen for custom event from header button
     const handleOpenEstimateForm = () => {
       setIsCreateOpen(true);
       setEditingEstimate(null);
@@ -36,7 +29,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates, initi
     return () => {
       window.removeEventListener('open-estimate-form', handleOpenEstimateForm);
     };
-  }, [initialFormOpen]);
+  }, []);
 
   const formatCurrency = (value: number | string) => {
     const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -317,7 +310,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates, initi
       {isCreateOpen && (
         <div className="modal-overlay" onClick={() => {
           setIsCreateOpen(false);
-          onFormClose?.();
         }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
@@ -413,7 +405,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates, initi
                   onClick={() => {
                     setIsCreateOpen(false);
                     setEditingEstimate(null);
-                    onFormClose?.();
                   }}
                   disabled={isPending}
                   className="cancel-button"
