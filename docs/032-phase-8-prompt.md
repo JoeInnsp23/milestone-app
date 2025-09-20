@@ -4,13 +4,16 @@
 You are tasked with implementing Phase 8 of the Milestone P&L Dashboard project. This phase adds construction phase tracking and management functionality to project detail pages, enabling users to organize their projects by standard construction phases (Groundworks, Superstructure, First Fix, Second Fix, Finals) with progress tracking, financial summaries, and webhook integration for n8n synchronization.
 
 ## Feature Overview
-This phase introduces:
-- Phase summary cards showing financial metrics per construction phase
-- Manual phase assignment for invoices, bills, and estimates
-- Progress tracking with ±5% adjustment buttons
-- Grouping toggle to organize items by phase with subtotals
-- Webhook integration for real-time n8n synchronization
-- Comprehensive audit logging for all phase-related changes
+This phase introduces a comprehensive construction cost tracking system with:
+- **17 specific construction phases** matching industry-standard build stages
+- **Phase summary table** replicating Excel cost tracker summary
+- **Detailed cost tracker table** with line items grouped by phase
+- **Float summary card** showing project float utilization
+- **Manual phase assignment** for invoices, bills, and estimates
+- **Progress tracking** with ±5% adjustment buttons
+- **Grouping toggle** to organize items by phase with subtotals
+- **Webhook integration** for real-time n8n synchronization
+- **Comprehensive audit logging** for all phase-related changes
 
 ## Pre-Implementation Requirements
 
@@ -103,14 +106,25 @@ CREATE TABLE build_phases (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- T340: Insert default phases
+-- T340: Insert 17 construction phases
 INSERT INTO build_phases (id, name, sort_order, color, icon) VALUES
-('groundworks', 'Groundworks', 1, '#8B4513', 'Shovel'),
-('superstructure', 'Superstructure', 2, '#708090', 'Building2'),
-('first_fix', 'First Fix', 3, '#4682B4', 'Wrench'),
-('second_fix', 'Second Fix', 4, '#32CD32', 'Hammer'),
-('finals', 'Finals', 5, '#9370DB', 'CheckSquare'),
-('unassigned', 'Unassigned', 999, '#6B7280', 'HelpCircle');
+('demolition', 'Demolition Enabling works', 1, '#8B4513', 'Hammer'),
+('groundworks', 'Groundworks', 2, '#8B5A2B', 'Shovel'),
+('masonry', 'Masonry', 3, '#A0522D', 'Layers'),
+('roofing', 'Roofing', 4, '#708090', 'Home'),
+('electrical', 'Electrical', 5, '#FFD700', 'Zap'),
+('plumbing', 'Plumbing & Heating', 6, '#4682B4', 'Droplets'),
+('joinery', 'Joinery', 7, '#8B7355', 'Hammer'),
+('windows', 'Windows and doors', 8, '#87CEEB', 'DoorOpen'),
+('plastering', 'Drylining & Plaster/Render', 9, '#F5F5DC', 'PaintRoller'),
+('decoration', 'Decoration', 10, '#9370DB', 'Paintbrush'),
+('landscaping', 'Landscaping', 11, '#228B22', 'Trees'),
+('finishes', 'Finishes Schedule', 12, '#DAA520', 'ListChecks'),
+('steelwork', 'Steelwork', 13, '#696969', 'HardHat'),
+('flooring', 'Flooring/Tiling', 14, '#D2691E', 'Grid3x3'),
+('kitchen', 'Kitchen', 15, '#FF6347', 'ChefHat'),
+('extra', 'Extra', 16, '#6B7280', 'Plus'),
+('pm_fee', 'Project Management Fee', 17, '#4B0082', 'Briefcase');
 ```
 
 **Create Phase Progress Table:**
@@ -137,21 +151,43 @@ import { formatCurrency } from '@/lib/utils';
 import { Building2, Wrench, Hammer, CheckSquare, HelpCircle, Shovel } from 'lucide-react';
 
 const phaseIcons = {
+  demolition: Hammer,
   groundworks: Shovel,
-  superstructure: Building2,
-  first_fix: Wrench,
-  second_fix: Hammer,
-  finals: CheckSquare,
-  unassigned: HelpCircle
+  masonry: Layers,
+  roofing: Home,
+  electrical: Zap,
+  plumbing: Droplets,
+  joinery: Hammer,
+  windows: DoorOpen,
+  plastering: PaintRoller,
+  decoration: Paintbrush,
+  landscaping: Trees,
+  finishes: ListChecks,
+  steelwork: HardHat,
+  flooring: Grid3x3,
+  kitchen: ChefHat,
+  extra: Plus,
+  pm_fee: Briefcase
 };
 
 const phaseColors = {
-  groundworks: '#8B4513',
-  superstructure: '#708090',
-  first_fix: '#4682B4',
-  second_fix: '#32CD32',
-  finals: '#9370DB',
-  unassigned: '#6B7280'
+  demolition: '#8B4513',
+  groundworks: '#8B5A2B',
+  masonry: '#A0522D',
+  roofing: '#708090',
+  electrical: '#FFD700',
+  plumbing: '#4682B4',
+  joinery: '#8B7355',
+  windows: '#87CEEB',
+  plastering: '#F5F5DC',
+  decoration: '#9370DB',
+  landscaping: '#228B22',
+  finishes: '#DAA520',
+  steelwork: '#696969',
+  flooring: '#D2691E',
+  kitchen: '#FF6347',
+  extra: '#6B7280',
+  pm_fee: '#4B0082'
 };
 
 export function PhaseSummaryCards({ phases }: { phases: PhaseData[] }) {
@@ -690,6 +726,323 @@ export function ProjectTabsEnhanced({
 }
 ```
 
+#### Float Summary Card (T377-T379):
+
+**Float Summary Card Component:**
+```typescript
+// T377: src/components/projects/float-summary-card.tsx
+'use client';
+
+import { Card } from '@/components/ui/card';
+import { formatCurrency } from '@/lib/utils';
+import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+
+export function FloatSummaryCard({
+  floatReceived,
+  totalCostsPaid,
+  projectId
+}: {
+  floatReceived: number;
+  totalCostsPaid: number;
+  projectId: string;
+}) {
+  const floatBalance = floatReceived - totalCostsPaid;
+  const floatUtilization = floatReceived > 0
+    ? (totalCostsPaid / floatReceived) * 100
+    : 0;
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2">
+          <Wallet className="h-5 w-5" />
+          Float Summary
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground">Total Float Received</span>
+          <span className="font-semibold text-lg">
+            {formatCurrency(floatReceived)}
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground">Total Costs Paid</span>
+          <span className="font-semibold text-lg">
+            {formatCurrency(totalCostsPaid)}
+          </span>
+        </div>
+
+        <div className="pt-3 border-t">
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground">Float Balance</span>
+            <div className="flex items-center gap-2">
+              {floatBalance >= 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-600" />
+              )}
+              <span className={`font-bold text-lg ${
+                floatBalance >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatCurrency(floatBalance)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-3">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm text-muted-foreground">Float Utilization</span>
+            <span className="text-sm font-medium">{floatUtilization.toFixed(1)}%</span>
+          </div>
+          <div className="w-full bg-secondary rounded-full h-2">
+            <div
+              className={`h-full rounded-full transition-all ${
+                floatUtilization > 90 ? 'bg-red-600' :
+                floatUtilization > 70 ? 'bg-yellow-600' :
+                'bg-green-600'
+              }`}
+              style={{ width: `${Math.min(floatUtilization, 100)}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+```
+
+#### Phase Summary Tab (T380-T382):
+
+**Phase Summary Table Component:**
+```typescript
+// T380: src/components/projects/phase-summary-table.tsx
+'use client';
+
+import { formatCurrency } from '@/lib/utils';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+
+interface PhaseSummaryData {
+  phaseId: string;
+  phaseName: string;
+  estimatedCost: number;
+  totalPaidToDate: number;
+  costsDue: number;
+  variance: number;
+}
+
+export function PhaseSummaryTable({
+  phases,
+  floatBalance
+}: {
+  phases: PhaseSummaryData[];
+  floatBalance?: number;
+}) {
+  const totals = phases.reduce(
+    (acc, phase) => ({
+      estimated: acc.estimated + phase.estimatedCost,
+      paid: acc.paid + phase.totalPaidToDate,
+      due: acc.due + phase.costsDue,
+      variance: acc.variance + phase.variance,
+    }),
+    { estimated: 0, paid: 0, due: 0, variance: 0 }
+  );
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Build Stage</TableHead>
+            <TableHead className="text-right">Estimated Cost</TableHead>
+            <TableHead className="text-right">Total Cost Paid to Date</TableHead>
+            <TableHead className="text-right">Costs Due</TableHead>
+            <TableHead className="text-right">Variance to Estimate</TableHead>
+            {floatBalance !== undefined && (
+              <TableHead className="text-right">Float Balance</TableHead>
+            )}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {phases.map((phase) => (
+            <TableRow key={phase.phaseId}>
+              <TableCell className="font-medium">{phase.phaseName}</TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(phase.estimatedCost)}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(phase.totalPaidToDate)}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(phase.costsDue)}
+              </TableCell>
+              <TableCell className={`text-right font-medium ${
+                phase.variance >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {formatCurrency(phase.variance)}
+              </TableCell>
+              {floatBalance !== undefined && <TableCell />}
+            </TableRow>
+          ))}
+
+          <TableRow className="font-bold border-t-2">
+            <TableCell>Total</TableCell>
+            <TableCell className="text-right">
+              {formatCurrency(totals.estimated)}
+            </TableCell>
+            <TableCell className="text-right">
+              {formatCurrency(totals.paid)}
+            </TableCell>
+            <TableCell className="text-right">
+              {formatCurrency(totals.due)}
+            </TableCell>
+            <TableCell className={`text-right ${
+              totals.variance >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {formatCurrency(totals.variance)}
+            </TableCell>
+            {floatBalance !== undefined && (
+              <TableCell className="text-right text-blue-600">
+                {formatCurrency(floatBalance)}
+              </TableCell>
+            )}
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+```
+
+#### Cost Tracker Tab (T383-T385):
+
+**Cost Tracker Table Component:**
+```typescript
+// T383: src/components/projects/cost-tracker-table.tsx
+'use client';
+
+import { useState } from 'react';
+import { formatCurrency } from '@/lib/utils';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface CostTrackerItem {
+  id: string;
+  date: Date;
+  invoiceReference: string;
+  description: string;
+  amountPaid: number;
+  costsDirectByCustomer: number;
+  refunds: number;
+  costsDue: number;
+  phaseId: string;
+  phaseName: string;
+}
+
+export function CostTrackerTable({ items }: { items: CostTrackerItem[] }) {
+  const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
+
+  // Group items by phase
+  const groupedItems = items.reduce((acc, item) => {
+    if (!acc[item.phaseId]) {
+      acc[item.phaseId] = {
+        phaseName: item.phaseName,
+        items: [],
+        totals: { paid: 0, direct: 0, refunds: 0, due: 0 }
+      };
+    }
+    acc[item.phaseId].items.push(item);
+    acc[item.phaseId].totals.paid += item.amountPaid;
+    acc[item.phaseId].totals.direct += item.costsDirectByCustomer;
+    acc[item.phaseId].totals.refunds += item.refunds;
+    acc[item.phaseId].totals.due += item.costsDue;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const togglePhase = (phaseId: string) => {
+    const newCollapsed = new Set(collapsedPhases);
+    if (newCollapsed.has(phaseId)) {
+      newCollapsed.delete(phaseId);
+    } else {
+      newCollapsed.add(phaseId);
+    }
+    setCollapsedPhases(newCollapsed);
+  };
+
+  return (
+    <div className="space-y-4">
+      {Object.entries(groupedItems).map(([phaseId, phaseData]) => {
+        const isCollapsed = collapsedPhases.has(phaseId);
+
+        return (
+          <div key={phaseId} className="border rounded-lg overflow-hidden">
+            <div
+              className="bg-muted p-4 cursor-pointer flex justify-between items-center"
+              onClick={() => togglePhase(phaseId)}
+            >
+              <div className="flex items-center gap-2">
+                {isCollapsed ? <ChevronRight /> : <ChevronDown />}
+                <h3 className="font-semibold">{phaseData.phaseName}</h3>
+                <span className="text-sm text-muted-foreground">
+                  ({phaseData.items.length} items)
+                </span>
+              </div>
+
+              <div className="flex gap-6 text-sm">
+                <span>Paid: {formatCurrency(phaseData.totals.paid)}</span>
+                <span>Due: {formatCurrency(phaseData.totals.due)}</span>
+              </div>
+            </div>
+
+            {!isCollapsed && (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-secondary text-sm">
+                    <tr>
+                      <th className="text-left p-2">Date</th>
+                      <th className="text-left p-2">Invoice Ref</th>
+                      <th className="text-left p-2">Description</th>
+                      <th className="text-right p-2">Amount Paid</th>
+                      <th className="text-right p-2">Direct By Customer</th>
+                      <th className="text-right p-2">Refunds</th>
+                      <th className="text-right p-2">Costs Due</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {phaseData.items.map((item: CostTrackerItem) => (
+                      <tr key={item.id} className="border-t">
+                        <td className="p-2">{format(item.date, 'dd/MM/yyyy')}</td>
+                        <td className="p-2">{item.invoiceReference}</td>
+                        <td className="p-2">{item.description}</td>
+                        <td className="p-2 text-right">{formatCurrency(item.amountPaid)}</td>
+                        <td className="p-2 text-right">{formatCurrency(item.costsDirectByCustomer)}</td>
+                        <td className="p-2 text-right">{formatCurrency(item.refunds)}</td>
+                        <td className="p-2 text-right">{formatCurrency(item.costsDue)}</td>
+                      </tr>
+                    ))}
+
+                    <tr className="border-t-2 font-semibold bg-secondary">
+                      <td colSpan={3} className="p-2">Subtotal</td>
+                      <td className="p-2 text-right">{formatCurrency(phaseData.totals.paid)}</td>
+                      <td className="p-2 text-right">{formatCurrency(phaseData.totals.direct)}</td>
+                      <td className="p-2 text-right">{formatCurrency(phaseData.totals.refunds)}</td>
+                      <td className="p-2 text-right">{formatCurrency(phaseData.totals.due)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+```
+
 ### Testing & QA (T386-T419):
 
 #### Running QA Validation:
@@ -773,15 +1126,18 @@ console.timeEnd('PhaseUpdate'); // Should be < 1s
 ## Success Criteria
 
 Phase 8 is complete when:
-1. **Phase summary cards** display with correct financial data
-2. **Progress tracking** allows ±5% adjustments that persist
-3. **Phase assignment** works for all item types
-4. **Grouping toggle** correctly organizes and subtotals items
-5. **Webhooks** fire on all updates for n8n sync
-6. **Audit logging** captures all phase-related changes
-7. **All 52 QA items** pass validation
-8. **Performance** targets met (<2s page loads)
-9. **No regressions** in existing functionality
+1. **17 construction phases** are properly seeded and displayed in correct order
+2. **Float Summary Card** displays accurate float balance and utilization
+3. **Summary Tab** shows phase-based cost summary matching Excel format
+4. **Cost Tracker Tab** displays detailed line items grouped by phase with subtotals
+5. **Phase assignment** works for all item types (invoices, bills, estimates)
+6. **Progress tracking** allows ±5% adjustments that persist
+7. **Grouping toggle** correctly organizes items by phase or chronologically
+8. **Webhooks** fire on all updates for n8n sync
+9. **Audit logging** captures all phase-related changes
+10. **All QA items** pass validation
+11. **Performance** targets met (<2s page loads)
+12. **No regressions** in existing functionality
 
 ## Next Steps
 

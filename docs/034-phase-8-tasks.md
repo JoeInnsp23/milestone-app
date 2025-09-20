@@ -59,23 +59,32 @@ Complete task-oriented breakdown for implementing construction phase tracking, v
 
 ## Phase Configuration
 
-**T341-Define Construction Phases**: Set up phase data
+**T341-Define Construction Phases 1-9**: Set up first half of phases
 - Open `src/db/seed.ts`
-- Define Groundworks phase
-- Define Superstructure phase
-- Define First Fix phase
-- Define Second Fix phase
+- Define Demolition Enabling works
+- Define Groundworks
+- Define Masonry
+- Define Roofing
+- Define Electrical
+- Define Plumbing & Heating
+- Define Joinery
+- Define Windows and doors
+- Define Drylining & Plaster/Render
 - Dependencies: T340
-- Estimated Time: 8 minutes
+- Estimated Time: 10 minutes
 
-**T342-Add Finals and Unassigned**: Complete phase list
-- Add Finals/Decoration phase
-- Add Unassigned phase (default)
-- Set appropriate colors for each
-- Set Lucide icon names
-- Set typical_duration_days
+**T342-Define Construction Phases 10-17**: Complete phase list
+- Define Decoration
+- Define Landscaping
+- Define Finishes Schedule
+- Define Steelwork
+- Define Flooring/Tiling
+- Define Kitchen
+- Define Extra
+- Define Project Management Fee
+- Set appropriate colors and icons
 - Dependencies: T341
-- Estimated Time: 5 minutes
+- Estimated Time: 8 minutes
 
 **T343-Update Seed Script**: Add phases to database
 - Insert phases into build_phases table
@@ -512,6 +521,80 @@ Complete task-oriented breakdown for implementing construction phase tracking, v
 - Dependencies: T388
 - Estimated Time: 5 minutes
 
+## New UI Components
+
+**T390A-Create Float Summary Card**: Display float utilization
+- Create `float-summary-card.tsx` component
+- Display total float received
+- Show total costs paid
+- Calculate float balance
+- Add utilization progress bar
+- Dependencies: T389
+- Estimated Time: 15 minutes
+
+**T390B-Style Float Card**: Apply consistent styling
+- Match existing KPI card design
+- Add color coding for balance
+- Use TrendingUp/Down icons
+- Add responsive layout
+- Test dark mode
+- Dependencies: T390A
+- Estimated Time: 8 minutes
+
+**T390C-Create Phase Summary Table**: Build summary tab
+- Create `phase-summary-table.tsx`
+- Display all 17 phases
+- Show estimated vs actual costs
+- Calculate variance
+- Add totals row
+- Dependencies: T390B
+- Estimated Time: 20 minutes
+
+**T390D-Add Summary Calculations**: Implement aggregations
+- Sum estimated costs
+- Sum paid to date
+- Sum costs due
+- Calculate total variance
+- Add float balance to total
+- Dependencies: T390C
+- Estimated Time: 10 minutes
+
+**T390E-Create Cost Tracker Table**: Detailed view
+- Create `cost-tracker-table.tsx`
+- Group items by phase
+- Add collapsible sections
+- Show all invoice/bill details
+- Calculate phase subtotals
+- Dependencies: T390D
+- Estimated Time: 25 minutes
+
+**T390F-Add Cost Tracker Features**: Enhance functionality
+- Add expand/collapse all
+- Implement sorting options
+- Add date formatting
+- Show payment status
+- Add export button placeholder
+- Dependencies: T390E
+- Estimated Time: 12 minutes
+
+**T390G-Update Project Tabs**: Add new tabs
+- Add Summary tab
+- Add Cost Tracker tab
+- Keep existing tabs
+- Set Summary as default
+- Update tab navigation
+- Dependencies: T390F
+- Estimated Time: 10 minutes
+
+**T390H-Integrate Float Card**: Add to project page
+- Import FloatSummaryCard
+- Add above or beside KPI cards
+- Pass float data props
+- Query float payments
+- Test responsive layout
+- Dependencies: T390G
+- Estimated Time: 8 minutes
+
 ## Integration with Project Page
 
 **T390-Update Project Page**: Add phase components
@@ -808,7 +891,7 @@ Complete task-oriented breakdown for implementing construction phase tracking, v
 - UI consistent with existing design
 
 ## Critical Path
-T335 → T336-T344 (Schema) → T345-T354 (Cards) → T355-T361 (Assignment) → T362-T369 (Grouping) → T370-T384 (Backend) → T390-T396 (Integration) → T401-T419 (Testing & Completion)
+T335 → T336-T344 (Schema) → T345-T354 (Cards) → T355-T361 (Assignment) → T362-T369 (Grouping) → T370-T384 (Backend) → T385-T389 (Queries) → T390A-T390H (New Components) → T390-T396 (Integration) → T401-T419 (Testing & Completion)
 
 ---
 

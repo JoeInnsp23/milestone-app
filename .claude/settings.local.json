@@ -37,7 +37,16 @@
       "Bash(PGPASSWORD:*)",
       "Bash(awk:*)",
       "Bash(xargs kill:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "WebFetch(domain:lucide.dev)",
+      "Bash(python3:*)",
+      "mcp__memory__search_nodes",
+      "Bash(gemini:*)",
+      "Bash(git log:*)",
+      "mcp__memory__create_entities",
+      "mcp__memory__create_relations",
+      "mcp__memory__delete_observations",
+      "mcp__memory__add_observations"
     ],
     "deny": [],
     "ask": []

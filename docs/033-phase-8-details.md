@@ -1,7 +1,7 @@
 # Phase 8: Construction Phases Feature Implementation
 
 ## Overview
-This phase implements comprehensive construction phase tracking and visualization throughout the Milestone P&L Dashboard. The feature enables categorization of invoices, bills, and estimates by construction phases (synced from Xero tracking categories), with phase-specific summaries, progress tracking, and grouping capabilities on project detail pages.
+This phase implements a comprehensive construction cost tracking system throughout the Milestone P&L Dashboard. The feature provides detailed phase-based cost tracking with 17 specific construction phases, matching industry-standard build stages used in construction project management. It includes phase-specific summaries replicating Excel tracker functionality, detailed cost tracking tables, float management visualization, progress tracking, and grouping capabilities on project detail pages.
 
 ## UI/UX Principles
 - **Phase Visibility**: Clear visual distinction between construction phases using unique colors and icons
@@ -23,74 +23,25 @@ This phase implements comprehensive construction phase tracking and visualizatio
 **File**: `src/db/seed.ts`
 
 ```typescript
-// Define standard construction phases
+// Define 17 specific construction phases matching Excel tracker
 const constructionPhases = [
-  {
-    id: 'phase-groundworks',
-    xero_phase_id: 'phase-groundworks',
-    name: 'Groundworks',
-    description: 'Site preparation, drainage, and foundations',
-    tracking_category_id: 'track-construction',
-    display_order: 1,
-    color: '#8B4513', // Brown
-    icon: 'Shovel',
-    typical_duration_days: 30
-  },
-  {
-    id: 'phase-superstructure',
-    xero_phase_id: 'phase-superstructure',
-    name: 'Superstructure',
-    description: 'Walls, roof structure, and external envelope',
-    tracking_category_id: 'track-construction',
-    display_order: 2,
-    color: '#708090', // Slate gray
-    icon: 'Building2',
-    typical_duration_days: 45
-  },
-  {
-    id: 'phase-first-fix',
-    xero_phase_id: 'phase-first-fix',
-    name: 'First Fix',
-    description: 'Plumbing, electrical wiring, insulation',
-    tracking_category_id: 'track-construction',
-    display_order: 3,
-    color: '#4682B4', // Steel blue
-    icon: 'Wrench',
-    typical_duration_days: 30
-  },
-  {
-    id: 'phase-second-fix',
-    xero_phase_id: 'phase-second-fix',
-    name: 'Second Fix',
-    description: 'Kitchens, bathrooms, switches, and fixtures',
-    tracking_category_id: 'track-construction',
-    display_order: 4,
-    color: '#32CD32', // Lime green
-    icon: 'Plug',
-    typical_duration_days: 30
-  },
-  {
-    id: 'phase-finals',
-    xero_phase_id: 'phase-finals',
-    name: 'Finals',
-    description: 'Decoration, painting, and final touches',
-    tracking_category_id: 'track-construction',
-    display_order: 5,
-    color: '#9370DB', // Medium purple
-    icon: 'Paintbrush',
-    typical_duration_days: 20
-  },
-  {
-    id: 'phase-unassigned',
-    xero_phase_id: 'phase-unassigned',
-    name: 'Unassigned',
-    description: 'Items not assigned to a specific phase',
-    tracking_category_id: 'track-construction',
-    display_order: 999,
-    color: '#6B7280', // Gray
-    icon: 'HelpCircle',
-    typical_duration_days: null
-  }
+  { id: 'BP001', name: 'Demolition Enabling works', display_order: 1, color: '#8B4513', icon: 'Hammer' },
+  { id: 'BP002', name: 'Groundworks', display_order: 2, color: '#8B5A2B', icon: 'Shovel' },
+  { id: 'BP003', name: 'Masonry', display_order: 3, color: '#A0522D', icon: 'Layers' },
+  { id: 'BP004', name: 'Roofing', display_order: 4, color: '#708090', icon: 'Home' },
+  { id: 'BP005', name: 'Electrical', display_order: 5, color: '#FFD700', icon: 'Zap' },
+  { id: 'BP006', name: 'Plumbing & Heating', display_order: 6, color: '#4682B4', icon: 'Droplets' },
+  { id: 'BP007', name: 'Joinery', display_order: 7, color: '#8B7355', icon: 'Hammer' },
+  { id: 'BP008', name: 'Windows and doors', display_order: 8, color: '#87CEEB', icon: 'DoorOpen' },
+  { id: 'BP009', name: 'Drylining & Plaster/Render', display_order: 9, color: '#F5F5DC', icon: 'PaintRoller' },
+  { id: 'BP010', name: 'Decoration', display_order: 10, color: '#9370DB', icon: 'Paintbrush' },
+  { id: 'BP011', name: 'Landscaping', display_order: 11, color: '#228B22', icon: 'Trees' },
+  { id: 'BP012', name: 'Finishes Schedule', display_order: 12, color: '#DAA520', icon: 'ListChecks' },
+  { id: 'BP013', name: 'Steelwork', display_order: 13, color: '#696969', icon: 'HardHat' },
+  { id: 'BP014', name: 'Flooring/Tiling', display_order: 14, color: '#D2691E', icon: 'Grid3x3' },
+  { id: 'BP015', name: 'Kitchen', display_order: 15, color: '#FF6347', icon: 'ChefHat' },
+  { id: 'BP016', name: 'Extra', display_order: 16, color: '#6B7280', icon: 'Plus' },
+  { id: 'BP017', name: 'Project Management Fee', display_order: 17, color: '#4B0082', icon: 'Briefcase' }
 ];
 ```
 
@@ -953,6 +904,66 @@ export async function getAllPhases() {
     .orderBy(buildPhases.display_order);
 }
 ```
+
+## Step 9: Float Summary Card Implementation
+
+### 9.1 Float Summary Card Component
+**File**: `src/components/projects/float-summary-card.tsx`
+
+This card displays float (customer advance payment) utilization for the project, showing how much float has been received vs. how much has been spent.
+
+Key features:
+- Total float received from customer
+- Total costs paid to date
+- Float balance (positive or negative)
+- Visual utilization percentage with color coding
+- Integrates with existing KPI card layout
+
+## Step 10: Phase Summary Tab Implementation
+
+### 10.1 Phase Summary Table Component
+**File**: `src/components/projects/phase-summary-table.tsx`
+
+This component replicates the Excel tracker's summary sheet format, displaying all construction phases with their financial metrics in a table format.
+
+Columns:
+- Build Stage (phase name)
+- Estimated Cost (from estimates)
+- Total Cost Paid to Date (from bills marked as paid)
+- Costs Due (from bills not yet paid)
+- Variance to Estimate (difference between estimated and actual)
+- Float Balance (displayed only on total row)
+
+Features:
+- All 17 construction phases displayed in order
+- Automatic calculation of totals
+- Color-coded variance (green for under budget, red for over)
+- Responsive table with horizontal scroll on mobile
+
+## Step 11: Cost Tracker Tab Implementation
+
+### 11.1 Cost Tracker Table Component
+**File**: `src/components/projects/cost-tracker-table.tsx`
+
+This component provides detailed line-item tracking grouped by construction phase, matching the Excel tracker's detailed view.
+
+Features:
+- Groups all invoices and bills by their assigned phase
+- Collapsible/expandable phase sections
+- Shows subtotals for each phase
+- Displays: Date, Invoice Reference, Description, Amount Paid, Direct By Customer, Refunds, Costs Due
+- Sortable by date or phase
+- Export capability to Excel format
+
+### 11.2 Enhanced Project Tabs
+**File**: `src/components/projects/project-tabs.tsx`
+
+Update the existing tabs component to include the new Summary and Cost Tracker tabs:
+- **Summary** - Phase summary table view
+- **Cost Tracker** - Detailed cost tracking view
+- **Invoices** - Existing invoices tab
+- **Bills** - Existing bills tab
+- **Estimates** - Existing estimates tab
 
 ## Testing & Validation
 

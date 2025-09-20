@@ -362,6 +362,74 @@ Comprehensive quality assurance checklist for validating Phase 8 construction ph
 - **Expected**: Correct profit/margins
 - **Methodology**: Mathematical validation
 
+## New Component Testing
+
+**QA394A-Test Float Summary Card**: Validate float display
+- Navigate to project detail page
+- Locate Float Summary card
+- Verify total float received displays
+- Check total costs paid shows
+- Verify float balance calculation
+- Check utilization percentage
+- Test color coding (green/yellow/red)
+- **Expected**: Accurate float metrics
+- **Methodology**: Financial validation
+
+**QA394B-Test Summary Tab**: Validate phase summary table
+- Click on Summary tab
+- Verify all 17 phases display
+- Check estimated cost column
+- Verify paid to date column
+- Check costs due column
+- Validate variance calculations
+- Verify totals row at bottom
+- Check float balance in total row
+- **Expected**: Complete summary table
+- **Methodology**: Table validation
+
+**QA394C-Test Cost Tracker Tab**: Validate detailed view
+- Click on Cost Tracker tab
+- Verify items grouped by phase
+- Test expand/collapse functionality
+- Check date formatting
+- Verify invoice references display
+- Check subtotals per phase
+- Test scrolling with many items
+- **Expected**: Grouped cost details
+- **Methodology**: Detail view validation
+
+**QA394D-Test Phase Order**: Validate 17 phases order
+- Check phases display in exact order:
+  1. Demolition Enabling works
+  2. Groundworks
+  3. Masonry
+  4. Roofing
+  5. Electrical
+  6. Plumbing & Heating
+  7. Joinery
+  8. Windows and doors
+  9. Drylining & Plaster/Render
+  10. Decoration
+  11. Landscaping
+  12. Finishes Schedule
+  13. Steelwork
+  14. Flooring/Tiling
+  15. Kitchen
+  16. Extra
+  17. Project Management Fee
+- **Expected**: Exact order maintained
+- **Methodology**: Order verification
+
+**QA394E-Test Tab Navigation**: Validate new tabs
+- Verify Summary tab appears first
+- Check Cost Tracker tab second
+- Verify existing tabs still work
+- Test tab switching
+- Check content updates correctly
+- Verify tab counts accurate
+- **Expected**: All tabs functional
+- **Methodology**: Navigation testing
+
 ## Performance Testing
 
 **QA394-Test Load Performance**: Validate with many items
@@ -508,11 +576,12 @@ Comprehensive quality assurance checklist for validating Phase 8 construction ph
 ---
 
 ## Summary
-- **Total QA Items**: 52 (QA356-QA407)
+- **Total QA Items**: 57 (QA356-QA407 including sub-items)
 - **Phase Cards Tests**: 10
 - **Progress Tests**: 5
 - **Assignment Tests**: 5
 - **Grouping Tests**: 8
+- **New Component Tests**: 5 (QA394A-QA394E)
 - **Integration Tests**: 10
 - **Performance Tests**: 6
 - **Cross-browser Tests**: 8
@@ -531,7 +600,7 @@ Comprehensive quality assurance checklist for validating Phase 8 construction ph
 - **Cross-browser**: 1 hour
 
 ## Sign-off Criteria
-- All 52 QA items pass
+- All 57 QA items pass
 - No critical bugs remain
 - Performance targets met
 - Audit trail complete
