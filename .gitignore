@@ -49,3 +49,4 @@ postgres_backups/
 
 # Drizzle files
 drizzle/meta/
+postgres_data/

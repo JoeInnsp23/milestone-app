@@ -1,12 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { getProjectById } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
-import { ProjectKPICards } from '@/components/projects/project-kpi-cards';
-import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
-import { ProjectTabs } from '@/components/projects/project-tabs';
-import { ExportButton } from '@/components/export/export-button';
+import { ProjectDetailClient } from '@/components/projects/project-detail-client';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -42,10 +38,25 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       return sum + (total || 0);
     }, 0);
 
-  const grossProfit = totalRevenue - (totalCosts * 0.6); // 60% as cost of sales
-  const operatingExpenses = totalCosts * 0.4; // 40% as operating expenses
-  const netProfit = totalRevenue - totalCosts;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+  // Calculate estimate totals
+  const estimatedRevenue = (project.estimates || [])
+    .filter(est => est.estimate_type === 'revenue')
+    .reduce((sum, est) => {
+      const amount = typeof est.amount === 'string' ? parseFloat(est.amount) : Number(est.amount);
+      return sum + (amount || 0);
+    }, 0);
+
+  const estimatedCosts = (project.estimates || [])
+    .filter(est => est.estimate_type === 'cost' || est.estimate_type === 'materials')
+    .reduce((sum, est) => {
+      const amount = typeof est.amount === 'string' ? parseFloat(est.amount) : Number(est.amount);
+      return sum + (amount || 0);
+    }, 0);
+
+  // Calculate values for financial breakdown (always includes estimates for now)
+  const totalRevenueWithEstimates = totalRevenue + estimatedRevenue;
+  const totalCostsWithEstimates = totalCosts + estimatedCosts;
+  const operatingExpenses = totalCostsWithEstimates * 0.4; // 40% as operating expenses
 
   return (
     <div className="min-h-screen dashboard-bg-gradient">
@@ -53,48 +64,19 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       <Navigation view="projects" />
 
       <div className="container">
-        {/* Back Button - Outside header card */}
-        <Link href="/projects" className="inline-block mb-4">
-          <button className="text-sm text-white/80 hover:text-white transition-colors">
-            ← Back to All Projects
-          </button>
-        </Link>
-
-        {/* Header Card */}
-        <div className="header-card">
-          <div className="flex justify-between items-center">
-            <div className="flex-1">
-              <h1>{project.name}</h1>
-              <div className="subtitle">
-                {project.client_name || 'No Client'} -
-                {project.start_date && project.end_date ?
-                  ` ${new Date(project.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })} to ${new Date(project.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}` :
-                  ' Date Range Not Set'}
-              </div>
-            </div>
-            <ExportButton projectId={resolvedParams.id} />
-          </div>
-        </div>
-
-        {/* KPI Cards */}
-        <ProjectKPICards
-          totalIncome={totalRevenue}
-          grossProfit={grossProfit}
-          netProfit={netProfit}
-          profitMargin={profitMargin}
-        />
-
-        {/* Financial Breakdown */}
-        <ProjectFinancialBreakdown
-          revenue={totalRevenue}
-          costOfSales={totalCosts * 0.6}
+        <ProjectDetailClient
+          projectId={resolvedParams.id}
+          projectName={project.name}
+          clientName={project.client_name || undefined}
+          startDate={project.start_date ? new Date(project.start_date) : undefined}
+          endDate={project.end_date ? new Date(project.end_date) : undefined}
+          actualRevenue={totalRevenue}
+          actualCosts={totalCosts}
+          estimatedRevenue={estimatedRevenue}
+          estimatedCosts={estimatedCosts}
+          totalRevenueWithEstimates={totalRevenueWithEstimates}
+          totalCostsWithEstimates={totalCostsWithEstimates}
           operatingExpenses={operatingExpenses}
-          invoices={project.invoices as Invoice[]}
-        />
-
-        {/* Tabs for Invoices, Bills, and Estimates */}
-        <ProjectTabs
-          projectId={project.id}
           invoices={project.invoices as Invoice[]}
           bills={project.bills as Bill[]}
           estimates={project.estimates || []}

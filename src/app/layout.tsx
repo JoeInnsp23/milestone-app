@@ -7,7 +7,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Milestone P&L Dashboard",
+  title: "Project Hub",
   description: "Project Profit & Loss Dashboard for Construction & Professional Services",
 };
 

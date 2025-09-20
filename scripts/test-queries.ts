@@ -109,7 +109,7 @@ async function testQueries() {
         const newEstimate = await createEstimate({
           project_id: projects[0].id,
           build_phase_id: phases[0]?.id,
-          estimate_type: 'hours',  // Use 'hours' type to avoid conflict with existing revenue estimates
+          estimate_type: 'materials',
           amount: '500.00',
           currency: 'GBP',
           notes: 'Test estimate from query test',

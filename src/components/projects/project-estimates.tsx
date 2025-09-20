@@ -1,65 +1,129 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authenticated)/projects/[id]/actions/estimates';
 import { ProjectEstimate } from '@/types';
+import { Button } from '@/components/ui/button';
 
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
 }
 
-export function ProjectEstimates({ projectId, estimates: initialEstimates }: ProjectEstimatesProps) {
-  const [estimates, setEstimates] = useState(initialEstimates);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
-  const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
-  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
-  const [isPending, startTransition] = useTransition();
+export interface ProjectEstimatesHandle {
+  openCreateModal: () => void;
+}
 
-  const formatCurrency = (value: number | string) => {
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    if (isNaN(numValue)) return '£0';
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(numValue);
-  };
+export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstimatesProps>(
+  function ProjectEstimates(
+    { projectId, estimates: initialEstimates }: ProjectEstimatesProps,
+    ref
+  ) {
+    const [estimates, setEstimates] = useState(initialEstimates);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [editingEstimate, setEditingEstimate] = useState<ProjectEstimate | null>(null);
+    const [deletingEstimate, setDeletingEstimate] = useState<ProjectEstimate | null>(null);
+    const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+    const [isPending, startTransition] = useTransition();
+    const modalContainerRef = useRef<HTMLDivElement | null>(null);
+    const previousBodyOverflowRef = useRef<string | null>(null);
 
-  const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString('en-GB');
-  };
+    const openModal = (nextEditing: ProjectEstimate | null) => {
+      setEditingEstimate(nextEditing);
+      setIsCreateOpen(true);
+    };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'revenue':
-        return '#10b981';
-      case 'cost':
-        return '#ef4444';
-      case 'hours':
-        return '#3b82f6';
-      case 'materials':
-        return '#8b5cf6';
-      default:
-        return '#6b7280';
-    }
-  };
+    useEffect(() => {
+      if (typeof document === 'undefined') return;
+
+      const container = document.createElement('div');
+      container.className = 'project-estimates-modal-root';
+      modalContainerRef.current = container;
+      document.body.appendChild(container);
+
+      return () => {
+        document.body.removeChild(container);
+        modalContainerRef.current = null;
+      };
+    }, []);
+
+    useEffect(() => {
+      if (typeof document === 'undefined') return;
+
+      if (isCreateOpen) {
+        if (previousBodyOverflowRef.current === null) {
+          previousBodyOverflowRef.current = document.body.style.overflow;
+        }
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+          document.body.style.overflow = previousBodyOverflowRef.current ?? '';
+          previousBodyOverflowRef.current = null;
+        };
+      }
+
+      if (previousBodyOverflowRef.current !== null) {
+        document.body.style.overflow = previousBodyOverflowRef.current;
+        previousBodyOverflowRef.current = null;
+      }
+
+      return;
+    }, [isCreateOpen]);
+
+    useImperativeHandle(ref, () => ({
+      openCreateModal: () => {
+        openModal(null);
+      },
+    }));
+
+    const formatCurrency = (value: number | string) => {
+      const numValue = typeof value === 'string' ? parseFloat(value) : value;
+      if (isNaN(numValue)) return '£0';
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: 'GBP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(numValue);
+    };
+
+    const formatDate = (date: Date | string) => {
+      return new Date(date).toLocaleDateString('en-GB');
+    };
+
+    const getTypeColor = (type: string) => {
+      switch (type) {
+        case 'revenue':
+          return '#10b981';
+        case 'cost':
+          return '#ef4444';
+        case 'materials':
+          return '#8b5cf6';
+        default:
+          return '#6b7280';
+      }
+    };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.append('project_id', projectId);
 
+    // Clean the amount value (remove any non-numeric characters except .)
+    const rawAmount = formData.get('amount') as string;
+    const cleanedAmount = rawAmount.replace(/[^0-9.]/g, '');
+    formData.set('amount', cleanedAmount);
+
     // Create optimistic estimate
     const tempId = `temp-${Date.now()}`;
+    const editingTarget = editingEstimate;
     const optimisticEstimate: ProjectEstimate = {
-      id: editingEstimate?.id || tempId,
+      id: editingTarget?.id || tempId,
       project_id: projectId,
       description: formData.get('description') as string,
-      estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'hours' | 'materials',
-      amount: formData.get('amount') as string,
+      estimate_type: formData.get('estimate_type') as 'revenue' | 'cost' | 'materials',
+      amount: cleanedAmount,
       estimate_date: formData.get('estimate_date') as string,
       confidence_level: Number(formData.get('confidence_level')),
       notes: formData.get('notes') as string,
@@ -72,14 +136,16 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
     // Optimistic update
     const previousEstimates = [...estimates];
-    const idToTrack = editingEstimate?.id || tempId;
+    const idToTrack = editingTarget?.id || tempId;
 
-    if (editingEstimate) {
-      setEstimates(estimates.map(e =>
-        e.id === editingEstimate.id ? { ...e, ...optimisticEstimate, id: editingEstimate.id } : e
-      ));
+    if (editingTarget) {
+      setEstimates((prev) =>
+        prev.map((e) =>
+          e.id === editingTarget.id ? { ...e, ...optimisticEstimate, id: editingTarget.id } : e
+        )
+      );
     } else {
-      setEstimates([...estimates, optimisticEstimate]);
+      setEstimates((prev) => [...prev, optimisticEstimate]);
     }
     setIsCreateOpen(false);
     setEditingEstimate(null);
@@ -89,36 +155,44 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
     startTransition(async () => {
       let result;
-      if (editingEstimate) {
-        result = await updateEstimate(editingEstimate.id, formData);
+      if (editingTarget) {
+        result = await updateEstimate(editingTarget.id, formData);
       } else {
         result = await createEstimate(formData);
       }
 
       if (result.success && result.estimate) {
-        // Replace optimistic with real data
-        if (editingEstimate) {
-          setEstimates(estimates.map(e =>
-            e.id === editingEstimate.id ? result.estimate! : e
-          ));
-        } else {
-          setEstimates(prevEstimates =>
-            prevEstimates.map(e => e.id === tempId ? result.estimate! : e)
+        const resolvedEstimate = result.estimate;
+
+        if (editingTarget) {
+          setEstimates((prev) =>
+            prev.map((e) => (e.id === editingTarget.id ? resolvedEstimate : e))
           );
+        } else {
+          setEstimates((prev) => {
+            let replaced = false;
+            const next = prev.map((e) => {
+              if (e.id === tempId) {
+                replaced = true;
+                return resolvedEstimate;
+              }
+              return e;
+            });
+            return replaced ? next : [...next, resolvedEstimate];
+          });
         }
       } else {
         // Rollback on error
         setEstimates(previousEstimates);
         alert(result.error || 'Failed to save estimate');
         // Reopen form with data
-        if (!editingEstimate) {
-          setIsCreateOpen(true);
+        if (!editingTarget) {
+          openModal(null);
         } else {
-          setEditingEstimate(editingEstimate);
-          setIsCreateOpen(true);
+          openModal(editingTarget);
         }
       }
-      // Clear pending state
+
       setPendingIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(idToTrack);
@@ -157,30 +231,26 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
   };
 
   // Group and calculate totals
-  const totals = {
-    revenue: estimates.filter(e => e.estimate_type === 'revenue').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    cost: estimates.filter(e => e.estimate_type === 'cost').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    hours: estimates.filter(e => e.estimate_type === 'hours').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-    materials: estimates.filter(e => e.estimate_type === 'materials').reduce((sum, e) => {
-      const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
-      return sum + (amount || 0);
-    }, 0),
-  };
+    const totals = {
+      revenue: estimates.filter(e => e.estimate_type === 'revenue').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+      cost: estimates.filter(e => e.estimate_type === 'cost').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+      materials: estimates.filter(e => e.estimate_type === 'materials').reduce((sum, e) => {
+        const amount = typeof e.amount === 'string' ? parseFloat(e.amount) : e.amount;
+        return sum + (amount || 0);
+      }, 0),
+    };
 
-  const estimatedProfit = totals.revenue - totals.cost - totals.materials;
-  const estimatedMargin = totals.revenue > 0 ? (estimatedProfit / totals.revenue) * 100 : 0;
+    const estimatedProfit = totals.revenue - totals.cost - totals.materials;
+    const estimatedMargin = totals.revenue > 0 ? (estimatedProfit / totals.revenue) * 100 : 0;
 
-  return (
-    <div className="estimates-section">
+    return (
+      <div className="estimates-section">
       {/* Summary Cards */}
       <div className="summary-cards">
         <div className="summary-card">
@@ -212,15 +282,13 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       {/* Add Estimate Button */}
       <div className="estimates-header">
         <h3>Project Estimates</h3>
-        <button
-          className="add-button"
-          onClick={() => {
-            setEditingEstimate(null);
-            setIsCreateOpen(true);
-          }}
+        <Button
+          type="button"
+          variant="header"
+          onClick={() => openModal(null)}
         >
           + Add Estimate
-        </button>
+        </Button>
       </div>
 
       {/* Estimates List */}
@@ -248,10 +316,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                 <div className="estimate-actions">
                   <button
                     className="action-button edit"
-                    onClick={() => {
-                      setEditingEstimate(estimate);
-                      setIsCreateOpen(true);
-                    }}
+                    onClick={() => openModal(estimate)}
                   >
                     Edit
                   </button>
@@ -266,9 +331,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
               <div className="estimate-content">
                 <div className="estimate-description">{estimate.description}</div>
                 <div className="estimate-amount">
-                  {estimate.estimate_type === 'hours'
-                    ? `${estimate.amount} hours`
-                    : formatCurrency(estimate.amount)}
+                  {formatCurrency(estimate.amount)}
                 </div>
                 {estimate.notes && (
                   <div className="estimate-notes">{estimate.notes}</div>
@@ -287,11 +350,18 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
       )}
 
       {/* Create/Edit Modal */}
-      {isCreateOpen && (
-        <div className="modal-overlay" onClick={() => setIsCreateOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
-            <form onSubmit={handleSubmit}>
+      {isCreateOpen && modalContainerRef.current
+        ? createPortal(
+            <div
+              className="modal-overlay"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setEditingEstimate(null);
+              }}
+            >
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h2>{editingEstimate ? 'Edit Estimate' : 'Create Estimate'}</h2>
+                <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="description">Description *</label>
                 <input
@@ -315,22 +385,25 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
                   >
                     <option value="revenue">Revenue</option>
                     <option value="cost">Cost</option>
-                    <option value="hours">Hours</option>
                     <option value="materials">Materials</option>
                   </select>
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="amount">Amount *</label>
-                  <input
-                    type="number"
-                    id="amount"
-                    name="amount"
-                    step="0.01"
-                    min="0.01"
-                    defaultValue={editingEstimate?.amount}
-                    required
-                  />
+                  <div className="amount-input-wrapper">
+                    <span className="currency-symbol">£</span>
+                    <input
+                      type="text"
+                      id="amount"
+                      name="amount"
+                      inputMode="decimal"
+                      pattern="^\d+(\.\d{0,2})?$"
+                      placeholder="0.00"
+                      defaultValue={editingEstimate?.amount}
+                      required
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -373,24 +446,32 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
               </div>
 
               <div className="form-actions">
-                <button
+                <Button
                   type="button"
-                  className="cancel-button"
+                  variant="outline"
                   onClick={() => {
                     setIsCreateOpen(false);
                     setEditingEstimate(null);
                   }}
+                  disabled={isPending}
+                  className="cancel-button"
                 >
                   Cancel
-                </button>
-                <button type="submit" className="submit-button" disabled={isPending}>
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isPending}
+                >
                   {isPending ? 'Saving...' : editingEstimate ? 'Update' : 'Create'}
-                </button>
+                </Button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+                </form>
+              </div>
+            </div>,
+            modalContainerRef.current
+          )
+        : null}
 
       {/* Delete Confirmation Modal */}
       {deletingEstimate && (
@@ -400,19 +481,21 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
             <p>Are you sure you want to delete this estimate?</p>
             <p className="delete-warning">This action cannot be undone.</p>
             <div className="form-actions">
-              <button
-                className="cancel-button"
+              <Button
+                variant="outline"
                 onClick={() => setDeletingEstimate(null)}
+                disabled={isPending}
+                className="cancel-button"
               >
                 Cancel
-              </button>
-              <button
-                className="delete-button"
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={handleDelete}
                 disabled={isPending}
               >
                 {isPending ? 'Deleting...' : 'Delete'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -460,20 +543,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           font-weight: 600;
         }
 
-        .add-button {
-          padding: 8px 16px;
-          background: var(--primary);
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .add-button:hover {
-          opacity: 0.9;
-        }
-
         .empty-state {
           text-align: center;
           padding: 40px;
@@ -516,21 +585,34 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
 
         .action-button {
           padding: 4px 12px;
-          border: 1px solid var(--border-color);
-          background: white;
           border-radius: 4px;
           cursor: pointer;
           font-size: 12px;
+          transition: all 0.2s;
+        }
+
+        .action-button.edit {
+          background: hsl(var(--primary) / 0.1);
+          color: hsl(var(--primary));
+          border: 1px solid hsl(var(--primary) / 0.3);
         }
 
         .action-button.edit:hover {
-          background: var(--primary);
-          color: white;
+          background: hsl(var(--primary));
+          color: hsl(var(--primary-foreground));
+          border-color: hsl(var(--primary));
+        }
+
+        .action-button.delete {
+          background: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .action-button.delete:hover {
-          background: var(--negative);
+          background: #ef4444;
           color: white;
+          border-color: #ef4444;
         }
 
         .estimate-description {
@@ -569,17 +651,20 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         }
 
         .modal-content {
-          background: white;
+          background: hsl(var(--card));
+          color: hsl(var(--card-foreground));
           border-radius: 8px;
           padding: 24px;
           width: 90%;
           max-width: 500px;
           max-height: 90vh;
           overflow-y: auto;
+          border: 1px solid hsl(var(--border));
         }
 
         .modal-content h2 {
           margin-bottom: 20px;
+          color: hsl(var(--foreground));
         }
 
         .form-group {
@@ -591,6 +676,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           margin-bottom: 4px;
           font-size: 14px;
           font-weight: 500;
+          color: hsl(var(--foreground));
         }
 
         .form-group input,
@@ -598,9 +684,76 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
         .form-group textarea {
           width: 100%;
           padding: 8px;
-          border: 1px solid var(--border-color);
+          border: 1px solid hsl(var(--border));
           border-radius: 4px;
           font-size: 14px;
+          background: hsl(var(--card));
+          color: hsl(var(--foreground));
+        }
+
+        :global(html.dark) .modal-content .form-group input,
+        :global(html.dark) .modal-content .form-group select,
+        :global(html.dark) .modal-content .form-group textarea {
+          background: hsl(220 32% 12%);
+          border-color: hsl(220 20% 24%);
+        }
+
+        /* Amount input with currency symbol */
+        .amount-input-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .currency-symbol {
+          position: absolute;
+          left: 10px;
+          color: hsl(var(--muted-foreground));
+          font-weight: 500;
+          pointer-events: none;
+        }
+
+        .amount-input-wrapper input {
+          padding-left: 25px;
+        }
+
+        /* Remove number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+
+        /* Fix date picker calendar icon in dark mode */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+          opacity: 0.7;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+          opacity: 1;
+        }
+
+        /* Light mode - revert the invert */
+        @media (prefers-color-scheme: light) {
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: none;
+          }
+        }
+
+        /* Handle light theme class */
+        :global(.light) input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: none;
+        }
+
+        /* Handle dark theme class */
+        :global(.dark) input[type="date"]::-webkit-calendar-picker-indicator {
+          filter: invert(1);
         }
 
         .form-row {
@@ -616,29 +769,6 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           margin-top: 24px;
         }
 
-        .cancel-button {
-          padding: 8px 16px;
-          border: 1px solid var(--border-color);
-          background: white;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .submit-button {
-          padding: 8px 16px;
-          background: var(--primary);
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .submit-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
         .delete-modal {
           max-width: 400px;
         }
@@ -648,26 +778,11 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates }: Pro
           font-size: 14px;
           margin-top: 8px;
         }
-
-        .delete-button {
-          padding: 8px 16px;
-          background: var(--negative);
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-weight: 500;
-        }
-
-        .delete-button:hover {
-          opacity: 0.9;
-        }
-
-        .delete-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
       `}</style>
-    </div>
-  );
-}
+
+      </div>
+    );
+  }
+);
+
+ProjectEstimates.displayName = 'ProjectEstimates';

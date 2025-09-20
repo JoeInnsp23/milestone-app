@@ -19,28 +19,45 @@ import {
 async function _getDashboardStats() {
   try {
     const stats = await db.execute(sql`
+    WITH revenue_data AS (
+      SELECT
+        COALESCE(SUM(CASE WHEN type = 'ACCREC' THEN total ELSE 0 END), 0) as total_revenue,
+        COUNT(CASE WHEN status = 'AUTHORISED' AND amount_due > 0 THEN 1 END) as pending_invoices,
+        COUNT(CASE WHEN status = 'AUTHORISED' AND due_date < CURRENT_DATE THEN 1 END) as overdue_invoices,
+        MIN(invoice_date) as min_invoice_date,
+        MAX(invoice_date) as max_invoice_date
+      FROM milestone.invoices
+      WHERE status IN ('AUTHORISED', 'PAID')
+    ),
+    cost_data AS (
+      SELECT
+        COALESCE(SUM(total), 0) as total_costs,
+        MIN(bill_date) as min_bill_date,
+        MAX(bill_date) as max_bill_date
+      FROM milestone.bills
+      WHERE status IN ('AUTHORISED', 'PAID')
+    ),
+    project_data AS (
+      SELECT COUNT(*) as active_projects
+      FROM milestone.projects
+      WHERE is_active = true
+    )
     SELECT
-      COALESCE(SUM(CASE WHEN i.type = 'ACCREC' THEN i.total ELSE 0 END), 0) as total_revenue,
-      COALESCE(SUM(b.total), 0) as total_costs,
-      COALESCE(SUM(CASE WHEN i.type = 'ACCREC' THEN i.total ELSE 0 END), 0) - COALESCE(SUM(b.total), 0) as total_profit,
+      r.total_revenue,
+      c.total_costs,
+      r.total_revenue - c.total_costs as total_profit,
       CASE
-        WHEN COALESCE(SUM(CASE WHEN i.type = 'ACCREC' THEN i.total ELSE 0 END), 0) > 0
-        THEN ((COALESCE(SUM(CASE WHEN i.type = 'ACCREC' THEN i.total ELSE 0 END), 0) - COALESCE(SUM(b.total), 0)) /
-              COALESCE(SUM(CASE WHEN i.type = 'ACCREC' THEN i.total ELSE 0 END), 1) * 100)
+        WHEN r.total_revenue > 0
+        THEN ((r.total_revenue - c.total_costs) / r.total_revenue * 100)
         ELSE 0
       END as profit_margin,
-      COUNT(DISTINCT p.id) as active_projects,
-      COUNT(CASE WHEN i.status = 'AUTHORISED' AND i.amount_due > 0 THEN 1 END) as pending_invoices,
-      COUNT(CASE WHEN i.status = 'AUTHORISED' AND i.due_date < CURRENT_DATE THEN 1 END) as overdue_invoices,
-      MIN(COALESCE(i.invoice_date, b.bill_date)) as date_from,
-      MAX(COALESCE(i.invoice_date, b.bill_date)) as date_to,
-      'Build By Milestone Ltd' as company_name
-    FROM milestone.projects p
-    LEFT JOIN milestone.invoices i ON p.id = i.project_id
-    LEFT JOIN milestone.bills b ON p.id = b.project_id
-    WHERE p.is_active = true
-      AND (i.status IN ('AUTHORISED', 'PAID') OR i.status IS NULL)
-      AND (b.status IN ('AUTHORISED', 'PAID') OR b.status IS NULL)
+      p.active_projects,
+      r.pending_invoices,
+      r.overdue_invoices,
+      LEAST(r.min_invoice_date, c.min_bill_date) as date_from,
+      GREATEST(r.max_invoice_date, c.max_bill_date) as date_to,
+      'Company Ltd' as company_name
+    FROM revenue_data r, cost_data c, project_data p
   `);
 
   const lastSync = await db
@@ -60,7 +77,7 @@ async function _getDashboardStats() {
     overdue_invoices: '0',
     date_from: null,
     date_to: null,
-    company_name: 'Build By Milestone Ltd'
+    company_name: 'Company Ltd'
   };
 
   // Convert decimal strings to numbers
@@ -82,7 +99,11 @@ async function _getDashboardStats() {
     last_sync_time: lastSync[0]?.completed_at || null,
   };
   } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
+    console.error('Error fetching dashboard stats:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      error: error,
+      stack: error instanceof Error ? error.stack : undefined
+    });
     // Return fallback data
     return {
       total_revenue: 0,
@@ -100,11 +121,11 @@ async function _getDashboardStats() {
   }
 }
 
-// Cached version with 60-second revalidation
+// Cached version with 10-second revalidation for better data freshness
 export const getDashboardStats = unstable_cache(
   _getDashboardStats,
   ['dashboard-stats'],
-  { revalidate: 60 }
+  { revalidate: 10 }
 );
 
 // Get project summary from materialized view
@@ -628,5 +649,81 @@ export async function getTopProjects(limit: number = 10) {
   } catch (error) {
     console.error('Error fetching top projects:', error);
     return [];
+  }
+}
+
+// Data Validation Queries
+export async function validateDashboardData() {
+  try {
+    // Get actual project count from database
+    const actualProjectCount = await db
+      .select({ count: sql<number>`COUNT(DISTINCT id)` })
+      .from(projects)
+      .where(eq(projects.is_active, true));
+
+    // Get displayed stats
+    const displayedStats = await getDashboardStats();
+
+    // Compare counts
+    const actualCount = Number(actualProjectCount[0]?.count || 0);
+    const displayedCount = Number(displayedStats.active_projects || 0);
+    const isValid = actualCount === displayedCount;
+
+    if (!isValid) {
+      console.error(`DATA MISMATCH: DB has ${actualCount} active projects, displaying ${displayedCount}`);
+    }
+
+    return {
+      actualProjects: actualCount,
+      displayedProjects: displayedCount,
+      isValid
+    };
+  } catch (error) {
+    console.error('Error validating dashboard data:', error);
+    return {
+      actualProjects: 0,
+      displayedProjects: 0,
+      isValid: false
+    };
+  }
+}
+
+export async function validateFinancialTotals(projectId?: string) {
+  try {
+    if (projectId) {
+      // Validate single project financials
+      const projectData = await db.execute(sql`
+        SELECT
+          p.id,
+          COALESCE(SUM(i.total), 0) as actual_revenue,
+          COALESCE(SUM(b.total), 0) as actual_costs,
+          COALESCE(SUM(i.total), 0) - COALESCE(SUM(b.total), 0) as actual_profit
+        FROM milestone.projects p
+        LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.status IN ('AUTHORISED', 'PAID')
+        LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.status IN ('AUTHORISED', 'PAID')
+        WHERE p.id = ${projectId}
+        GROUP BY p.id
+      `);
+
+      return projectData[0] || null;
+    } else {
+      // Validate company-wide financials
+      const totals = await db.execute(sql`
+        SELECT
+          COALESCE(SUM(i.total), 0) as total_revenue,
+          COALESCE(SUM(b.total), 0) as total_costs,
+          COALESCE(SUM(i.total), 0) - COALESCE(SUM(b.total), 0) as total_profit,
+          COUNT(DISTINCT p.id) as project_count
+        FROM milestone.projects p
+        LEFT JOIN milestone.invoices i ON p.id = i.project_id AND i.status IN ('AUTHORISED', 'PAID')
+        LEFT JOIN milestone.bills b ON p.id = b.project_id AND b.status IN ('AUTHORISED', 'PAID')
+        WHERE p.is_active = true
+      `);
+
+      return totals[0] || null;
+    }
+  } catch (error) {
+    console.error('Error validating financial totals:', error);
+    return null;
   }
 }

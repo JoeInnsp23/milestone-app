@@ -10,7 +10,8 @@ import { ExportResult } from '@/types/export';
 
 export async function exportPDF(
   template: 'summary' | 'detailed' = 'summary',
-  projectId?: string
+  projectId?: string,
+  context: 'dashboard' | 'projects' | 'project-detail' = 'dashboard'
 ): Promise<ExportResult> {
   const { userId } = await auth();
 
@@ -37,10 +38,17 @@ export async function exportPDF(
       let buffer: Buffer;
       let filename: string;
 
-      if (template === 'summary' && projectId) {
+      // Context-aware PDF generation
+      if (context === 'project-detail' && projectId) {
+        // Single project detail export
         buffer = await generateSummaryPDF(userId, projectId);
-        filename = generateFilename('project-summary', 'pdf');
+        filename = generateFilename('project-detail', 'pdf');
+      } else if (context === 'projects') {
+        // Projects list export
+        buffer = await generateDetailedPDF(userId, true);
+        filename = generateFilename('projects-list', 'pdf');
       } else {
+        // Dashboard export (company-wide summary)
         buffer = await generateDetailedPDF(userId, template === 'detailed');
         filename = generateFilename('dashboard-report', 'pdf');
       }
@@ -115,7 +123,8 @@ export async function exportPDF(
 
 export async function exportExcel(
   template: 'summary' | 'detailed' = 'summary',
-  projectId?: string
+  projectId?: string,
+  context: 'dashboard' | 'projects' | 'project-detail' = 'dashboard'
 ): Promise<ExportResult> {
   const { userId } = await auth();
 
@@ -141,10 +150,20 @@ export async function exportExcel(
     const generatePromise = async () => {
       const builder = new ExcelBuilder();
 
-      if (template === 'summary') {
+      // Context-aware Excel generation
+      if (context === 'project-detail' && projectId) {
+        // Single project detail export
         await builder.addSummarySheet(userId, projectId);
-      } else {
+      } else if (context === 'projects') {
+        // Projects list export - all projects summary
         await builder.addDetailedSheets(userId);
+      } else {
+        // Dashboard export - company-wide overview
+        if (template === 'summary') {
+          await builder.addSummarySheet(userId);
+        } else {
+          await builder.addDetailedSheets(userId);
+        }
       }
 
       const buffer = await builder.getBuffer();
@@ -154,10 +173,14 @@ export async function exportExcel(
         throw new Error('File too large: The generated Excel file exceeds the maximum size limit of 10MB');
       }
 
-      const filename = generateFilename(
-        projectId ? 'project-export' : 'dashboard-export',
-        'xlsx'
-      );
+      let filenamePrefix = 'dashboard-export';
+      if (context === 'project-detail') {
+        filenamePrefix = 'project-detail';
+      } else if (context === 'projects') {
+        filenamePrefix = 'projects-list';
+      }
+
+      const filename = generateFilename(filenamePrefix, 'xlsx');
 
       return { buffer, filename };
     };

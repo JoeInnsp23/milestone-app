@@ -4,9 +4,10 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
-import { ProjectsTable } from '@/components/dashboard/projects-table';
-import { ExportButton } from '@/components/export/export-button';
+import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
+import { runDashboardValidation } from '@/lib/server-validation';
+import { redirect } from 'next/navigation';
 
 interface DashboardPageProps {
   searchParams: Promise<{ view?: string }>;
@@ -19,7 +20,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     return null;
   }
 
-  const view = params?.view || 'overview';
+  if (params?.view === 'all') {
+    redirect('/projects');
+  }
+
+  const view = 'overview';
 
   // Fetch data using Server Component
   const [statsRaw, projectSummaries, monthlyRevenue, topProjects] = await Promise.all([
@@ -28,6 +33,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     getMonthlyRevenue('6m'),
     getTopProjects(10),
   ]);
+
+  // Run server-side validation in development
+  await runDashboardValidation(statsRaw);
 
   // Type the stats object properly
   const stats = statsRaw as unknown as {
@@ -107,37 +115,38 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     },
   ];
 
+  const profitableProjectsCount = uniqueProjects.filter(p => p.profit > 0).length;
+  const totalUniqueProjects = uniqueProjects.length;
+
   const formattedStats = {
     totalRevenue: stats.total_revenue || 0,
     totalCosts: stats.total_costs || 0,
     totalProfit: stats.total_profit || 0,
     profitMargin: stats.profit_margin || 0,
-    activeProjects: stats.active_projects || 0,
-    profitableProjects: uniqueProjects.filter(p => p.profit > 0).length,
+    activeProjects: totalUniqueProjects, // Use actual unique project count
+    profitableProjects: profitableProjectsCount,
   };
 
   return (
     <div className="min-h-screen dashboard-bg-gradient">
-      {/* Navigation */}
-      <Navigation view={view} />
+        {/* Navigation */}
+        <Navigation view={view} />
 
-      {/* Main content */}
-      <div className="container">
-        {view === 'overview' ? (
-          <>
+        {/* Main content */}
+        <div className="container">
+        <>
             {/* Header Card */}
             <div className="header-card">
               <div className="flex justify-between items-center">
                 <div className="flex-1">
-                  <h1>Projects P&L Dashboard</h1>
+                  <h1>{stats.company_name || 'Company Ltd'}</h1>
                   <div className="subtitle">
-                    {stats.company_name || 'Build By Milestone Ltd'} -
                     {stats.date_from && stats.date_to ?
                       ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
                       ' All Time'}
                   </div>
                 </div>
-                <ExportButton />
+                <ExportDialog />
               </div>
             </div>
 
@@ -159,7 +168,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </div>
               <div className="stat-card">
                 <div className="stat-label">PROFITABLE PROJECTS</div>
-                <div className="stat-value">{formattedStats.profitableProjects} / {formattedStats.activeProjects}</div>
+                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects} Projects Profitable</div>
               </div>
             </div>
 
@@ -189,14 +198,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </div>
               </div>
             </div>
-
-            {/* Projects Table */}
-            <ProjectsTable projects={uniqueProjects.slice(0, 10)} />
-          </>
-        ) : (
-          /* All Projects View */
-          <ProjectsTable projects={uniqueProjects} />
-        )}
+        </>
 
         {/* Sync Status */}
         {stats.last_sync_time && (
@@ -209,7 +211,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
   );
 }

@@ -4,6 +4,7 @@ import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectsPageClient } from '@/components/projects/projects-page-client';
 import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
+import { runProjectCountValidation } from '@/lib/server-validation';
 
 export default async function ProjectsPage() {
   const { userId } = await auth();
@@ -39,6 +40,9 @@ export default async function ProjectsPage() {
 
   const projects = Array.from(projectsMap.values());
 
+  // Run server-side validation in development
+  await runProjectCountValidation(projects.length);
+
   const statsTyped = stats as {
     company_name?: string;
     date_from?: Date | string | null;
@@ -60,9 +64,9 @@ export default async function ProjectsPage() {
         <div className="header-card">
           <div className="flex justify-between items-center">
             <div className="flex-1">
-              <h1>Projects P&L Dashboard</h1>
+              <h1>{companyName}</h1>
               <div className="subtitle">
-                {companyName} - {dateFrom && dateTo ? (
+                {dateFrom && dateTo ? (
                   <>
                     {format(new Date(dateFrom), 'd MMMM yyyy')} to {format(new Date(dateTo), 'd MMMM yyyy')}
                   </>
@@ -71,7 +75,7 @@ export default async function ProjectsPage() {
                 )}
               </div>
             </div>
-            <ExportDialog />
+            <ExportDialog context="projects" />
           </div>
         </div>
 

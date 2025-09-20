@@ -32,7 +32,8 @@ Xero API → n8n (sync) → PostgreSQL → Next.js App → Users
 4. **Phase 4**: Dashboard implementation
 5. **Phase 5**: Project features & estimates CRUD
 6. **Phase 6**: Export functionality (PDF/Excel)
-7. **Phase 7**: Production deployment with Coolify
+7. **Phase 7**: Frontend UI fixes and data validation
+99. **Phase 99**: Production deployment with Coolify
 
 Each phase has detailed documentation in the `docs` folder.
 

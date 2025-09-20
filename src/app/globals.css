@@ -24,7 +24,7 @@
     /* Tailwind variables for light mode */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    --card: 248 249% 98%;
+    --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
@@ -48,6 +48,7 @@
     --negative: #ef4444;
     --warning: #fb923c;
     --chart-grid: rgba(0, 0, 0, 0.1);
+    --separator: 214.3 31.8% 91.4%;
 
     /* Navigation colors */
     --nav-btn-bg: #667eea;
@@ -59,6 +60,10 @@
     --text-secondary: #4b5563;
     --text-muted: #6b7280;
     --text-dim: #9ca3af;
+
+    /* Table hover colors */
+    --table-hover: rgba(210, 210, 210, 0.5);
+    --muted-rgb: 210, 210, 210;
   }
 
   /* Dark Mode Theme Variables - Matching MVP */
@@ -102,6 +107,7 @@
     --negative: #f87171;
     --warning: #fbbf24;
     --chart-grid: rgba(255, 255, 255, 0.1);
+    --separator: 215 27% 30%;
 
     /* Navigation colors */
     --nav-btn-bg: #334155;
@@ -113,6 +119,10 @@
     --text-secondary: #a8a8a8;
     --text-muted: #94a3b8;
     --text-dim: #64748b;
+
+    /* Table hover colors */
+    --table-hover: rgba(100, 100, 100, 0.3);
+    --muted-rgb: 100, 100, 100;
   }
 }
 
@@ -155,7 +165,6 @@
     transition: all 0.3s ease;
     box-sizing: border-box;
     width: 100%;
-    margin-bottom: 30px;
   }
 
   .dashboard-card:hover {
@@ -166,25 +175,6 @@
   .dashboard-card-dark {
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(10px);
-  }
-
-  /* Button styling matching MVP */
-  .nav-button {
-    padding: 1rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 300ms;
-    background: var(--nav-btn-bg);
-    color: white;
-  }
-
-  .nav-button:hover {
-    background: var(--nav-btn-hover);
-    transform: translateY(-1px);
-  }
-
-  .nav-button.active {
-    background: var(--nav-btn-active);
   }
 
   /* Table styling matching MVP */
@@ -213,8 +203,8 @@
     transition: background-color 150ms;
   }
 
-  .dashboard-table tr:hover {
-    background-color: rgba(var(--muted-rgb, 210, 210, 210), 0.5);
+  .dashboard-table tbody tr:hover {
+    background-color: var(--table-hover) !important;
   }
 
   /* Chart container styling */
@@ -238,7 +228,7 @@
     z-index: 1000;
     transition: all 0.3s ease;
     width: 100%;
-    max-width: 100vw;
+    max-width: 100%;
     box-sizing: border-box;
   }
 
@@ -283,26 +273,6 @@
     align-items: center;
   }
 
-  .nav-btn {
-    padding: 8px 16px;
-    background: var(--nav-btn-bg);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.3s;
-  }
-
-  .nav-btn:hover {
-    background: var(--nav-btn-hover);
-    transform: translateY(-1px);
-  }
-
-  .nav-btn.active {
-    background: var(--nav-btn-active);
-  }
-
   /* Container styles for full-width layout */
   .container {
     width: 100%;
@@ -335,9 +305,10 @@
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    margin-bottom: 35px;
+    gap: 1.5rem;
     width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   @media (min-width: 1200px) {
@@ -350,9 +321,10 @@
   .stats-grid-3 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    margin-bottom: 35px;
+    gap: 1.5rem;
     width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
   @media (min-width: 992px) {
@@ -446,6 +418,12 @@
     margin: 30px 0;
   }
 
+  .financial-breakdown-grid .dashboard-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
   .breakdown-title {
     font-size: 16px;
     font-weight: 600;
@@ -459,6 +437,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
   }
 
   .breakdown-item {
@@ -466,7 +445,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-    border-bottom: 1px solid hsl(var(--border));
+    border-bottom: 1px solid hsl(var(--separator));
   }
 
   .breakdown-item:last-child {
@@ -493,8 +472,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 0 0;
-    margin-top: 8px;
-    border-top: 2px solid hsl(var(--border));
+    margin-top: auto;
+    border-top: 2px solid hsl(var(--separator));
   }
 
   .total-label {
@@ -521,24 +500,29 @@
 
   .tab-button {
     padding: 16px 24px;
-    background: none;
+    background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-secondary);
+    color: hsl(var(--muted-foreground));
     transition: all 0.2s ease;
     margin-bottom: -2px;
+    border-radius: 0.375rem 0.375rem 0 0;
   }
 
   .tab-button:hover {
-    color: var(--primary-blue-light);
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
   }
 
   .tab-button.active {
-    color: var(--primary-blue-light);
-    border-bottom-color: var(--primary-blue-light);
+    background-color: hsl(var(--primary) / 0.15);
+    color: hsl(var(--primary));
+    border-bottom-color: hsl(var(--primary));
+    font-weight: 600;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
   }
 
   .tab-content {
@@ -549,14 +533,12 @@
   .chart-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 30px;
+    gap: 1.5rem;
     width: 100%;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
   }
 
-  /* Remove bottom margin from cards inside grid */
-  .chart-grid .dashboard-card {
-    margin-bottom: 0;
-  }
 
   @media (max-width: 1100px) {
     .chart-grid {
@@ -574,7 +556,6 @@
     min-width: 0;
     opacity: 1;
     box-sizing: border-box;
-    margin-bottom: 30px;
   }
 
   .chart-title {
@@ -589,12 +570,13 @@
     background: hsl(var(--card));
     border-radius: 15px;
     padding: 30px;
-    margin-bottom: 30px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     width: 100%;
     opacity: 1;
     box-sizing: border-box;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
   }
 
   .header-card h1 {
@@ -625,4 +607,102 @@
   .profit-bar.negative {
     background: var(--negative);
   }
+
+  /* Dashboard card default spacing */
+  .dashboard-card {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Chart tooltip styling for opacity fix */
+  .chart-tooltip {
+    background-color: hsl(var(--card));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
+    z-index: 50;
+    opacity: 1;
+  }
+
+  /* Estimates toggle switch styling */
+  .estimates-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    appearance: none;
+    background-color: #ef4444; /* Red when OFF */
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .estimates-toggle:checked {
+    background-color: #10b981; /* Green when ON */
+  }
+
+  .estimates-toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .estimates-toggle:checked::after {
+    transform: translateX(20px);
+  }
+
+  .estimates-toggle:focus {
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
+
+  /* Dialog content with dashboard-card styling */
+  [data-state="open"][role="dialog"].dashboard-card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    border-radius: 15px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    padding: 25px !important;
+    border: none !important;
+  }
+
+  /* Dark mode dialog with dashboard-card styling */
+  .dark [data-state="open"][role="dialog"].dashboard-card {
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  /* Global cancel button styling for dialogs */
+  .cancel-button {
+    color: #dc2626 !important; /* red-600 */
+    border-color: #fecaca !important; /* red-200 */
+  }
+
+  .cancel-button:hover {
+    color: #b91c1c !important; /* red-700 */
+    background-color: #fef2f2 !important; /* red-50 */
+    border-color: #fca5a5 !important; /* red-300 */
+  }
+
+  /* Dark mode cancel button styling */
+  .dark .cancel-button {
+    color: #f87171 !important; /* red-400 */
+    border-color: #991b1b !important; /* red-800 */
+  }
+
+  .dark .cancel-button:hover {
+    color: #fca5a5 !important; /* red-300 */
+    background-color: #7f1d1d !important; /* red-900 */
+    border-color: #dc2626 !important; /* red-600 */
+  }
+
 }

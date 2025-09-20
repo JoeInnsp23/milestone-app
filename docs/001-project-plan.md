@@ -181,7 +181,7 @@ CREATE TABLE milestone.project_estimates (
     id SERIAL PRIMARY KEY,
     project_id VARCHAR(50) REFERENCES milestone.projects(id) ON DELETE CASCADE,
     build_phase_id VARCHAR(50) REFERENCES milestone.build_phases(id),
-    estimate_type VARCHAR(50) NOT NULL, -- 'revenue', 'cost', 'hours', 'materials'
+   estimate_type VARCHAR(50) NOT NULL, -- 'revenue', 'cost', 'materials'
     amount DECIMAL(12,2) NOT NULL,
     currency VARCHAR(3) DEFAULT 'GBP',
     confidence_level INTEGER CHECK (confidence_level BETWEEN 1 AND 5),

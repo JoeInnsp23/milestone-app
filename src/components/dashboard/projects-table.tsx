@@ -1,22 +1,80 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { ProjectSummary } from '@/types';
 import { FilterState } from '@/components/projects/projects-filter';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search, X } from 'lucide-react';
 
 interface ProjectsTableProps {
   projects: ProjectSummary[];
   filters?: FilterState;
+  onFilterChange?: (filters: FilterState) => void;
   isLoading?: boolean;
 }
 
-type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'profit' | 'profit_margin';
+type SortKey = 'project_name' | 'actual_revenue' | 'actual_costs' | 'operating_expenses' | 'profit' | 'profit_margin';
 type SortDirection = 'asc' | 'desc';
 
-export function ProjectsTable({ projects: initialProjects, filters, isLoading }: ProjectsTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('project_name');
+export function ProjectsTable({ projects: initialProjects, filters, onFilterChange, isLoading }: ProjectsTableProps) {
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
+  // Local filter state for debouncing
+  const [localFilters, setLocalFilters] = useState<FilterState>({
+    search: '',
+    status: 'all',
+  });
+
+  // Sync with incoming filters
+  useEffect(() => {
+    if (filters) {
+      setLocalFilters(filters);
+    }
+  }, [filters]);
+
+  // Debounced filter updates
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onFilterChange) {
+        onFilterChange(localFilters);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [localFilters, onFilterChange]);
+
+  // Check if filters are active
+  const hasActiveFilters = localFilters.search !== '' || localFilters.status !== 'all';
+
+  // Filter handlers
+  const handleSearchChange = (value: string) => {
+    setLocalFilters(prev => ({ ...prev, search: value }));
+  };
+
+  const handleStatusChange = (value: string) => {
+    setLocalFilters(prev => ({ ...prev, status: value }));
+  };
+
+  const clearFilters = () => {
+    setLocalFilters({
+      search: '',
+      status: 'all',
+    });
+  };
+
+  const clearSort = useCallback(() => {
+    setSortKey(null);
+    setSortDirection('asc');
+  }, []);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-GB', {
@@ -67,6 +125,9 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
   const sortedProjects = useMemo(() => {
     const sorted = [...filteredProjects];
 
+    // If no sort key is set, return unsorted (preserves default order)
+    if (!sortKey) return sorted;
+
     sorted.sort((a, b) => {
       let aValue: string | number;
       let bValue: string | number;
@@ -83,6 +144,11 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
         case 'actual_costs':
           aValue = a.actual_costs;
           bValue = b.actual_costs;
+          break;
+        case 'operating_expenses':
+          // Assuming operating expenses is 40% of costs (as per dashboard calculation)
+          aValue = a.actual_costs * 0.4;
+          bValue = b.actual_costs * 0.4;
           break;
         case 'profit':
           aValue = a.profit;
@@ -139,12 +205,69 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
 
   return (
     <div className="dashboard-card">
-      <div className="chart-title" style={{ marginBottom: '20px' }}>
+      <div className="chart-title" style={{ marginBottom: '16px' }}>
         All Projects Summary (Click project name for details)
         {filteredProjects.length < initialProjects.length && (
           <span className="text-sm text-gray-500 ml-2">
             (Showing {filteredProjects.length} of {initialProjects.length} projects)
           </span>
+        )}
+      </div>
+
+      {/* Search and Filter Controls */}
+      <div className="flex flex-wrap gap-3 mb-6" style={{ marginBottom: '24px' }}>
+        <div className="flex-1 min-w-[250px]">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <input
+              type="text"
+              placeholder="Search by project or client name..."
+              value={localFilters.search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                padding: '8px',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '4px',
+                fontSize: '14px',
+                background: 'hsl(var(--card))',
+                color: 'hsl(var(--foreground))',
+                paddingLeft: '40px'
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="w-[180px]">
+          <Select value={localFilters.status} onValueChange={handleStatusChange}>
+            <SelectTrigger className="bg-[var(--nav-btn-bg)] text-white rounded-lg shadow transition-transform hover:bg-[var(--nav-btn-hover)] hover:-translate-y-0.5">
+              <SelectValue placeholder="All Status" className="text-white" />
+            </SelectTrigger>
+            <SelectContent className="bg-[var(--nav-btn-bg)] rounded-lg shadow border border-[var(--nav-btn-hover)]">
+              <SelectItem value="all" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">All Status</SelectItem>
+              <SelectItem value="ACTIVE" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Active</SelectItem>
+              <SelectItem value="COMPLETED" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Completed</SelectItem>
+              <SelectItem value="ON_HOLD" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">On Hold</SelectItem>
+              <SelectItem value="DRAFT" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Button
+          variant="header"
+          size="default"
+          onClick={clearFilters}
+          disabled={!hasActiveFilters}
+        >
+          <X className="mr-2 h-4 w-4" />
+          Clear Filters
+        </Button>
+
+        {sortKey && (
+          <Button variant="header" size="default" onClick={clearSort}>
+            <X className="mr-2 h-4 w-4" />
+            Clear Sort
+          </Button>
         )}
       </div>
       <div style={{ overflowX: 'auto' }}>
@@ -199,16 +322,21 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
               >
                 Cost of Sales {getSortIcon('actual_costs')}
               </th>
-              <th style={{
-                textAlign: 'right',
-                padding: '12px',
-                fontWeight: '600',
-                fontSize: '14px',
-                textTransform: 'uppercase',
-                borderBottom: '2px solid var(--border-color)',
-                background: 'var(--border-light)'
-              }}>
-                Operating Exp.
+              <th
+                onClick={() => handleSort('operating_expenses')}
+                style={{
+                  textAlign: 'right',
+                  padding: '12px',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  textTransform: 'uppercase',
+                  borderBottom: '2px solid var(--border-color)',
+                  background: 'var(--border-light)',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+              >
+                Operating Exp. {getSortIcon('operating_expenses')}
               </th>
               <th
                 onClick={() => handleSort('profit')}
@@ -278,8 +406,6 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
                     borderBottom: '1px solid var(--border-color)',
                     transition: 'background-color 0.2s'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--table-hover)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 >
                   <td style={{ padding: '12px' }}>
                     <Link
@@ -342,6 +468,11 @@ export function ProjectsTable({ projects: initialProjects, filters, isLoading }:
         .sort-icon.active {
           opacity: 1;
           color: var(--primary);
+        }
+
+        :global(html.dark) input[type="text"] {
+          background: hsl(220 32% 12%) !important;
+          border-color: hsl(220 20% 24%) !important;
         }
       `}</style>
     </div>

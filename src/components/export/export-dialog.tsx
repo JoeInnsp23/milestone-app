@@ -19,15 +19,17 @@ import { exportPDF, exportExcel } from '@/app/actions/export';
 
 interface ExportDialogProps {
   projectId?: string;
+  context?: 'dashboard' | 'projects' | 'project-detail';
   triggerClassName?: string;
-  triggerVariant?: 'default' | 'outline' | 'ghost';
+  triggerVariant?: 'default' | 'outline' | 'ghost' | 'header';
   triggerSize?: 'sm' | 'default' | 'lg';
 }
 
 export function ExportDialog({
   projectId,
+  context,
   triggerClassName,
-  triggerVariant = 'outline',
+  triggerVariant = 'header',
   triggerSize = 'default'
 }: ExportDialogProps) {
   const [open, setOpen] = useState(false);
@@ -35,13 +37,16 @@ export function ExportDialog({
   const [format, setFormat] = useState<'pdf' | 'excel'>('pdf');
   const [template, setTemplate] = useState<'summary' | 'detailed'>('summary');
 
+  // Auto-detect context if not provided
+  const exportContext = context || (projectId ? 'project-detail' : 'dashboard');
+
   const handleExport = async () => {
     setIsExporting(true);
 
     try {
       const result = format === 'pdf'
-        ? await exportPDF(template, projectId)
-        : await exportExcel(template, projectId);
+        ? await exportPDF(template, projectId, exportContext)
+        : await exportExcel(template, projectId, exportContext);
 
       if (!result.success) {
         throw new Error(result.error || 'Export failed');
@@ -73,7 +78,7 @@ export function ExportDialog({
           Export Data
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] dashboard-card">
         <DialogHeader>
           <DialogTitle>Export Data</DialogTitle>
           <DialogDescription>
@@ -140,10 +145,15 @@ export function ExportDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={isExporting}>
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={isExporting}
+            className="cancel-button"
+          >
             Cancel
           </Button>
-          <Button onClick={handleExport} disabled={isExporting}>
+          <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleExport} disabled={isExporting}>
             {isExporting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

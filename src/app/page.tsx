@@ -4,6 +4,7 @@ import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
 import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -13,25 +14,21 @@ export default function Home() {
       {/* Navigation Bar - Matching Dashboard */}
       <div className="nav-bar">
         <div className="nav-content">
-          <div className="nav-title">Projects P&L Dashboard</div>
+          <div className="nav-title">Project Hub</div>
           <div className="nav-buttons">
             <SignedOut>
-              <Link href="/sign-in">
-                <button className="nav-btn">Sign In</button>
-              </Link>
+              <Button asChild variant="header">
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
             </SignedOut>
-            <SignedIn>
-              <Link href="/dashboard">
-                <button className="nav-btn active">Go to Dashboard</button>
-              </Link>
-            </SignedIn>
-            <button
+            <Button
+              type="button"
               onClick={toggleTheme}
-              className="nav-btn"
+              variant="header"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
+            </Button>
             <SignedIn>
               <UserButton />
             </SignedIn>
@@ -42,8 +39,8 @@ export default function Home() {
       {/* Main Content */}
       <div className="container">
         {/* Call to Action Section - Now at the top as hero */}
-        <div className="dashboard-card" style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)' }}>
+        <div className="header-card" style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '36px', marginBottom: '15px', color: 'var(--foreground)', fontWeight: 'bold' }}>
             Transform Your Project Management
           </h1>
           <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '18px' }}>
@@ -52,31 +49,27 @@ export default function Home() {
           </p>
           <SignedOut>
             <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-              <Link href="/sign-in">
-                <button className="nav-btn active" style={{ padding: '12px 30px', fontSize: '16px' }}>
-                  Access Dashboard
-                </button>
-              </Link>
-              <button className="nav-btn" style={{ padding: '12px 30px', fontSize: '16px' }}>
+              <Button asChild variant="header" size="lg" data-state="active" className="text-base px-7 py-3">
+                <Link href="/sign-in">Access Dashboard</Link>
+              </Button>
+              <Button variant="header" size="lg" className="text-base px-7 py-3">
                 Request Demo
-              </button>
+              </Button>
             </div>
             <p style={{ color: 'var(--text-dim)', marginTop: '20px', fontSize: '14px' }}>
               Contact your administrator for access credentials
             </p>
           </SignedOut>
           <SignedIn>
-            <Link href="/dashboard">
-              <button className="nav-btn active" style={{ padding: '12px 40px', fontSize: '16px' }}>
-                Open Dashboard
-              </button>
-            </Link>
+            <Button asChild variant="header" size="lg" data-state="active" className="text-base px-10 py-3">
+              <Link href="/dashboard">Open Dashboard</Link>
+            </Button>
           </SignedIn>
         </div>
 
         {/* Features Section - Professional Cards */}
-        <div className="chart-grid">
-          <div className="dashboard-card">
+        <div className="stats-grid">
+          <div className="stat-card">
             <div className="chart-title">Real-Time Analytics</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Live project performance metrics synchronized with your accounting system for accurate, up-to-date financial insights.
@@ -89,7 +82,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Comprehensive Reporting</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Generate detailed P&L reports by project, phase, or time period.
@@ -102,7 +95,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Project Performance Tracking</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Track individual project profitability with detailed breakdowns of revenue,
@@ -115,7 +108,7 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="dashboard-card">
+          <div className="stat-card">
             <div className="chart-title">Enterprise Security</div>
             <p style={{ color: 'var(--text-muted)', marginBottom: '15px' }}>
               Bank-grade security with enterprise authentication, ensuring your financial data
@@ -137,7 +130,7 @@ export default function Home() {
           textAlign: 'center'
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            © 2024 Professional P&L Dashboard. All rights reserved.
+            © 2024 Project Hub. All rights reserved.
           </p>
           <p style={{ color: 'var(--text-dim)', fontSize: '12px', marginTop: '10px' }}>
             Secure cloud infrastructure • Real-time data synchronization • Enterprise-grade security

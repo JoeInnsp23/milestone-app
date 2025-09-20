@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { ThemeToggle } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
 
 interface DashboardHeaderProps {
   stats: {
@@ -20,7 +21,7 @@ export function DashboardHeader({ stats, view }: DashboardHeaderProps) {
         <div className="py-4 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              Projects P&L Dashboard
+              {String(stats.company_name || 'Build By Milestone Ltd')} Dashboard
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {String(stats.company_name || 'Build By Milestone Ltd')} -{' '}
@@ -35,20 +36,20 @@ export function DashboardHeader({ stats, view }: DashboardHeaderProps) {
           </div>
           <div className="flex items-center gap-3">
             <div className="flex gap-2">
-              <Link href="/dashboard?view=overview">
-                <button
-                  className={`nav-button ${view === 'overview' ? 'active' : ''}`}
-                >
-                  Overview
-                </button>
-              </Link>
-              <Link href="/dashboard?view=all">
-                <button
-                  className={`nav-button ${view === 'all' ? 'active' : ''}`}
-                >
-                  All Projects
-                </button>
-              </Link>
+              <Button
+                asChild
+                variant="header"
+                data-state={view === 'overview' ? 'active' : undefined}
+              >
+                <Link href="/dashboard?view=overview">Overview</Link>
+              </Button>
+              <Button
+                asChild
+                variant="header"
+                data-state={view === 'all' ? 'active' : undefined}
+              >
+                <Link href="/dashboard?view=all">All Projects</Link>
+              </Button>
             </div>
             <ThemeToggle />
           </div>

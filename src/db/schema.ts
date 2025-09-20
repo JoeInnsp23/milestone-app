@@ -10,7 +10,6 @@ import {
   uuid,
   text,
   index,
-  uniqueIndex,
   pgEnum,
   serial,
 } from 'drizzle-orm/pg-core';
@@ -42,7 +41,6 @@ export const billTypeEnum = pgEnum('bill_type', ['BILL', 'PURCHASEORDER']);
 export const estimateTypeEnum = pgEnum('estimate_type', [
   'revenue',
   'cost',
-  'hours',
   'materials',
 ]);
 
@@ -128,16 +126,11 @@ export const projectEstimates = milestone.table(
     updated_by: varchar('updated_by', { length: 255 }),
     created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-    version: integer('version').default(1),
-    previous_version_id: uuid('previous_version_id'),
   },
   (table) => ({
     idx_estimates_project: index('idx_estimates_project').on(table.project_id),
     idx_estimates_project_phase: index('idx_estimates_project_phase').on(table.project_id, table.build_phase_id),
-    // Partial unique index for current estimates only (where valid_until IS NULL)
-    ux_estimates_current: uniqueIndex('ux_estimates_current')
-      .on(table.project_id, table.estimate_type)
-      .where(sql`${table.valid_until} IS NULL`),
+    idx_estimates_project_type: index('idx_estimates_project_type').on(table.project_id, table.estimate_type),
   })
 );
 

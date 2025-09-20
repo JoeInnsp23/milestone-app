@@ -16,7 +16,7 @@ Creates a new estimate for a project.
 |-----------|------|----------|-------------|
 | `project_id` | string | Yes | UUID of the project |
 | `description` | string | Yes | Description of the estimate (max 500 chars) |
-| `estimate_type` | enum | Yes | One of: 'revenue', 'cost', 'hours', 'materials' |
+| `estimate_type` | enum | Yes | One of: 'revenue', 'cost', 'materials' |
 | `amount` | number | Yes | Numeric amount (must be positive) |
 | `estimate_date` | string | Yes | Date in ISO format (YYYY-MM-DD) |
 | `confidence_level` | number | No | Confidence level from 1-5 (default: 3) |
@@ -131,7 +131,7 @@ Input validation is handled using Zod schemas:
 const EstimateSchema = z.object({
   project_id: z.string().uuid(),
   description: z.string().min(1).max(500),
-  estimate_type: z.enum(['revenue', 'cost', 'hours', 'materials']),
+  estimate_type: z.enum(['revenue', 'cost', 'materials']),
   amount: z.number().positive(),
   estimate_date: z.string(),
   confidence_level: z.number().min(1).max(5).optional(),

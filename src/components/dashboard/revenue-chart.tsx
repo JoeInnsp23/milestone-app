@@ -55,12 +55,12 @@ export const RevenueChart = memo(function RevenueChart({ data }: RevenueChartPro
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="rounded-lg border bg-background p-2 shadow-sm">
+        <div className="chart-tooltip">
           <div className="flex flex-col">
             <span className="text-[0.70rem] uppercase text-muted-foreground">
               {payload[0].name}
             </span>
-            <span className="font-bold">
+            <span className="font-bold text-foreground">
               {formatCurrency(payload[0].value)}
             </span>
           </div>
@@ -80,9 +80,10 @@ export const RevenueChart = memo(function RevenueChart({ data }: RevenueChartPro
           cy="50%"
           labelLine={false}
           outerRadius={100}
-          innerRadius={60}
+          innerRadius={0}
           fill="#8884d8"
           dataKey="value"
+          stroke="none"
         >
           {data.map((entry, index) => (
             <Cell key={`cell-${index}`} fill={entry.color} />

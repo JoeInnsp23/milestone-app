@@ -11,6 +11,8 @@ export interface ProjectSummary {
   estimated_revenue?: number;
   estimated_costs?: number;
   estimated_profit?: number;
+  latest_invoice_date?: Date | string | null;
+  latest_bill_date?: Date | string | null;
 }
 
 export interface DashboardStats {
@@ -76,7 +78,7 @@ export interface ProjectEstimate {
   project_id: string;
   build_phase_id: string | null;
   description: string;
-  estimate_type: 'revenue' | 'cost' | 'hours' | 'materials';
+  estimate_type: 'revenue' | 'cost' | 'materials';
   amount: number | string;
   estimate_date: Date | string;
   confidence_level: number | null;

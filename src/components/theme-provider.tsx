@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 type Theme = 'light' | 'dark';
 
@@ -73,13 +74,11 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <button
+    <Button
+      type="button"
       onClick={toggleTheme}
-      className={`p-2 rounded-lg transition-all duration-300 hover:scale-110 ${className}`}
-      style={{
-        background: 'var(--nav-btn-bg)',
-        color: 'white'
-      }}
+      variant="header"
+      className={`p-2 hover:scale-110 hover:translate-y-0 transition-transform duration-300 ${className}`}
       aria-label="Toggle theme"
     >
       {theme === 'dark' ? (
@@ -87,6 +86,6 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       ) : (
         <Moon className="h-5 w-5" />
       )}
-    </button>
+    </Button>
   );
 }
