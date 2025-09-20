@@ -681,4 +681,28 @@
     color: hsl(var(--card-foreground)) !important;
   }
 
+  /* Global cancel button styling for dialogs */
+  .cancel-button {
+    color: #dc2626 !important; /* red-600 */
+    border-color: #fecaca !important; /* red-200 */
+  }
+
+  .cancel-button:hover {
+    color: #b91c1c !important; /* red-700 */
+    background-color: #fef2f2 !important; /* red-50 */
+    border-color: #fca5a5 !important; /* red-300 */
+  }
+
+  /* Dark mode cancel button styling */
+  .dark .cancel-button {
+    color: #f87171 !important; /* red-400 */
+    border-color: #991b1b !important; /* red-800 */
+  }
+
+  .dark .cancel-button:hover {
+    color: #fca5a5 !important; /* red-300 */
+    background-color: #7f1d1d !important; /* red-900 */
+    border-color: #dc2626 !important; /* red-600 */
+  }
+
 }

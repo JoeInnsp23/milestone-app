@@ -416,6 +416,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates, initi
                     onFormClose?.();
                   }}
                   disabled={isPending}
+                  className="cancel-button"
                 >
                   Cancel
                 </Button>
@@ -444,6 +445,7 @@ export function ProjectEstimates({ projectId, estimates: initialEstimates, initi
                 variant="outline"
                 onClick={() => setDeletingEstimate(null)}
                 disabled={isPending}
+                className="cancel-button"
               >
                 Cancel
               </Button>

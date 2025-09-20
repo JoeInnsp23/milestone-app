@@ -145,7 +145,12 @@ export function ExportDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} disabled={isExporting}>
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={isExporting}
+            className="cancel-button"
+          >
             Cancel
           </Button>
           <Button variant="default" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleExport} disabled={isExporting}>
