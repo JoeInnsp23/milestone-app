@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ProjectSummary } from '@/types';
-import { ProjectsFilter, FilterState } from '@/components/projects/projects-filter';
+import { FilterState } from '@/components/projects/projects-filter';
 import { ProjectsTable } from '@/components/dashboard/projects-table';
 
 interface ProjectsPageClientProps {
@@ -51,8 +51,11 @@ export function ProjectsPageClient({ projects }: ProjectsPageClientProps) {
 
   return (
     <>
-      <ProjectsFilter onFilterChange={setFilters} />
-      <ProjectsTable projects={sortedProjects} filters={filters} />
+      <ProjectsTable
+        projects={sortedProjects}
+        filters={filters}
+        onFilterChange={setFilters}
+      />
     </>
   );
 }
