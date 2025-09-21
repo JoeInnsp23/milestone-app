@@ -159,17 +159,21 @@ export function ProjectTabsEnhanced({
           return (
             <div key={phaseId} className="border rounded-lg overflow-hidden">
               <div
-                className="bg-muted p-3 cursor-pointer flex justify-between items-center"
+                className="p-3 cursor-pointer flex justify-between items-center transition-all duration-200 hover:opacity-90"
+                style={{
+                  backgroundColor: group.phase?.color ? `${group.phase.color}20` : 'var(--muted)',
+                  borderLeft: group.phase?.color ? `4px solid ${group.phase.color}` : undefined
+                }}
                 onClick={() => togglePhase(phaseId)}
               >
                 <div className="flex items-center gap-2">
-                  {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   {group.phase && (
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: group.phase.color }}
                     />
                   )}
+                  {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   <span className="font-medium">
                     {group.phase?.name || 'Unassigned'}
                   </span>
