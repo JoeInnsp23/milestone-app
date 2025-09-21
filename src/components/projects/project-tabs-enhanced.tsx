@@ -391,15 +391,26 @@ export function ProjectTabsEnhanced({
         </div>
 
         {(currentTab === 'invoices' || currentTab === 'bills' || currentTab === 'estimates') && (
-          <label className="flex items-center gap-2 cursor-pointer">
-            <span className="text-sm text-muted-foreground">Group by Phase</span>
-            <input
-              type="checkbox"
-              checked={groupByPhase}
-              onChange={(e) => setGroupByPhase(e.target.checked)}
-              className="estimates-toggle"
-            />
-          </label>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <span className="text-sm text-muted-foreground">Group by Phase</span>
+              <input
+                type="checkbox"
+                checked={groupByPhase}
+                onChange={(e) => setGroupByPhase(e.target.checked)}
+                className="estimates-toggle"
+              />
+            </label>
+            {currentTab === 'estimates' && estimatesRef && (
+              <button
+                type="button"
+                className="add-estimate-button"
+                onClick={() => (estimatesRef as React.RefObject<ProjectEstimatesHandle>).current?.openCreateModal()}
+              >
+                + Add Estimate
+              </button>
+            )}
+          </div>
         )}
       </div>
 
