@@ -10,6 +10,7 @@ import {
   uuid,
   text,
   index,
+  uniqueIndex,
   pgEnum,
   serial,
 } from 'drizzle-orm/pg-core';
@@ -70,7 +71,7 @@ export const projects = milestone.table(
     client_name: varchar('client_name', { length: 255 }),
     client_contact_id: varchar('client_contact_id', { length: 50 }),
     tracking_category_id: varchar('tracking_category_id', { length: 50 }).notNull(),
-    status: varchar('status', { length: 50 }).default('active'),
+    status: varchar('status', { length: 50 }).default('Active'),
     start_date: date('start_date'),
     end_date: date('end_date'),
     project_manager: varchar('project_manager', { length: 255 }),
@@ -305,6 +306,32 @@ export const syncStatus = milestone.table(
     idx_sync_status_type: index('idx_sync_status_type').on(
       table.sync_type,
       table.status
+    ),
+  })
+);
+
+// Phase progress tracking table - tracks construction phase progress per project
+export const phaseProgress = milestone.table(
+  'phase_progress',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    project_id: varchar('project_id', { length: 50 })
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    build_phase_id: varchar('build_phase_id', { length: 50 })
+      .notNull()
+      .references(() => buildPhases.id, { onDelete: 'cascade' }),
+    progress_percentage: integer('progress_percentage').default(0).notNull(),
+    last_updated_by: varchar('last_updated_by', { length: 255 }),
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    idx_phase_progress_project: index('idx_phase_progress_project').on(table.project_id),
+    idx_phase_progress_phase: index('idx_phase_progress_phase').on(table.build_phase_id),
+    ux_phase_progress_unique: uniqueIndex('ux_phase_progress_unique').on(
+      table.project_id,
+      table.build_phase_id
     ),
   })
 );

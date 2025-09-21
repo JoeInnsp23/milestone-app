@@ -6,9 +6,21 @@ import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authentic
 import { ProjectEstimate } from '@/types';
 import { Button } from '@/components/ui/button';
 
+interface Phase {
+  id: string;
+  name: string;
+  color?: string;
+  icon?: string;
+  display_order?: number;
+}
+
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
+  phases?: Phase[];
+  openAddModal?: boolean;
+  onAddModalClose?: () => void;
+  isGrouped?: boolean;
 }
 
 export interface ProjectEstimatesHandle {
@@ -17,7 +29,7 @@ export interface ProjectEstimatesHandle {
 
 export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstimatesProps>(
   function ProjectEstimates(
-    { projectId, estimates: initialEstimates }: ProjectEstimatesProps,
+    { projectId, estimates: initialEstimates, phases, openAddModal, onAddModalClose, isGrouped = false }: ProjectEstimatesProps,
     ref
   ) {
     const [estimates, setEstimates] = useState(initialEstimates);
@@ -77,6 +89,14 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
       },
     }));
 
+    // Handle external trigger to open modal
+    useEffect(() => {
+      if (openAddModal) {
+        openModal(null);
+        onAddModalClose?.();
+      }
+    }, [openAddModal, onAddModalClose]);
+
     const formatCurrency = (value: number | string) => {
       const numValue = typeof value === 'string' ? parseFloat(value) : value;
       if (isNaN(numValue)) return '£0';
@@ -127,7 +147,7 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
       estimate_date: formData.get('estimate_date') as string,
       confidence_level: Number(formData.get('confidence_level')),
       notes: formData.get('notes') as string,
-      build_phase_id: null,
+      build_phase_id: formData.get('build_phase_id') as string || null,
       created_by: 'current-user',
       created_at: new Date().toISOString(),
       updated_by: null,
@@ -251,102 +271,159 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
 
     return (
       <div className="estimates-section">
-      {/* Summary Cards */}
-      <div className="summary-cards">
-        <div className="summary-card">
-          <div className="summary-label">Est. Revenue</div>
-          <div className="summary-value" style={{ color: '#10b981' }}>
-            {formatCurrency(totals.revenue)}
-          </div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Est. Costs</div>
-          <div className="summary-value" style={{ color: '#ef4444' }}>
-            {formatCurrency(totals.cost + totals.materials)}
-          </div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Est. Profit</div>
-          <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
-            {formatCurrency(estimatedProfit)}
-          </div>
-        </div>
-        <div className="summary-card">
-          <div className="summary-label">Est. Margin</div>
-          <div className="summary-value" style={{ color: '#8b5cf6' }}>
-            {estimatedMargin.toFixed(1)}%
-          </div>
-        </div>
-      </div>
-
-      {/* Add Estimate Button */}
-      <div className="estimates-header">
-        <h3>Project Estimates</h3>
-        <Button
-          type="button"
-          variant="header"
-          onClick={() => openModal(null)}
-        >
-          + Add Estimate
-        </Button>
-      </div>
-
-      {/* Estimates List */}
+      {/* Estimates Table */}
       {estimates.length === 0 ? (
         <div className="empty-state">
           <p>No estimates added yet. Click &quot;Add Estimate&quot; to create your first estimate.</p>
         </div>
       ) : (
-        <div className="estimates-list">
-          {estimates.map((estimate) => {
-            const isPending = pendingIds.has(estimate.id);
-            return (
-            <div
-              key={estimate.id}
-              className="estimate-card"
-              style={{ opacity: isPending ? 0.6 : 1, transition: 'opacity 0.3s' }}
-            >
-              <div className="estimate-header">
-                <span
-                  className="estimate-type"
-                  style={{ backgroundColor: getTypeColor(estimate.estimate_type) }}
-                >
-                  {estimate.estimate_type}
-                </span>
-                <div className="estimate-actions">
-                  <button
-                    className="action-button edit"
-                    onClick={() => openModal(estimate)}
+        <>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className={isGrouped ? "" : "bg-secondary text-sm"}>
+              <tr>
+                <th className={`text-left p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Type</th>
+                <th className={`text-left p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Description</th>
+                {!isGrouped && <th className="text-left p-2">Phase</th>}
+                <th className={`text-right p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Amount</th>
+                <th className={`text-center p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Date</th>
+                <th className={`text-center p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Confidence</th>
+                <th className={`text-center p-3 ${isGrouped ? 'uppercase text-xs font-semibold text-muted-foreground border-b-2 border-border' : ''}`}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {estimates.map((estimate) => {
+                const isPending = pendingIds.has(estimate.id);
+                const phase = phases?.find(p => p.id === estimate.build_phase_id);
+                return (
+                  <tr
+                    key={estimate.id}
+                    className={`border-t ${isGrouped ? 'border-border' : ''} hover:bg-muted/30 transition-colors`}
+                    style={{ opacity: isPending ? 0.6 : 1, transition: 'opacity 0.3s' }}
                   >
-                    Edit
-                  </button>
-                  <button
-                    className="action-button delete"
-                    onClick={() => setDeletingEstimate(estimate)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-              <div className="estimate-content">
-                <div className="estimate-description">{estimate.description}</div>
-                <div className="estimate-amount">
-                  {formatCurrency(estimate.amount)}
-                </div>
-                {estimate.notes && (
-                  <div className="estimate-notes">{estimate.notes}</div>
-                )}
-                <div className="estimate-meta">
-                  Date: {formatDate(estimate.estimate_date)}
-                  {estimate.confidence_level && (
-                    <> • Confidence: {estimate.confidence_level}/5</>
-                  )}
-                </div>
+                    <td className="p-3 text-sm">
+                      <span
+                        className="estimate-type inline-block px-2 py-1 rounded text-xs font-semibold text-white uppercase"
+                        style={{ backgroundColor: getTypeColor(estimate.estimate_type) }}
+                      >
+                        {estimate.estimate_type}
+                      </span>
+                    </td>
+                    <td className="p-3 text-sm">
+                      <div className="font-medium">{estimate.description}</div>
+                      {estimate.notes && (
+                        <div className="text-xs text-muted-foreground mt-1">{estimate.notes}</div>
+                      )}
+                    </td>
+                    {!isGrouped && (
+                      <td className="p-2">
+                        {phase && (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: phase.color || '#6B7280' }}
+                            />
+                            <span className="text-sm">{phase.name}</span>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                    <td className="p-3 text-right font-semibold text-sm">
+                      {formatCurrency(estimate.amount)}
+                    </td>
+                    <td className="p-3 text-center text-sm">
+                      {formatDate(estimate.estimate_date)}
+                    </td>
+                    <td className="p-3 text-center">
+                      {estimate.confidence_level && (
+                        <span className="text-sm text-muted-foreground">
+                          {estimate.confidence_level}/5
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          className="action-button edit"
+                          onClick={() => openModal(estimate)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="action-button delete"
+                          onClick={() => setDeletingEstimate(estimate)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Summary Cards - show at bottom when not grouped, or as phase subtotals when grouped */}
+        {!isGrouped && (
+          <div className="summary-cards">
+            <div className="summary-card">
+              <div className="summary-label">Total Revenue</div>
+              <div className="summary-value" style={{ color: '#10b981' }}>
+                {formatCurrency(totals.revenue)}
               </div>
             </div>
-            );
-          })}
-        </div>
+            <div className="summary-card">
+              <div className="summary-label">Total Costs</div>
+              <div className="summary-value" style={{ color: '#ef4444' }}>
+                {formatCurrency(totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Est. Profit</div>
+              <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
+                {formatCurrency(estimatedProfit)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Est. Margin</div>
+              <div className="summary-value" style={{ color: '#8b5cf6' }}>
+                {estimatedMargin.toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Phase Subtotal Cards - only show when grouped */}
+        {isGrouped && estimates.length > 0 && (
+          <div className="summary-cards">
+            <div className="summary-card">
+              <div className="summary-label">Total Estimates</div>
+              <div className="summary-value">
+                {formatCurrency(totals.revenue + totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Revenue</div>
+              <div className="summary-value" style={{ color: '#10b981' }}>
+                {formatCurrency(totals.revenue)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Costs</div>
+              <div className="summary-value" style={{ color: '#ef4444' }}>
+                {formatCurrency(totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Net</div>
+              <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
+                {formatCurrency(estimatedProfit)}
+              </div>
+            </div>
+          </div>
+        )}
+        </>
       )}
 
       {/* Create/Edit Modal */}
@@ -380,7 +457,7 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                   <select
                     id="estimate_type"
                     name="estimate_type"
-                    defaultValue={editingEstimate?.estimate_type || 'revenue'}
+                    defaultValue={editingEstimate?.estimate_type || 'cost'}
                     required
                   >
                     <option value="revenue">Revenue</option>
@@ -389,6 +466,25 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                   </select>
                 </div>
 
+                <div className="form-group">
+                  <label htmlFor="build_phase_id">Build Phase *</label>
+                  <select
+                    id="build_phase_id"
+                    name="build_phase_id"
+                    defaultValue={editingEstimate?.build_phase_id || ''}
+                    required
+                  >
+                    <option value="">Select a phase...</option>
+                    {phases?.sort((a, b) => (a.display_order || 999) - (b.display_order || 999)).map(phase => (
+                      <option key={phase.id} value={phase.id}>
+                        {phase.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="amount">Amount *</label>
                   <div className="amount-input-wrapper">
@@ -405,16 +501,18 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="estimate_date">Date *</label>
                   <input
                     type="date"
                     id="estimate_date"
                     name="estimate_date"
-                    defaultValue={editingEstimate?.estimate_date ? (typeof editingEstimate.estimate_date === 'string' ? editingEstimate.estimate_date.split('T')[0] : new Date(editingEstimate.estimate_date).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0]}
+                    defaultValue={
+                      editingEstimate?.estimate_date
+                        ? new Date(editingEstimate.estimate_date).toISOString().split('T')[0]
+                        : new Date().toISOString().split('T')[0]
+                    }
                     required
                   />
                 </div>
@@ -506,11 +604,11 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           padding: 0;
         }
 
-        .summary-cards {
+        .estimates-section .summary-cards {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 16px;
-          margin-bottom: 24px;
+          margin-top: 24px;
         }
 
         .summary-card {
@@ -531,57 +629,13 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           font-weight: 700;
         }
 
-        .estimates-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        .estimates-header h3 {
-          font-size: 18px;
-          font-weight: 600;
-        }
-
         .empty-state {
           text-align: center;
           padding: 40px;
           color: var(--text-secondary);
         }
 
-        .estimates-list {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-
-        .estimate-card {
-          border: 1px solid var(--border-color);
-          border-radius: 8px;
-          padding: 16px;
-        }
-
-        .estimate-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 12px;
-        }
-
-        .estimate-type {
-          display: inline-block;
-          padding: 4px 8px;
-          border-radius: 4px;
-          color: white;
-          font-size: 11px;
-          font-weight: 600;
-          text-transform: uppercase;
-        }
-
-        .estimate-actions {
-          display: flex;
-          gap: 8px;
-        }
+        /* Remove old card styles - now using table layout */
 
         .action-button {
           padding: 4px 12px;
@@ -589,6 +643,8 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           cursor: pointer;
           font-size: 12px;
           transition: all 0.2s;
+          border: none;
+          background: none;
         }
 
         .action-button.edit {
@@ -615,27 +671,7 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           border-color: #ef4444;
         }
 
-        .estimate-description {
-          font-weight: 500;
-          margin-bottom: 8px;
-        }
-
-        .estimate-amount {
-          font-size: 18px;
-          font-weight: 700;
-          margin-bottom: 8px;
-        }
-
-        .estimate-notes {
-          font-size: 14px;
-          color: var(--text-secondary);
-          margin-bottom: 8px;
-        }
-
-        .estimate-meta {
-          font-size: 12px;
-          color: var(--text-secondary);
-        }
+        /* Remove old estimate content styles - now using table cells */
 
         .modal-overlay {
           position: fixed;

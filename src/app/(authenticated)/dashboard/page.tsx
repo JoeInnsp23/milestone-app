@@ -1,9 +1,10 @@
 import { auth } from '@clerk/nextjs/server';
-import { getDashboardStats, getProjectSummaries, getMonthlyRevenue, getTopProjects } from '@/lib/queries';
+import { getDashboardStats, getProjectSummaries, getMonthlyRevenue, getTopProjects, getTopProjectsPhaseProgress } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
 import { ProfitChart } from '@/components/dashboard/profit-chart';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
+import { ProjectProgressChart } from '@/components/dashboard/project-progress-chart';
 import { ExportDialog } from '@/components/export/export-dialog';
 import { format } from 'date-fns';
 import { runDashboardValidation } from '@/lib/server-validation';
@@ -27,11 +28,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const view = 'overview';
 
   // Fetch data using Server Component
-  const [statsRaw, projectSummaries, monthlyRevenue, topProjects] = await Promise.all([
+  const [statsRaw, projectSummaries, monthlyRevenue, topProjects, phaseProgress] = await Promise.all([
     getDashboardStats(),
     getProjectSummaries(),
     getMonthlyRevenue('6m'),
     getTopProjects(10),
+    getTopProjectsPhaseProgress(3),
   ]);
 
   // Run server-side validation in development
@@ -168,7 +170,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </div>
               <div className="stat-card">
                 <div className="stat-label">PROFITABLE PROJECTS</div>
-                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects} Projects Profitable</div>
+                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects}</div>
               </div>
             </div>
 
@@ -190,12 +192,9 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   profit: Number(item.profit || 0)
                 })) : []}
               />
-              {/* TODO: Add Distribution Chart */}
               <div className="chart-card">
-                <div className="chart-title">Project Performance Distribution</div>
-                <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Coming Soon</span>
-                </div>
+                <div className="chart-title">Project Progress</div>
+                <ProjectProgressChart data={phaseProgress} />
               </div>
             </div>
         </>

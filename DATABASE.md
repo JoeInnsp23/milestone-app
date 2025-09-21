@@ -59,8 +59,11 @@ npm run db:push
 # View database with Drizzle Studio
 npm run db:studio
 
-# Seed sample data
+# Seed sample data (comprehensive dataset with 50+ projects)
 npm run db:seed
+
+# Seed minimal data (4 projects for testing)
+npm run db:seed:minimal
 ```
 
 ### Docker Commands

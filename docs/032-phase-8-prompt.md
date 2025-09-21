@@ -576,9 +576,10 @@ export async function updatePhaseProgress(
       created_at: new Date()
     });
 
-    // Trigger webhook
-    await triggerWebhook({
-      event: 'progress_updated',
+    // Note: No webhook trigger for progress updates per user requirements
+    // Progress changes are local to the dashboard only
+    // await triggerWebhook({
+      event: 'progress_updated', // REMOVED per requirements
       data: {
         projectId,
         phaseId,
@@ -595,7 +596,9 @@ export async function updatePhaseProgress(
 }
 ```
 
-#### Webhook Integration (T371-T375):
+#### Webhook Integration for Phase Assignments (T371-T375):
+
+**Note**: Webhooks are only triggered for phase assignment changes, NOT for progress updates.
 
 **Webhook Handler:**
 ```typescript

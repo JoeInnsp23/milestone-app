@@ -608,22 +608,24 @@
     background: var(--negative);
   }
 
-  /* Dashboard card default spacing */
-  .dashboard-card {
-    margin-bottom: 1.5rem;
-  }
+  /* Dashboard card default spacing - removed margin-bottom to let grid/flex handle spacing */
 
   /* Chart tooltip styling for opacity fix */
   .chart-tooltip {
-    background-color: hsl(var(--card));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background-color: hsl(var(--card) / 1) !important;
+    background: hsl(var(--card)) !important;
     border: 1px solid hsl(var(--border));
     border-radius: 0.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     padding: 0.75rem;
-    z-index: 50;
-    opacity: 1;
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    position: relative !important;
+  }
+
+  .dark .chart-tooltip {
+    background-color: hsl(217.2 32.6% 17.5%) !important;
+    background: hsl(217.2 32.6% 17.5%) !important;
   }
 
   /* Estimates toggle switch styling */

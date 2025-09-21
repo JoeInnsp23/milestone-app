@@ -1,5 +1,5 @@
 {
-  "id": "61955470-3e8f-442e-a8c7-5cb25427021a",
+  "id": "45621a2b-7e2d-43b3-82c4-cb807d11334f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -919,6 +919,146 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "milestone.phase_progress": {
+      "name": "phase_progress",
+      "schema": "milestone",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "build_phase_id": {
+          "name": "build_phase_id",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "progress_percentage": {
+          "name": "progress_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "last_updated_by": {
+          "name": "last_updated_by",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_phase_progress_project": {
+          "name": "idx_phase_progress_project",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_phase_progress_phase": {
+          "name": "idx_phase_progress_phase",
+          "columns": [
+            {
+              "expression": "build_phase_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ux_phase_progress_unique": {
+          "name": "ux_phase_progress_unique",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "build_phase_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "phase_progress_project_id_projects_id_fk": {
+          "name": "phase_progress_project_id_projects_id_fk",
+          "tableFrom": "phase_progress",
+          "tableTo": "projects",
+          "schemaTo": "milestone",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "phase_progress_build_phase_id_build_phases_id_fk": {
+          "name": "phase_progress_build_phase_id_build_phases_id_fk",
+          "tableFrom": "phase_progress",
+          "tableTo": "build_phases",
+          "schemaTo": "milestone",
+          "columnsFrom": [
+            "build_phase_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "milestone.project_estimates": {
       "name": "project_estimates",
       "schema": "milestone",
@@ -942,6 +1082,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "description": {
+          "name": "description",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Estimate'"
+        },
         "estimate_type": {
           "name": "estimate_type",
           "type": "estimate_type",
@@ -954,6 +1101,20 @@
           "type": "numeric(12, 2)",
           "primaryKey": false,
           "notNull": true
+        },
+        "estimate_date": {
+          "name": "estimate_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "confidence_level": {
+          "name": "confidence_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 3
         },
         "currency": {
           "name": "currency",
@@ -1005,19 +1166,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 1
-        },
-        "previous_version_id": {
-          "name": "previous_version_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -1057,8 +1205,8 @@
           "method": "btree",
           "with": {}
         },
-        "ux_estimates_current": {
-          "name": "ux_estimates_current",
+        "idx_estimates_project_type": {
+          "name": "idx_estimates_project_type",
           "columns": [
             {
               "expression": "project_id",
@@ -1073,8 +1221,7 @@
               "nulls": "last"
             }
           ],
-          "isUnique": true,
-          "where": "\"milestone\".\"project_estimates\".\"valid_until\" IS NULL",
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -1501,7 +1648,6 @@
       "values": [
         "revenue",
         "cost",
-        "hours",
         "materials"
       ]
     },
@@ -1544,9 +1690,7 @@
       ]
     }
   },
-  "schemas": {
-    "milestone": "milestone"
-  },
+  "schemas": {},
   "sequences": {},
   "roles": {},
   "policies": {},

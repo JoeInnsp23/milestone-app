@@ -1,5 +1,3 @@
-CREATE SCHEMA "milestone";
---> statement-breakpoint
 CREATE TYPE "public"."audit_action" AS ENUM('CREATE', 'READ', 'UPDATE', 'DELETE', 'EXPORT');--> statement-breakpoint
 CREATE TYPE "public"."bill_status" AS ENUM('DRAFT', 'SUBMITTED', 'AUTHORISED', 'PAID', 'VOIDED');--> statement-breakpoint
 CREATE TYPE "public"."bill_type" AS ENUM('BILL', 'PURCHASEORDER');--> statement-breakpoint
@@ -113,12 +111,25 @@ CREATE TABLE "milestone"."invoices" (
 	CONSTRAINT "invoices_xero_invoice_id_unique" UNIQUE("xero_invoice_id")
 );
 --> statement-breakpoint
+CREATE TABLE "milestone"."phase_progress" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"project_id" varchar(50) NOT NULL,
+	"build_phase_id" varchar(50) NOT NULL,
+	"progress_percentage" integer DEFAULT 0 NOT NULL,
+	"last_updated_by" varchar(255),
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "milestone"."project_estimates" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"project_id" varchar(50) NOT NULL,
 	"build_phase_id" varchar(50),
+	"description" varchar(500) DEFAULT 'Estimate' NOT NULL,
 	"estimate_type" "estimate_type" NOT NULL,
 	"amount" numeric(12, 2) NOT NULL,
+	"estimate_date" date DEFAULT now() NOT NULL,
+	"confidence_level" integer DEFAULT 3,
 	"currency" varchar(3) DEFAULT 'GBP',
 	"notes" text,
 	"valid_from" date,
@@ -126,9 +137,7 @@ CREATE TABLE "milestone"."project_estimates" (
 	"created_by" varchar(255) NOT NULL,
 	"updated_by" varchar(255),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"version" integer DEFAULT 1,
-	"previous_version_id" uuid
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "milestone"."projects" (
@@ -183,6 +192,8 @@ ALTER TABLE "milestone"."bills" ADD CONSTRAINT "bills_project_id_projects_id_fk"
 ALTER TABLE "milestone"."bills" ADD CONSTRAINT "bills_build_phase_id_build_phases_id_fk" FOREIGN KEY ("build_phase_id") REFERENCES "milestone"."build_phases"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "milestone"."invoices" ADD CONSTRAINT "invoices_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "milestone"."projects"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "milestone"."invoices" ADD CONSTRAINT "invoices_build_phase_id_build_phases_id_fk" FOREIGN KEY ("build_phase_id") REFERENCES "milestone"."build_phases"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "milestone"."phase_progress" ADD CONSTRAINT "phase_progress_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "milestone"."projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "milestone"."phase_progress" ADD CONSTRAINT "phase_progress_build_phase_id_build_phases_id_fk" FOREIGN KEY ("build_phase_id") REFERENCES "milestone"."build_phases"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "milestone"."project_estimates" ADD CONSTRAINT "project_estimates_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "milestone"."projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "milestone"."project_estimates" ADD CONSTRAINT "project_estimates_build_phase_id_build_phases_id_fk" FOREIGN KEY ("build_phase_id") REFERENCES "milestone"."build_phases"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "idx_audit_user" ON "milestone"."audit_logs" USING btree ("user_id");--> statement-breakpoint
@@ -199,8 +210,12 @@ CREATE INDEX "idx_invoices_phase" ON "milestone"."invoices" USING btree ("build_
 CREATE INDEX "idx_invoices_date" ON "milestone"."invoices" USING btree ("invoice_date");--> statement-breakpoint
 CREATE INDEX "idx_invoices_status" ON "milestone"."invoices" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "idx_inv_proj_date" ON "milestone"."invoices" USING btree ("project_id","invoice_date") WHERE "milestone"."invoices"."status" IN ('AUTHORISED', 'PAID');--> statement-breakpoint
+CREATE INDEX "idx_phase_progress_project" ON "milestone"."phase_progress" USING btree ("project_id");--> statement-breakpoint
+CREATE INDEX "idx_phase_progress_phase" ON "milestone"."phase_progress" USING btree ("build_phase_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "ux_phase_progress_unique" ON "milestone"."phase_progress" USING btree ("project_id","build_phase_id");--> statement-breakpoint
 CREATE INDEX "idx_estimates_project" ON "milestone"."project_estimates" USING btree ("project_id");--> statement-breakpoint
 CREATE INDEX "idx_estimates_project_phase" ON "milestone"."project_estimates" USING btree ("project_id","build_phase_id");--> statement-breakpoint
+CREATE INDEX "idx_estimates_project_type" ON "milestone"."project_estimates" USING btree ("project_id","estimate_type");--> statement-breakpoint
 CREATE INDEX "idx_projects_active" ON "milestone"."projects" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "idx_projects_client" ON "milestone"."projects" USING btree ("client_name");--> statement-breakpoint
 CREATE INDEX "idx_sync_status_type" ON "milestone"."sync_status" USING btree ("sync_type","status");

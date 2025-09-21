@@ -7,7 +7,8 @@ import {
   projectEstimates,
   syncStatus,
   auditLogs,
-  userPreferences
+  userPreferences,
+  phaseProgress
 } from './schema';
 import { sql } from 'drizzle-orm';
 
@@ -113,57 +114,189 @@ async function seedComprehensive() {
       {
         id: 'BP001',
         xero_phase_id: 'XBP001',
-        name: 'Planning & Design',
-        description: 'Initial planning, architectural design, and permits',
+        name: 'Demolition Enabling works',
+        description: 'Demolition and site enabling works',
         tracking_category_id: 'TRACK002',
         display_order: 1,
-        color: '#3B82F6',
-        icon: 'blueprint',
-        typical_duration_days: 30,
+        color: '#DC2626',
+        icon: 'Hammer',
+        typical_duration_days: 14,
       },
       {
         id: 'BP002',
         xero_phase_id: 'XBP002',
-        name: 'Foundation',
-        description: 'Site preparation and foundation work',
+        name: 'Groundworks',
+        description: 'Foundation and ground preparation',
         tracking_category_id: 'TRACK002',
         display_order: 2,
-        color: '#8B5CF6',
-        icon: 'foundation',
+        color: '#EA580C',
+        icon: 'Shovel',
         typical_duration_days: 21,
       },
       {
         id: 'BP003',
         xero_phase_id: 'XBP003',
-        name: 'Framing',
-        description: 'Structural framing and roofing',
+        name: 'Masonry',
+        description: 'Brickwork and blockwork',
         tracking_category_id: 'TRACK002',
         display_order: 3,
-        color: '#10B981',
-        icon: 'frame',
+        color: '#CA8A04',
+        icon: 'Layers',
         typical_duration_days: 28,
       },
       {
         id: 'BP004',
         xero_phase_id: 'XBP004',
-        name: 'MEP Installation',
-        description: 'Mechanical, electrical, and plumbing',
+        name: 'Roofing',
+        description: 'Roof structure and covering',
         tracking_category_id: 'TRACK002',
         display_order: 4,
-        color: '#F59E0B',
-        icon: 'electrical',
-        typical_duration_days: 21,
+        color: '#16A34A',
+        icon: 'Home',
+        typical_duration_days: 14,
       },
       {
         id: 'BP005',
         xero_phase_id: 'XBP005',
-        name: 'Interior Finishes',
-        description: 'Drywall, flooring, painting, and fixtures',
+        name: 'Electrical',
+        description: 'Electrical installation and wiring',
         tracking_category_id: 'TRACK002',
         display_order: 5,
-        color: '#EF4444',
-        icon: 'paint',
-        typical_duration_days: 35,
+        color: '#EAB308',
+        icon: 'Zap',
+        typical_duration_days: 21,
+      },
+      {
+        id: 'BP006',
+        xero_phase_id: 'XBP006',
+        name: 'Plumbing & Heating',
+        description: 'Plumbing and heating systems',
+        tracking_category_id: 'TRACK002',
+        display_order: 6,
+        color: '#0EA5E9',
+        icon: 'Droplets',
+        typical_duration_days: 21,
+      },
+      {
+        id: 'BP007',
+        xero_phase_id: 'XBP007',
+        name: 'Joinery',
+        description: 'Carpentry and joinery work',
+        tracking_category_id: 'TRACK002',
+        display_order: 7,
+        color: '#8B4513',
+        icon: 'Hammer',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP008',
+        xero_phase_id: 'XBP008',
+        name: 'Windows and doors',
+        description: 'Window and door installation',
+        tracking_category_id: 'TRACK002',
+        display_order: 8,
+        color: '#06B6D4',
+        icon: 'DoorOpen',
+        typical_duration_days: 7,
+      },
+      {
+        id: 'BP009',
+        xero_phase_id: 'XBP009',
+        name: 'Drylining & Plaster/Render',
+        description: 'Internal walls and plastering',
+        tracking_category_id: 'TRACK002',
+        display_order: 9,
+        color: '#84CC16',
+        icon: 'PaintRoller',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP010',
+        xero_phase_id: 'XBP010',
+        name: 'Decoration',
+        description: 'Painting and decorating',
+        tracking_category_id: 'TRACK002',
+        display_order: 10,
+        color: '#A855F7',
+        icon: 'Paintbrush',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP011',
+        xero_phase_id: 'XBP011',
+        name: 'Landscaping',
+        description: 'External landscaping and gardens',
+        tracking_category_id: 'TRACK002',
+        display_order: 11,
+        color: '#22C55E',
+        icon: 'Trees',
+        typical_duration_days: 21,
+      },
+      {
+        id: 'BP012',
+        xero_phase_id: 'XBP012',
+        name: 'Finishes Schedule',
+        description: 'Final finishes and fittings',
+        tracking_category_id: 'TRACK002',
+        display_order: 12,
+        color: '#F59E0B',
+        icon: 'ListChecks',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP013',
+        xero_phase_id: 'XBP013',
+        name: 'Steelwork',
+        description: 'Structural steel installation',
+        tracking_category_id: 'TRACK002',
+        display_order: 13,
+        color: '#6B7280',
+        icon: 'HardHat',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP014',
+        xero_phase_id: 'XBP014',
+        name: 'Flooring/Tiling',
+        description: 'Floor coverings and tiling',
+        tracking_category_id: 'TRACK002',
+        display_order: 14,
+        color: '#EC4899',
+        icon: 'Grid3x3',
+        typical_duration_days: 14,
+      },
+      {
+        id: 'BP015',
+        xero_phase_id: 'XBP015',
+        name: 'Kitchen',
+        description: 'Kitchen installation and fitting',
+        tracking_category_id: 'TRACK002',
+        display_order: 15,
+        color: '#3B82F6',
+        icon: 'ChefHat',
+        typical_duration_days: 7,
+      },
+      {
+        id: 'BP016',
+        xero_phase_id: 'XBP016',
+        name: 'Extra',
+        description: 'Additional works and variations',
+        tracking_category_id: 'TRACK002',
+        display_order: 16,
+        color: '#8B5CF6',
+        icon: 'Plus',
+        typical_duration_days: 7,
+      },
+      {
+        id: 'BP017',
+        xero_phase_id: 'XBP017',
+        name: 'Project Management Fee',
+        description: 'Project management and administration',
+        tracking_category_id: 'TRACK002',
+        display_order: 17,
+        color: '#1F2937',
+        icon: 'Briefcase',
+        typical_duration_days: 0,
       },
     ];
     await db.insert(buildPhases).values(phasesData);
@@ -175,7 +308,7 @@ async function seedComprehensive() {
     const numProjects = 55; // Generate 55 projects
 
     for (let i = 0; i < numProjects; i++) {
-      const status = Math.random() > 0.3 ? 'active' : 'completed';
+      const status = Math.random() > 0.3 ? 'Active' : 'Completed';
       const startDate = randomDate(new Date('2023-01-01'), new Date('2024-06-01'));
       const endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + Math.floor(Math.random() * 18) + 3);
@@ -197,7 +330,7 @@ async function seedComprehensive() {
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
         project_manager: projectManagers[i % projectManagers.length],
-        is_active: status === 'active',
+        is_active: status === 'Active',
         metadata: {
           location: location,
           type: type.split(' ')[0].toLowerCase(),
@@ -217,8 +350,21 @@ async function seedComprehensive() {
       // Each project gets 3-5 invoices
       const numInvoices = Math.floor(Math.random() * 3) + 3;
 
+      // Determine how far the project has progressed (which phases are active)
+      // Projects typically progress through phases sequentially
+      const maxPhaseIndex = Math.min(
+        Math.floor(Math.random() * 8) + 2, // Projects are in phases 2-9 typically
+        phasesData.length - 1
+      );
+
       for (let j = 0; j < numInvoices; j++) {
-        const phase = phasesData[j % phasesData.length];
+        // Assign invoices to phases that make sense for project progress
+        // Earlier invoices go to earlier phases
+        const phaseIndex = Math.min(
+          Math.floor(j * maxPhaseIndex / numInvoices),
+          maxPhaseIndex
+        );
+        const phase = phasesData[phaseIndex];
         const invoiceDate = randomDate(
           new Date(project.start_date),
           new Date(project.end_date)
@@ -285,8 +431,19 @@ async function seedComprehensive() {
       // Each project gets 2-4 bills
       const numBills = Math.floor(Math.random() * 3) + 2;
 
+      // Use similar phase progression as invoices
+      const maxPhaseIndex = Math.min(
+        Math.floor(Math.random() * 8) + 2,
+        phasesData.length - 1
+      );
+
       for (let j = 0; j < numBills; j++) {
-        const phase = phasesData[j % phasesData.length];
+        // Bills also follow sequential phase progression
+        const phaseIndex = Math.min(
+          Math.floor(j * maxPhaseIndex / numBills),
+          maxPhaseIndex
+        );
+        const phase = phasesData[phaseIndex];
         const billDate = randomDate(
           new Date(project.start_date),
           new Date(project.end_date)
@@ -345,7 +502,7 @@ async function seedComprehensive() {
     console.log('📊 Generating project estimates...');
     const estimatesData = [];
 
-    for (const project of projectsData.filter(p => p.status === 'active')) {
+    for (const project of projectsData.filter(p => p.status === 'Active')) {
       // Add 1-2 estimates per active project
       const phase = phasesData[Math.floor(Math.random() * phasesData.length)];
 
@@ -427,9 +584,72 @@ async function seedComprehensive() {
     await db.insert(userPreferences).values(preferencesData);
     console.log('✅ Inserted user preferences\n');
 
+    // Generate phase progress data based on actual work
+    console.log('📊 Generating phase progress data...');
+    const phaseProgressData = [];
+
+    // Get unique project-phase combinations that have work
+    const projectPhaseWork = new Map();
+
+    // Track phases with invoices
+    for (const invoice of invoicesData) {
+      const key = `${invoice.project_id}-${invoice.build_phase_id}`;
+      if (!projectPhaseWork.has(key)) {
+        projectPhaseWork.set(key, {
+          project_id: invoice.project_id,
+          build_phase_id: invoice.build_phase_id,
+          hasInvoice: true,
+          hasBill: false
+        });
+      } else {
+        projectPhaseWork.get(key).hasInvoice = true;
+      }
+    }
+
+    // Track phases with bills
+    for (const bill of billsData) {
+      const key = `${bill.project_id}-${bill.build_phase_id}`;
+      if (!projectPhaseWork.has(key)) {
+        projectPhaseWork.set(key, {
+          project_id: bill.project_id,
+          build_phase_id: bill.build_phase_id,
+          hasInvoice: false,
+          hasBill: true
+        });
+      } else {
+        projectPhaseWork.get(key).hasBill = true;
+      }
+    }
+
+    // Generate progress for phases with work
+    for (const work of projectPhaseWork.values()) {
+      // Determine progress based on what work exists
+      let progress = 0;
+      if (work.hasInvoice && work.hasBill) {
+        progress = Math.floor(Math.random() * 30) + 70; // 70-100% if both invoice and bill
+      } else if (work.hasInvoice) {
+        progress = Math.floor(Math.random() * 30) + 40; // 40-70% if only invoice
+      } else if (work.hasBill) {
+        progress = Math.floor(Math.random() * 30) + 10; // 10-40% if only bill
+      }
+
+      phaseProgressData.push({
+        project_id: work.project_id,
+        build_phase_id: work.build_phase_id,
+        progress_percentage: progress,
+        last_updated_by: 'comprehensive_seed'
+      });
+    }
+
+    // Insert phase progress data
+    for (const progress of phaseProgressData) {
+      await db.insert(phaseProgress).values(progress);
+    }
+    console.log(`✅ Inserted ${phaseProgressData.length} phase progress records\n`);
+
     // Refresh materialized view
     console.log('🔄 Refreshing materialized view...');
-    await db.execute(sql`REFRESH MATERIALIZED VIEW CONCURRENTLY milestone.project_phase_summary`);
+    await db.execute(sql`REFRESH MATERIALIZED VIEW milestone.project_phase_summary`);
     console.log('✅ Materialized view refreshed\n');
 
     // Calculate statistics
@@ -451,8 +671,8 @@ async function seedComprehensive() {
     console.log(`   - 1 user preference record`);
 
     console.log('\n📈 Project Distribution:');
-    console.log(`   - Active: ${projectsData.filter(p => p.status === 'active').length}`);
-    console.log(`   - Completed: ${projectsData.filter(p => p.status === 'completed').length}`);
+    console.log(`   - Active: ${projectsData.filter(p => p.status === 'Active').length}`);
+    console.log(`   - Completed: ${projectsData.filter(p => p.status === 'Completed').length}`);
     console.log(`   - Small: ${projectsData.filter(p => p.metadata.size === 'small').length}`);
     console.log(`   - Medium: ${projectsData.filter(p => p.metadata.size === 'medium').length}`);
     console.log(`   - Large: ${projectsData.filter(p => p.metadata.size === 'large').length}`);

@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ProjectHeaderClient } from '@/components/projects/project-header-client';
 import { ProjectKPISection } from '@/components/projects/project-kpi-section';
 import { ProjectFinancialBreakdown } from '@/components/projects/project-financial-breakdown';
-import { ProjectTabs } from '@/components/projects/project-tabs';
+import { ProjectTabsEnhanced } from '@/components/projects/project-tabs-enhanced';
+import { FloatSummaryCard } from '@/components/projects/float-summary-card';
 import { ProjectEstimatesHandle } from '@/components/projects/project-estimates';
 import { Invoice, Bill, ProjectEstimate } from '@/types';
 
@@ -24,6 +25,32 @@ interface ProjectDetailClientProps {
   invoices: Invoice[];
   bills: Bill[];
   estimates: ProjectEstimate[];
+  phaseSummaries: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+    projectId: string;
+    revenue: number;
+    costs: number;
+    profit: number;
+    margin: number;
+    itemCount: number;
+    progress: number;
+    invoiceCount: number;
+    billCount: number;
+    estimateCount: number;
+  }>;
+  allPhases: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+    display_order?: number;
+  }>;
+  allProjects: Array<{ id: string; name: string }>;
+  floatReceived: number;
+  totalCostsPaid: number;
 }
 
 export function ProjectDetailClient({
@@ -42,8 +69,13 @@ export function ProjectDetailClient({
   invoices,
   bills,
   estimates,
+  phaseSummaries,
+  allPhases,
+  allProjects,
+  floatReceived,
+  totalCostsPaid,
 }: ProjectDetailClientProps) {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'bills' | 'estimates'>('estimates');
+  const [activeTab, setActiveTab] = useState<'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates'>('summary');
   const [pendingOpen, setPendingOpen] = useState(false);
   const estimatesRef = useRef<ProjectEstimatesHandle>(null);
 
@@ -92,13 +124,23 @@ export function ProjectDetailClient({
 
       {/* Main content with consistent spacing */}
       <div className="space-y-6">
-        {/* KPI Cards with Estimates Toggle */}
-        <ProjectKPISection
-          actualRevenue={actualRevenue}
-          actualCosts={actualCosts}
-          estimatedRevenue={estimatedRevenue}
-          estimatedCosts={estimatedCosts}
-        />
+        {/* Float Summary Card and KPI Cards */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
+            <FloatSummaryCard
+              floatReceived={floatReceived}
+              totalCostsPaid={totalCostsPaid}
+            />
+          </div>
+          <div>
+            <ProjectKPISection
+              actualRevenue={actualRevenue}
+              actualCosts={actualCosts}
+              estimatedRevenue={estimatedRevenue}
+              estimatedCosts={estimatedCosts}
+            />
+          </div>
+        </div>
 
         {/* Financial Breakdown - Including Estimates */}
         <ProjectFinancialBreakdown
@@ -108,12 +150,15 @@ export function ProjectDetailClient({
           invoices={invoices}
         />
 
-        {/* Tabs for Invoices, Bills, and Estimates */}
-        <ProjectTabs
+        {/* Enhanced Tabs with Phase Grouping */}
+        <ProjectTabsEnhanced
           projectId={projectId}
           invoices={invoices}
           bills={bills}
           estimates={estimates}
+          phases={allPhases}
+          phaseSummaries={phaseSummaries}
+          projects={allProjects}
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab)}
           estimatesRef={estimatesRef}

@@ -46,7 +46,14 @@
       "mcp__memory__create_entities",
       "mcp__memory__create_relations",
       "mcp__memory__delete_observations",
-      "mcp__memory__add_observations"
+      "mcp__memory__add_observations",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"CREATE SCHEMA IF NOT EXISTS milestone;\")",
+      "Bash(npx drizzle-kit generate:*)",
+      "Bash(node:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT id, name, is_active FROM milestone.build_phases ORDER BY display_order;\")",
+      "Bash(npx tsx:*)",
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql:*)"
     ],
     "deny": [],
     "ask": []

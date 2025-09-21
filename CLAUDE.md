@@ -78,7 +78,8 @@ npm run db:push      # Push schema to database
 npm run db:generate  # Generate migration files
 npm run db:migrate   # Apply migrations
 npm run db:studio    # Open Drizzle Studio GUI
-npm run db:seed      # Run seed data
+npm run db:seed      # Run seed data (comprehensive dataset with 50+ projects)
+npm run db:seed:minimal  # Run minimal seed data (4 projects for testing)
 
 # Docker operations
 docker compose up -d     # Start PostgreSQL container
