@@ -468,6 +468,7 @@ export function ProjectTabsEnhanced({
                   ref={estimatesRef}
                   projectId={projectId}
                   estimates={[]}
+                  phases={phases}
                   openAddModal={isAddEstimateOpen}
                   onAddModalClose={() => setIsAddEstimateOpen(false)}
                 />
@@ -481,6 +482,7 @@ export function ProjectTabsEnhanced({
                     <ProjectEstimates
                       projectId={projectId}
                       estimates={[estimate]}
+                      phases={phases}
                     />
                   </div>
                 )
@@ -491,6 +493,7 @@ export function ProjectTabsEnhanced({
               ref={estimatesRef}
               projectId={projectId}
               estimates={estimates}
+              phases={phases}
               openAddModal={isAddEstimateOpen}
               onAddModalClose={() => setIsAddEstimateOpen(false)}
             />

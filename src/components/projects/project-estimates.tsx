@@ -6,9 +6,18 @@ import { createEstimate, updateEstimate, deleteEstimate } from '@/app/(authentic
 import { ProjectEstimate } from '@/types';
 import { Button } from '@/components/ui/button';
 
+interface Phase {
+  id: string;
+  name: string;
+  color?: string;
+  icon?: string;
+  display_order?: number;
+}
+
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
+  phases?: Phase[];
   openAddModal?: boolean;
   onAddModalClose?: () => void;
 }
@@ -19,7 +28,7 @@ export interface ProjectEstimatesHandle {
 
 export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstimatesProps>(
   function ProjectEstimates(
-    { projectId, estimates: initialEstimates, openAddModal, onAddModalClose }: ProjectEstimatesProps,
+    { projectId, estimates: initialEstimates, phases, openAddModal, onAddModalClose }: ProjectEstimatesProps,
     ref
   ) {
     const [estimates, setEstimates] = useState(initialEstimates);
@@ -137,7 +146,7 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
       estimate_date: formData.get('estimate_date') as string,
       confidence_level: Number(formData.get('confidence_level')),
       notes: formData.get('notes') as string,
-      build_phase_id: null,
+      build_phase_id: formData.get('build_phase_id') as string || null,
       created_by: 'current-user',
       created_at: new Date().toISOString(),
       updated_by: null,
@@ -388,6 +397,25 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                 </div>
 
                 <div className="form-group">
+                  <label htmlFor="build_phase_id">Build Phase *</label>
+                  <select
+                    id="build_phase_id"
+                    name="build_phase_id"
+                    defaultValue={editingEstimate?.build_phase_id || ''}
+                    required
+                  >
+                    <option value="">Select a phase...</option>
+                    {phases?.sort((a, b) => (a.display_order || 999) - (b.display_order || 999)).map(phase => (
+                      <option key={phase.id} value={phase.id}>
+                        {phase.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
                   <label htmlFor="amount">Amount *</label>
                   <div className="amount-input-wrapper">
                     <span className="currency-symbol">£</span>
@@ -403,16 +431,18 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                     />
                   </div>
                 </div>
-              </div>
 
-              <div className="form-row">
                 <div className="form-group">
                   <label htmlFor="estimate_date">Date *</label>
                   <input
                     type="date"
                     id="estimate_date"
                     name="estimate_date"
-                    defaultValue={editingEstimate?.estimate_date ? (typeof editingEstimate.estimate_date === 'string' ? editingEstimate.estimate_date.split('T')[0] : new Date(editingEstimate.estimate_date).toISOString().split('T')[0]) : new Date().toISOString().split('T')[0]}
+                    defaultValue={
+                      editingEstimate?.estimate_date
+                        ? new Date(editingEstimate.estimate_date).toISOString().split('T')[0]
+                        : new Date().toISOString().split('T')[0]
+                    }
                     required
                   />
                 </div>
