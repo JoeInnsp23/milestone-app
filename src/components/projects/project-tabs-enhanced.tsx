@@ -474,23 +474,57 @@ export function ProjectTabsEnhanced({
                   phases={phases}
                   openAddModal={isAddEstimateOpen}
                   onAddModalClose={() => setIsAddEstimateOpen(false)}
+                  isGrouped={true}
                 />
               </div>
-              {renderGroupedItems(
-                estimates,
-                groupedEstimates,
-                (estimate) => (
-                  <div key={estimate.id}>
-                    {/* Individual estimates without modal handling */}
-                    <ProjectEstimates
-                      projectId={projectId}
-                      estimates={[estimate]}
-                      phases={phases}
-                    />
+              {groupedEstimates.map((group) => {
+                const phaseId = group.phase?.id || 'unassigned';
+                const isCollapsed = collapsedPhases.has(phaseId);
+
+                return (
+                  <div key={phaseId} className="border rounded-lg overflow-hidden">
+                    <div
+                      className="p-4 cursor-pointer flex justify-between items-center transition-all duration-200 hover:opacity-90"
+                      style={{
+                        backgroundColor: group.phase?.color ? `${group.phase.color}20` : 'var(--muted)',
+                        borderLeft: group.phase?.color ? `4px solid ${group.phase.color}` : undefined
+                      }}
+                      onClick={() => togglePhase(phaseId)}
+                    >
+                      <div className="flex items-center gap-2">
+                        {group.phase && (
+                          <div
+                            className="w-3 h-3 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: group.phase.color }}
+                          />
+                        )}
+                        {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        <h3 className="font-semibold">
+                          {group.phase?.name || 'Unassigned'}
+                        </h3>
+                        <span className="text-sm text-muted-foreground">
+                          ({group.items.length} items)
+                        </span>
+                      </div>
+
+                      <div className="flex gap-6 text-sm">
+                        <span>Total: <span className="font-medium">{formatCurrency(group.subtotal)}</span></span>
+                      </div>
+                    </div>
+
+                    {!isCollapsed && (
+                      <div>
+                        <ProjectEstimates
+                          projectId={projectId}
+                          estimates={group.items}
+                          phases={phases}
+                          isGrouped={true}
+                        />
+                      </div>
+                    )}
                   </div>
-                ),
-                false // Don't show subtotal for estimates
-              )}
+                );
+              })}
             </>
           ) : (
             <ProjectEstimates
