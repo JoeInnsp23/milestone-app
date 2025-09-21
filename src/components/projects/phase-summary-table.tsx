@@ -1,7 +1,11 @@
 'use client';
 
+import { useState, useCallback, useEffect } from 'react';
 import { formatCurrency } from '@/lib/export/utils';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { updatePhaseProgress } from '@/app/actions/phases';
+import { Minus, Plus } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface PhaseSummaryData {
   phaseId: string;
@@ -19,11 +23,107 @@ interface PhaseSummaryData {
 
 interface PhaseSummaryTableProps {
   phases: PhaseSummaryData[];
+  projectId?: string;
 }
 
 export function PhaseSummaryTable({
-  phases
+  phases,
+  projectId
 }: PhaseSummaryTableProps) {
+  const [progressValues, setProgressValues] = useState<Record<string, number>>({});
+  const [editingPhase, setEditingPhase] = useState<string | null>(null);
+  const [pendingUpdates, setPendingUpdates] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const initialProgress: Record<string, number> = {};
+    phases.forEach(phase => {
+      initialProgress[phase.phaseId] = phase.progress;
+    });
+    setProgressValues(initialProgress);
+  }, [phases]);
+
+  const handleProgressUpdate = useCallback(async (phaseId: string, newProgress: number) => {
+    if (!projectId) {
+      toast.error('Project ID is required to update progress');
+      return;
+    }
+
+    const clampedProgress = Math.max(0, Math.min(100, Math.round(newProgress)));
+
+    setProgressValues(prev => ({
+      ...prev,
+      [phaseId]: clampedProgress
+    }));
+
+    setPendingUpdates(prev => new Set(prev).add(phaseId));
+
+    try {
+      await updatePhaseProgress(projectId, phaseId, clampedProgress);
+      toast.success('Progress updated');
+    } catch (error) {
+      console.error('Failed to update progress:', error);
+      toast.error('Failed to update progress');
+      const originalPhase = phases.find(p => p.phaseId === phaseId);
+      if (originalPhase) {
+        setProgressValues(prev => ({
+          ...prev,
+          [phaseId]: originalPhase.progress
+        }));
+      }
+    } finally {
+      setPendingUpdates(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(phaseId);
+        return newSet;
+      });
+    }
+  }, [projectId, phases]);
+
+  const handleIncrement = useCallback((phaseId: string, shiftKey: boolean) => {
+    const currentValue = progressValues[phaseId] ?? 0;
+    const increment = shiftKey ? 1 : 5;
+    handleProgressUpdate(phaseId, currentValue + increment);
+  }, [progressValues, handleProgressUpdate]);
+
+  const handleDecrement = useCallback((phaseId: string, shiftKey: boolean) => {
+    const currentValue = progressValues[phaseId] ?? 0;
+    const decrement = shiftKey ? 1 : 5;
+    handleProgressUpdate(phaseId, currentValue - decrement);
+  }, [progressValues, handleProgressUpdate]);
+
+  const handleInputChange = useCallback((phaseId: string, value: string) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      setProgressValues(prev => ({
+        ...prev,
+        [phaseId]: Math.max(0, Math.min(100, numValue))
+      }));
+    }
+  }, []);
+
+  const handleInputBlur = useCallback((phaseId: string) => {
+    setEditingPhase(null);
+    const currentValue = progressValues[phaseId];
+    if (currentValue !== undefined) {
+      handleProgressUpdate(phaseId, currentValue);
+    }
+  }, [progressValues, handleProgressUpdate]);
+
+  const handleInputKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>, phaseId: string) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    } else if (e.key === 'Escape') {
+      const originalPhase = phases.find(p => p.phaseId === phaseId);
+      if (originalPhase) {
+        setProgressValues(prev => ({
+          ...prev,
+          [phaseId]: originalPhase.progress
+        }));
+      }
+      setEditingPhase(null);
+    }
+  }, [phases]);
+
   const totals = phases.reduce(
     (acc, phase) => ({
       estimatedRevenue: acc.estimatedRevenue + phase.estimatedRevenue,
@@ -64,6 +164,9 @@ export function PhaseSummaryTable({
             const phaseCosts = phase.actualCosts + phase.estimatedCost;
             const phaseProfit = phaseRevenue - phaseCosts;
             const phaseMargin = phaseRevenue > 0 ? (phaseProfit / phaseRevenue) * 100 : 0;
+            const currentProgress = progressValues[phase.phaseId] ?? phase.progress;
+            const isUpdating = pendingUpdates.has(phase.phaseId);
+            const isEditing = editingPhase === phase.phaseId;
 
             return (
               <TableRow key={phase.phaseId} className="group [&:hover]:!bg-[var(--table-hover)] transition-colors duration-150">
@@ -79,16 +182,57 @@ export function PhaseSummaryTable({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <div className="w-16 bg-secondary rounded-full h-2">
-                      <div
-                        className="h-full rounded-full transition-all bg-primary"
-                        style={{ width: `${Math.min(phase.progress, 100)}%` }}
-                      />
+                  <div className="flex items-center justify-end gap-1">
+                    {projectId && (
+                      <button
+                        onClick={(e) => handleDecrement(phase.phaseId, e.shiftKey)}
+                        className="p-1 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100"
+                        disabled={isUpdating || currentProgress <= 0}
+                        title="Decrease by 5% (hold Shift for 1%)"
+                      >
+                        <Minus className="h-3 w-3" />
+                      </button>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <div className="w-16 bg-secondary rounded-full h-2">
+                        <div
+                          className="h-full rounded-full transition-all bg-primary"
+                          style={{
+                            width: `${Math.min(currentProgress, 100)}%`,
+                            opacity: isUpdating ? 0.6 : 1
+                          }}
+                        />
+                      </div>
+                      {projectId ? (
+                        <input
+                          type="number"
+                          value={isEditing ? currentProgress : currentProgress}
+                          onChange={(e) => handleInputChange(phase.phaseId, e.target.value)}
+                          onFocus={() => setEditingPhase(phase.phaseId)}
+                          onBlur={() => handleInputBlur(phase.phaseId)}
+                          onKeyDown={(e) => handleInputKeyDown(e, phase.phaseId)}
+                          className="w-12 text-sm text-right bg-transparent hover:bg-secondary focus:bg-secondary rounded px-1 transition-colors"
+                          min="0"
+                          max="100"
+                          disabled={isUpdating}
+                        />
+                      ) : (
+                        <span className="text-sm text-muted-foreground min-w-[40px] text-right">
+                          {currentProgress}%
+                        </span>
+                      )}
+                      <span className="text-sm text-muted-foreground">%</span>
                     </div>
-                    <span className="text-sm text-muted-foreground min-w-[40px] text-right">
-                      {phase.progress}%
-                    </span>
+                    {projectId && (
+                      <button
+                        onClick={(e) => handleIncrement(phase.phaseId, e.shiftKey)}
+                        className="p-1 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100"
+                        disabled={isUpdating || currentProgress >= 100}
+                        title="Increase by 5% (hold Shift for 1%)"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">

@@ -431,6 +431,7 @@ export function ProjectTabsEnhanced({
         {currentTab === 'summary' && (
           <PhaseSummaryTable
             phases={phaseSummaryData}
+            projectId={projectId}
           />
         )}
 
