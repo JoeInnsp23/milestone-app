@@ -168,7 +168,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               </div>
               <div className="stat-card">
                 <div className="stat-label">PROFITABLE PROJECTS</div>
-                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects} Projects Profitable</div>
+                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects}</div>
               </div>
             </div>
 
