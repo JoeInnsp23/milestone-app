@@ -207,23 +207,23 @@ export function ProjectTabsEnhanced({
   const phaseSummaryData = useMemo(() => {
     // ALWAYS use all 17 phases as the base
     const allPhasesData = [
-      { id: 'BP001', name: 'Demolition Enabling works', color: '#8B4513', icon: 'Hammer', display_order: 1 },
-      { id: 'BP002', name: 'Groundworks', color: '#8B5A2B', icon: 'Shovel', display_order: 2 },
-      { id: 'BP003', name: 'Masonry', color: '#A0522D', icon: 'Layers', display_order: 3 },
-      { id: 'BP004', name: 'Roofing', color: '#708090', icon: 'Home', display_order: 4 },
-      { id: 'BP005', name: 'Electrical', color: '#FFD700', icon: 'Zap', display_order: 5 },
-      { id: 'BP006', name: 'Plumbing & Heating', color: '#4682B4', icon: 'Droplets', display_order: 6 },
-      { id: 'BP007', name: 'Joinery', color: '#8B7355', icon: 'Hammer', display_order: 7 },
-      { id: 'BP008', name: 'Windows and doors', color: '#87CEEB', icon: 'DoorOpen', display_order: 8 },
-      { id: 'BP009', name: 'Drylining & Plaster/Render', color: '#F5F5DC', icon: 'PaintRoller', display_order: 9 },
-      { id: 'BP010', name: 'Decoration', color: '#9370DB', icon: 'Paintbrush', display_order: 10 },
-      { id: 'BP011', name: 'Landscaping', color: '#228B22', icon: 'Trees', display_order: 11 },
-      { id: 'BP012', name: 'Finishes Schedule', color: '#DAA520', icon: 'ListChecks', display_order: 12 },
-      { id: 'BP013', name: 'Steelwork', color: '#696969', icon: 'HardHat', display_order: 13 },
-      { id: 'BP014', name: 'Flooring/Tiling', color: '#D2691E', icon: 'Grid3x3', display_order: 14 },
-      { id: 'BP015', name: 'Kitchen', color: '#FF6347', icon: 'ChefHat', display_order: 15 },
-      { id: 'BP016', name: 'Extra', color: '#6B7280', icon: 'Plus', display_order: 16 },
-      { id: 'BP017', name: 'Project Management Fee', color: '#4B0082', icon: 'Briefcase', display_order: 17 },
+      { id: 'BP001', name: 'Demolition Enabling works', color: '#DC2626', icon: 'Hammer', display_order: 1 },  // Red
+      { id: 'BP002', name: 'Groundworks', color: '#EA580C', icon: 'Shovel', display_order: 2 },  // Orange
+      { id: 'BP003', name: 'Masonry', color: '#CA8A04', icon: 'Layers', display_order: 3 },  // Amber
+      { id: 'BP004', name: 'Roofing', color: '#16A34A', icon: 'Home', display_order: 4 },  // Green
+      { id: 'BP005', name: 'Electrical', color: '#EAB308', icon: 'Zap', display_order: 5 },  // Yellow
+      { id: 'BP006', name: 'Plumbing & Heating', color: '#0EA5E9', icon: 'Droplets', display_order: 6 },  // Sky Blue
+      { id: 'BP007', name: 'Joinery', color: '#8B4513', icon: 'Hammer', display_order: 7 },  // Brown
+      { id: 'BP008', name: 'Windows and doors', color: '#06B6D4', icon: 'DoorOpen', display_order: 8 },  // Cyan
+      { id: 'BP009', name: 'Drylining & Plaster/Render', color: '#84CC16', icon: 'PaintRoller', display_order: 9 },  // Lime
+      { id: 'BP010', name: 'Decoration', color: '#A855F7', icon: 'Paintbrush', display_order: 10 },  // Purple
+      { id: 'BP011', name: 'Landscaping', color: '#22C55E', icon: 'Trees', display_order: 11 },  // Light Green
+      { id: 'BP012', name: 'Finishes Schedule', color: '#F59E0B', icon: 'ListChecks', display_order: 12 },  // Amber/Orange
+      { id: 'BP013', name: 'Steelwork', color: '#6B7280', icon: 'HardHat', display_order: 13 },  // Gray
+      { id: 'BP014', name: 'Flooring/Tiling', color: '#EC4899', icon: 'Grid3x3', display_order: 14 },  // Pink
+      { id: 'BP015', name: 'Kitchen', color: '#3B82F6', icon: 'ChefHat', display_order: 15 },  // Blue
+      { id: 'BP016', name: 'Extra', color: '#8B5CF6', icon: 'Plus', display_order: 16 },  // Violet
+      { id: 'BP017', name: 'Project Management Fee', color: '#1F2937', icon: 'Briefcase', display_order: 17 },  // Dark Gray
     ];
 
     // Create a map of phase summaries if available
@@ -315,11 +315,11 @@ export function ProjectTabsEnhanced({
     ]);
 
     const phaseColorMap = new Map([
-      ['BP001', '#8B4513'], ['BP002', '#8B5A2B'], ['BP003', '#A0522D'], ['BP004', '#708090'],
-      ['BP005', '#FFD700'], ['BP006', '#4682B4'], ['BP007', '#8B7355'], ['BP008', '#87CEEB'],
-      ['BP009', '#F5F5DC'], ['BP010', '#9370DB'], ['BP011', '#228B22'], ['BP012', '#DAA520'],
-      ['BP013', '#696969'], ['BP014', '#D2691E'], ['BP015', '#FF6347'], ['BP016', '#6B7280'],
-      ['BP017', '#4B0082']
+      ['BP001', '#DC2626'], ['BP002', '#EA580C'], ['BP003', '#CA8A04'], ['BP004', '#16A34A'],
+      ['BP005', '#EAB308'], ['BP006', '#0EA5E9'], ['BP007', '#8B4513'], ['BP008', '#06B6D4'],
+      ['BP009', '#84CC16'], ['BP010', '#A855F7'], ['BP011', '#22C55E'], ['BP012', '#F59E0B'],
+      ['BP013', '#6B7280'], ['BP014', '#EC4899'], ['BP015', '#3B82F6'], ['BP016', '#8B5CF6'],
+      ['BP017', '#1F2937']
     ]);
 
     // Combine bills and invoices for cost tracking
