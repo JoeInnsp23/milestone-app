@@ -151,21 +151,28 @@ export const ProjectProgressChart = memo(function ProjectProgressChart({ data }:
 
   return (
     <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={chartData}>
+      <BarChart
+        data={chartData}
+        layout="horizontal"
+        margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+      >
         <CartesianGrid
           strokeDasharray="3 3"
           stroke={isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}
         />
         <XAxis
-          dataKey="name"
-          className="text-xs"
-          tick={{ fill: isDark ? '#94a3b8' : '#6b7280' }}
-        />
-        <YAxis
+          type="number"
           className="text-xs"
           tick={{ fill: isDark ? '#94a3b8' : '#6b7280' }}
           domain={[0, 100]}
           tickFormatter={(value) => `${value}%`}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          className="text-xs"
+          tick={{ fill: isDark ? '#94a3b8' : '#6b7280' }}
+          width={80}
         />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
