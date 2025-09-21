@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { formatCurrency } from '@/lib/export/utils';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { updatePhaseProgress } from '@/app/actions/phases';
-import { Minus, Plus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface PhaseSummaryData {
@@ -78,18 +77,6 @@ export function PhaseSummaryTable({
       });
     }
   }, [projectId, phases]);
-
-  const handleIncrement = useCallback((phaseId: string, shiftKey: boolean) => {
-    const currentValue = progressValues[phaseId] ?? 0;
-    const increment = shiftKey ? 1 : 5;
-    handleProgressUpdate(phaseId, currentValue + increment);
-  }, [progressValues, handleProgressUpdate]);
-
-  const handleDecrement = useCallback((phaseId: string, shiftKey: boolean) => {
-    const currentValue = progressValues[phaseId] ?? 0;
-    const decrement = shiftKey ? 1 : 5;
-    handleProgressUpdate(phaseId, currentValue - decrement);
-  }, [progressValues, handleProgressUpdate]);
 
   const handleInputChange = useCallback((phaseId: string, value: string) => {
     const numValue = parseInt(value, 10);
@@ -182,57 +169,35 @@ export function PhaseSummaryTable({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    {projectId && (
-                      <button
-                        onClick={(e) => handleDecrement(phase.phaseId, e.shiftKey)}
-                        className="p-1 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100"
-                        disabled={isUpdating || currentProgress <= 0}
-                        title="Decrease by 5% (hold Shift for 1%)"
-                      >
-                        <Minus className="h-3 w-3" />
-                      </button>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-secondary rounded-full h-2">
-                        <div
-                          className="h-full rounded-full transition-all bg-primary"
-                          style={{
-                            width: `${Math.min(currentProgress, 100)}%`,
-                            opacity: isUpdating ? 0.6 : 1
-                          }}
-                        />
-                      </div>
-                      {projectId ? (
-                        <input
-                          type="number"
-                          value={isEditing ? currentProgress : currentProgress}
-                          onChange={(e) => handleInputChange(phase.phaseId, e.target.value)}
-                          onFocus={() => setEditingPhase(phase.phaseId)}
-                          onBlur={() => handleInputBlur(phase.phaseId)}
-                          onKeyDown={(e) => handleInputKeyDown(e, phase.phaseId)}
-                          className="w-12 text-sm text-right bg-transparent hover:bg-secondary focus:bg-secondary rounded px-1 transition-colors"
-                          min="0"
-                          max="100"
-                          disabled={isUpdating}
-                        />
-                      ) : (
-                        <span className="text-sm text-muted-foreground min-w-[40px] text-right">
-                          {currentProgress}%
-                        </span>
-                      )}
-                      <span className="text-sm text-muted-foreground">%</span>
+                  <div className="flex items-center justify-end gap-2">
+                    <div className="w-16 bg-secondary rounded-full h-2">
+                      <div
+                        className="h-full rounded-full transition-all bg-primary"
+                        style={{
+                          width: `${Math.min(currentProgress, 100)}%`,
+                          opacity: isUpdating ? 0.6 : 1
+                        }}
+                      />
                     </div>
-                    {projectId && (
-                      <button
-                        onClick={(e) => handleIncrement(phase.phaseId, e.shiftKey)}
-                        className="p-1 rounded hover:bg-secondary transition-colors opacity-0 group-hover:opacity-100"
-                        disabled={isUpdating || currentProgress >= 100}
-                        title="Increase by 5% (hold Shift for 1%)"
-                      >
-                        <Plus className="h-3 w-3" />
-                      </button>
+                    {projectId ? (
+                      <input
+                        type="number"
+                        value={isEditing ? currentProgress : currentProgress}
+                        onChange={(e) => handleInputChange(phase.phaseId, e.target.value)}
+                        onFocus={() => setEditingPhase(phase.phaseId)}
+                        onBlur={() => handleInputBlur(phase.phaseId)}
+                        onKeyDown={(e) => handleInputKeyDown(e, phase.phaseId)}
+                        className="w-12 text-sm text-right bg-transparent hover:bg-secondary focus:bg-secondary rounded px-1 transition-colors"
+                        min="0"
+                        max="100"
+                        disabled={isUpdating}
+                      />
+                    ) : (
+                      <span className="text-sm text-muted-foreground min-w-[40px] text-right">
+                        {currentProgress}%
+                      </span>
                     )}
+                    <span className="text-sm text-muted-foreground">%</span>
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
