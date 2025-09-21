@@ -279,6 +279,21 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
         </div>
       </div>
 
+      {/* Add Estimate Button - only show when in grouped mode (single estimate) or when empty */}
+      {(estimates.length === 1 || estimates.length === 0) && (
+        <div className="estimates-header">
+          <h3>Estimates</h3>
+          <Button
+            type="button"
+            variant="header"
+            size="sm"
+            onClick={() => openModal(null)}
+          >
+            + Add Estimate
+          </Button>
+        </div>
+      )}
+
       {/* Estimates List */}
       {estimates.length === 0 ? (
         <div className="empty-state">
@@ -517,6 +532,18 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
         .summary-value {
           font-size: 20px;
           font-weight: 700;
+        }
+
+        .estimates-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .estimates-header h3 {
+          font-size: 18px;
+          font-weight: 600;
         }
 
         .empty-state {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Ref, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { ProjectInvoices } from './project-invoices';
 import { ProjectBills } from './project-bills';
 import { ProjectEstimates, ProjectEstimatesHandle } from './project-estimates';
@@ -41,7 +41,7 @@ interface ProjectTabsEnhancedProps {
   projects: Array<{ id: string; name: string }>;
   activeTab?: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates';
   onTabChange?: (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => void;
-  estimatesRef?: Ref<ProjectEstimatesHandle>;
+  estimatesRef?: React.RefObject<ProjectEstimatesHandle | null>;
 }
 
 interface GroupedItem<T> {
@@ -407,7 +407,7 @@ export function ProjectTabsEnhanced({
                 type="button"
                 variant="header"
                 size="sm"
-                onClick={() => (estimatesRef as React.RefObject<ProjectEstimatesHandle>).current?.openCreateModal()}
+                onClick={() => estimatesRef?.current?.openCreateModal()}
               >
                 + Add Estimate
               </Button>
@@ -458,9 +458,8 @@ export function ProjectTabsEnhanced({
               groupedEstimates,
               (estimate) => (
                 <div key={estimate.id}>
-                  {/* Render individual estimate */}
+                  {/* Render individual estimate - no ref when grouped */}
                   <ProjectEstimates
-                    ref={estimatesRef}
                     projectId={projectId}
                     estimates={[estimate]}
                   />
