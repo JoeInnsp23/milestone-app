@@ -2,6 +2,7 @@ import { SignIn } from '@clerk/nextjs';
 import { BarChart3 } from 'lucide-react';
 
 export default function SignInPage() {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
   return (
     <div className="min-h-screen dashboard-bg-gradient flex items-center justify-center p-4">
       <div className="relative z-10">
@@ -28,8 +29,7 @@ export default function SignInPage() {
             }
           }}
           routing="path"
-          path="/sign-in"
-          signUpUrl={undefined}  // Disable sign-up link
+          path={`${basePath}/sign-in`}
         />
 
         <p className="text-center text-sm text-muted-foreground mt-8">
