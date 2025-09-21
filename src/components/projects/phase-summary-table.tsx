@@ -66,7 +66,7 @@ export function PhaseSummaryTable({
             const phaseMargin = phaseRevenue > 0 ? (phaseProfit / phaseRevenue) * 100 : 0;
 
             return (
-              <TableRow key={phase.phaseId} className="group hover:bg-muted/50 transition-colors duration-150">
+              <TableRow key={phase.phaseId} className="group [&:hover]:!bg-[var(--table-hover)] transition-colors duration-150">
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {phase.phaseColor && (
@@ -124,7 +124,7 @@ export function PhaseSummaryTable({
             );
           })}
 
-          <TableRow className="font-bold border-t-2 bg-muted/30">
+          <TableRow className="font-bold border-t-2 bg-muted/30 [&:hover]:!bg-muted/30">
             <TableCell>Total</TableCell>
             <TableCell className="text-right">
               <span className="text-sm text-muted-foreground">
