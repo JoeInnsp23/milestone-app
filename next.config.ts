@@ -2,8 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // basePath configuration for production deployment
-  basePath: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/milestone-app' : '',
+  // Beta uses /demo, production uses /milestone-app
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_ENVIRONMENT !== 'beta' ? '/milestone-app' : ''),
+  assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_ENVIRONMENT !== 'beta' ? '/milestone-app' : ''),
+
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
 
   // Treat pdfkit as external to avoid bundling issues with font files
   serverExternalPackages: ['pdfkit'],

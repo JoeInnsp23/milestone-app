@@ -53,7 +53,10 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"SELECT id, name, is_active FROM milestone.build_phases ORDER BY display_order;\")",
       "Bash(npx tsx:*)",
-      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql:*)"
+      "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(./build-beta.sh:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,62 @@
+version: '3.8'
+
+networks:
+  beta-network:
+    driver: bridge
+
+services:
+  # PostgreSQL Database for Beta
+  milestone-postgres-beta:
+    image: postgres:16-alpine
+    container_name: milestone-postgres-beta
+    hostname: milestone-postgres-beta
+    networks:
+      - beta-network
+    ports:
+      - "5434:5432"  # Different port to avoid conflicts
+    environment:
+      POSTGRES_USER: milestone_user
+      POSTGRES_PASSWORD: J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=
+      POSTGRES_DB: milestone
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - ./postgres_data_beta:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U milestone_user -d milestone']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Next.js Application
+  milestone-app-beta:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: milestone-app-beta:latest
+    container_name: milestone-app-beta
+    networks:
+      - beta-network
+    ports:
+      - "3001:3000"  # Expose on port 3001 to avoid conflicts
+    environment:
+      # Copy all env vars from .env.beta
+      DATABASE_URL: "postgresql://milestone_user:J22%2F%2BcGJpFZaLSffuzOymJIvke%2FwhllGRGHMrW8n7ys%3D@milestone-postgres-beta:5432/milestone"
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZnVuLW9hcmZpc2gtOTkuY2xlcmsuYWNjb3VudHMuZGV2JA
+      CLERK_SECRET_KEY: sk_test_W35ANt3ubzNnHxZJTG5evJ0jvwjR0jh1pXnUw7Z2nm
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /demo/sign-in
+      NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /demo/dashboard
+      NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: /demo/dashboard
+      NEXT_PUBLIC_APP_URL: https://dashboard.innspiredaccountancy.com/demo
+      NODE_ENV: production
+      NEXT_PUBLIC_ENVIRONMENT: beta
+      NEXT_PUBLIC_BASE_PATH: /demo
+    depends_on:
+      milestone-postgres-beta:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
