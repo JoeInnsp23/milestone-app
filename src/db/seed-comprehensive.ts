@@ -308,7 +308,7 @@ async function seedComprehensive() {
     const numProjects = 55; // Generate 55 projects
 
     for (let i = 0; i < numProjects; i++) {
-      const status = Math.random() > 0.3 ? 'active' : 'completed';
+      const status = Math.random() > 0.3 ? 'Active' : 'Completed';
       const startDate = randomDate(new Date('2023-01-01'), new Date('2024-06-01'));
       const endDate = new Date(startDate);
       endDate.setMonth(endDate.getMonth() + Math.floor(Math.random() * 18) + 3);
@@ -330,7 +330,7 @@ async function seedComprehensive() {
         start_date: startDate.toISOString().split('T')[0],
         end_date: endDate.toISOString().split('T')[0],
         project_manager: projectManagers[i % projectManagers.length],
-        is_active: status === 'active',
+        is_active: status === 'Active',
         metadata: {
           location: location,
           type: type.split(' ')[0].toLowerCase(),
@@ -502,7 +502,7 @@ async function seedComprehensive() {
     console.log('📊 Generating project estimates...');
     const estimatesData = [];
 
-    for (const project of projectsData.filter(p => p.status === 'active')) {
+    for (const project of projectsData.filter(p => p.status === 'Active')) {
       // Add 1-2 estimates per active project
       const phase = phasesData[Math.floor(Math.random() * phasesData.length)];
 
@@ -671,8 +671,8 @@ async function seedComprehensive() {
     console.log(`   - 1 user preference record`);
 
     console.log('\n📈 Project Distribution:');
-    console.log(`   - Active: ${projectsData.filter(p => p.status === 'active').length}`);
-    console.log(`   - Completed: ${projectsData.filter(p => p.status === 'completed').length}`);
+    console.log(`   - Active: ${projectsData.filter(p => p.status === 'Active').length}`);
+    console.log(`   - Completed: ${projectsData.filter(p => p.status === 'Completed').length}`);
     console.log(`   - Small: ${projectsData.filter(p => p.metadata.size === 'small').length}`);
     console.log(`   - Medium: ${projectsData.filter(p => p.metadata.size === 'medium').length}`);
     console.log(`   - Large: ${projectsData.filter(p => p.metadata.size === 'large').length}`);

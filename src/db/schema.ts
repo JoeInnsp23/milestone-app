@@ -71,7 +71,7 @@ export const projects = milestone.table(
     client_name: varchar('client_name', { length: 255 }),
     client_contact_id: varchar('client_contact_id', { length: 50 }),
     tracking_category_id: varchar('tracking_category_id', { length: 50 }).notNull(),
-    status: varchar('status', { length: 50 }).default('active'),
+    status: varchar('status', { length: 50 }).default('Active'),
     start_date: date('start_date'),
     end_date: date('end_date'),
     project_manager: varchar('project_manager', { length: 255 }),

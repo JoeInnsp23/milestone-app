@@ -245,10 +245,8 @@ export function ProjectsTable({ projects: initialProjects, filters, onFilterChan
             </SelectTrigger>
             <SelectContent className="bg-[var(--nav-btn-bg)] rounded-lg shadow border border-[var(--nav-btn-hover)]">
               <SelectItem value="all" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">All Status</SelectItem>
-              <SelectItem value="ACTIVE" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Active</SelectItem>
-              <SelectItem value="COMPLETED" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Completed</SelectItem>
-              <SelectItem value="ON_HOLD" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">On Hold</SelectItem>
-              <SelectItem value="DRAFT" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Draft</SelectItem>
+              <SelectItem value="Active" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Active</SelectItem>
+              <SelectItem value="Completed" className="text-white hover:bg-[var(--nav-btn-hover)] focus:bg-[var(--nav-btn-hover)] data-[state=checked]:bg-[var(--nav-btn-active)]">Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
