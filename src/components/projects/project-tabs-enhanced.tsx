@@ -144,14 +144,14 @@ export function ProjectTabsEnhanced({
   ) => {
     if (!groupByPhase) {
       return (
-        <div className="space-y-2 p-4">
+        <div className="space-y-2">
           {groups[0]?.items.map(renderItem)}
         </div>
       );
     }
 
     return (
-      <div className="space-y-4 p-4">
+      <div className="space-y-4">
         {groups.map((group) => {
           const phaseId = group.phase?.id || 'unassigned';
           const isCollapsed = collapsedPhases.has(phaseId);
@@ -159,7 +159,7 @@ export function ProjectTabsEnhanced({
           return (
             <div key={phaseId} className="border rounded-lg overflow-hidden">
               <div
-                className="p-3 cursor-pointer flex justify-between items-center transition-all duration-200 hover:opacity-90"
+                className="p-4 cursor-pointer flex justify-between items-center transition-all duration-200 hover:opacity-90"
                 style={{
                   backgroundColor: group.phase?.color ? `${group.phase.color}20` : 'var(--muted)',
                   borderLeft: group.phase?.color ? `4px solid ${group.phase.color}` : undefined
@@ -174,21 +174,21 @@ export function ProjectTabsEnhanced({
                     />
                   )}
                   {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  <span className="font-medium">
+                  <h3 className="font-semibold">
                     {group.phase?.name || 'Unassigned'}
-                  </span>
+                  </h3>
                   <span className="text-sm text-muted-foreground">
                     ({group.items.length} items)
                   </span>
                 </div>
 
-                <span className="font-medium">
-                  {formatCurrency(group.subtotal)}
-                </span>
+                <div className="flex gap-6 text-sm">
+                  <span>Total: <span className="font-medium">{formatCurrency(group.subtotal)}</span></span>
+                </div>
               </div>
 
               {!isCollapsed && (
-                <div className="p-3 space-y-2 bg-background">
+                <div className="overflow-x-auto">
                   {group.items.map(renderItem)}
                 </div>
               )}
