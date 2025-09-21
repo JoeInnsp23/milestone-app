@@ -194,7 +194,28 @@ export function ProjectTabsEnhanced({
 
   // Prepare data for Summary and Cost Tracker tabs
   const phaseSummaryData = useMemo(() => {
-    return phases.map(phase => {
+    // Ensure we have all phases, even if empty
+    const allPhasesData = phases.length > 0 ? phases : [
+      { id: 'BP001', name: 'Demolition Enabling works', color: '#8B4513', icon: 'Hammer', display_order: 1 },
+      { id: 'BP002', name: 'Groundworks', color: '#8B5A2B', icon: 'Shovel', display_order: 2 },
+      { id: 'BP003', name: 'Masonry', color: '#A0522D', icon: 'Layers', display_order: 3 },
+      { id: 'BP004', name: 'Roofing', color: '#708090', icon: 'Home', display_order: 4 },
+      { id: 'BP005', name: 'Electrical', color: '#FFD700', icon: 'Zap', display_order: 5 },
+      { id: 'BP006', name: 'Plumbing & Heating', color: '#4682B4', icon: 'Droplets', display_order: 6 },
+      { id: 'BP007', name: 'Joinery', color: '#8B7355', icon: 'Hammer', display_order: 7 },
+      { id: 'BP008', name: 'Windows and doors', color: '#87CEEB', icon: 'DoorOpen', display_order: 8 },
+      { id: 'BP009', name: 'Drylining & Plaster/Render', color: '#F5F5DC', icon: 'PaintRoller', display_order: 9 },
+      { id: 'BP010', name: 'Decoration', color: '#9370DB', icon: 'Paintbrush', display_order: 10 },
+      { id: 'BP011', name: 'Landscaping', color: '#228B22', icon: 'Trees', display_order: 11 },
+      { id: 'BP012', name: 'Finishes Schedule', color: '#DAA520', icon: 'ListChecks', display_order: 12 },
+      { id: 'BP013', name: 'Steelwork', color: '#696969', icon: 'HardHat', display_order: 13 },
+      { id: 'BP014', name: 'Flooring/Tiling', color: '#D2691E', icon: 'Grid3x3', display_order: 14 },
+      { id: 'BP015', name: 'Kitchen', color: '#FF6347', icon: 'ChefHat', display_order: 15 },
+      { id: 'BP016', name: 'Extra', color: '#6B7280', icon: 'Plus', display_order: 16 },
+      { id: 'BP017', name: 'Project Management Fee', color: '#4B0082', icon: 'Briefcase', display_order: 17 },
+    ];
+
+    return allPhasesData.map(phase => {
       // const phaseInvoices = invoices.filter(inv => inv.build_phase_id === phase.id); // Not used in summary
       const phaseBills = bills.filter(bill => bill.build_phase_id === phase.id);
       const phaseEstimates = estimates.filter(est => est.build_phase_id === phase.id);
@@ -222,6 +243,11 @@ export function ProjectTabsEnhanced({
         costsDue,
         variance
       };
+    }).sort((a, b) => {
+      // Sort by display order if available, otherwise by phase ID
+      const orderA = phases.find(p => p.id === a.phaseId)?.display_order || parseInt(a.phaseId.replace('BP', ''));
+      const orderB = phases.find(p => p.id === b.phaseId)?.display_order || parseInt(b.phaseId.replace('BP', ''));
+      return (orderA || 0) - (orderB || 0);
     });
   }, [phases, invoices, bills, estimates]);
 
