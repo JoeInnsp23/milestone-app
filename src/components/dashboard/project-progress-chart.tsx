@@ -100,7 +100,6 @@ export const ProjectProgressChart = memo(function ProjectProgressChart({ data }:
       return (
         <div style={{
           backgroundColor: isDark ? 'hsl(217.2, 32.6%, 17.5%)' : 'hsl(0, 0%, 100%)',
-          border: `1px solid ${isDark ? 'hsl(217.2, 19.1%, 26.7%)' : 'hsl(214.3, 31.8%, 91.4%)'}`,
           borderRadius: '0.5rem',
           padding: '0.75rem',
           opacity: 1,
