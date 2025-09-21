@@ -6,6 +6,7 @@ import { ProjectBills } from './project-bills';
 import { ProjectEstimates, ProjectEstimatesHandle } from './project-estimates';
 import { PhaseSummaryTable } from './phase-summary-table';
 import { CostTrackerTable } from './cost-tracker-table';
+import { Button } from '@/components/ui/button';
 import { Invoice, Bill, ProjectEstimate } from '@/types';
 import { formatCurrency } from '@/lib/export/utils';
 import { ChevronDown, ChevronRight } from 'lucide-react';
@@ -402,13 +403,14 @@ export function ProjectTabsEnhanced({
               />
             </label>
             {currentTab === 'estimates' && estimatesRef && (
-              <button
+              <Button
                 type="button"
-                className="add-estimate-button"
+                variant="header"
+                size="sm"
                 onClick={() => (estimatesRef as React.RefObject<ProjectEstimatesHandle>).current?.openCreateModal()}
               >
                 + Add Estimate
-              </button>
+              </Button>
             )}
           </div>
         )}

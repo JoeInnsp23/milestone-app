@@ -662,28 +662,6 @@
     box-shadow: 0 0 0 2px hsl(var(--ring));
   }
 
-  /* Add Estimate Button */
-  .add-estimate-button {
-    padding: 6px 12px;
-    border-radius: 6px;
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: none;
-  }
-
-  .add-estimate-button:hover {
-    background: hsl(var(--primary) / 0.9);
-    transform: translateY(-1px);
-  }
-
-  .add-estimate-button:active {
-    transform: translateY(0);
-  }
-
   /* Dialog content with dashboard-card styling */
   [data-state="open"][role="dialog"].dashboard-card {
     background-color: hsl(var(--card)) !important;
