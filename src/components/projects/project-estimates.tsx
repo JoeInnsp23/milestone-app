@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 interface ProjectEstimatesProps {
   projectId: string;
   estimates: ProjectEstimate[];
+  openAddModal?: boolean;
+  onAddModalClose?: () => void;
 }
 
 export interface ProjectEstimatesHandle {
@@ -17,7 +19,7 @@ export interface ProjectEstimatesHandle {
 
 export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstimatesProps>(
   function ProjectEstimates(
-    { projectId, estimates: initialEstimates }: ProjectEstimatesProps,
+    { projectId, estimates: initialEstimates, openAddModal, onAddModalClose }: ProjectEstimatesProps,
     ref
   ) {
     const [estimates, setEstimates] = useState(initialEstimates);
@@ -76,6 +78,14 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
         openModal(null);
       },
     }));
+
+    // Handle external trigger to open modal
+    useEffect(() => {
+      if (openAddModal) {
+        openModal(null);
+        onAddModalClose?.();
+      }
+    }, [openAddModal, onAddModalClose]);
 
     const formatCurrency = (value: number | string) => {
       const numValue = typeof value === 'string' ? parseFloat(value) : value;
@@ -278,21 +288,6 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           </div>
         </div>
       </div>
-
-      {/* Add Estimate Button - only show when in grouped mode (single estimate) or when empty */}
-      {(estimates.length === 1 || estimates.length === 0) && (
-        <div className="estimates-header">
-          <h3>Estimates</h3>
-          <Button
-            type="button"
-            variant="header"
-            size="sm"
-            onClick={() => openModal(null)}
-          >
-            + Add Estimate
-          </Button>
-        </div>
-      )}
 
       {/* Estimates List */}
       {estimates.length === 0 ? (
@@ -532,18 +527,6 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
         .summary-value {
           font-size: 20px;
           font-weight: 700;
-        }
-
-        .estimates-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        .estimates-header h3 {
-          font-size: 18px;
-          font-weight: 600;
         }
 
         .empty-state {

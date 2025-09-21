@@ -65,6 +65,7 @@ export function ProjectTabsEnhanced({
   const [internalActiveTab, setInternalActiveTab] = useState<'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates'>('summary');
   const [groupByPhase, setGroupByPhase] = useState(true);
   const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
+  const [isAddEstimateOpen, setIsAddEstimateOpen] = useState(false);
   const currentTab = activeTab ?? internalActiveTab;
 
   const handleTabChange = (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => {
@@ -402,12 +403,19 @@ export function ProjectTabsEnhanced({
                 className="estimates-toggle"
               />
             </label>
-            {currentTab === 'estimates' && estimatesRef && (
+            {currentTab === 'estimates' && (
               <Button
                 type="button"
                 variant="header"
                 size="sm"
-                onClick={() => estimatesRef?.current?.openCreateModal()}
+                onClick={() => {
+                  // Try ref first, fallback to local state
+                  if (estimatesRef?.current) {
+                    estimatesRef.current.openCreateModal();
+                  } else {
+                    setIsAddEstimateOpen(true);
+                  }
+                }}
               >
                 + Add Estimate
               </Button>
@@ -453,24 +461,38 @@ export function ProjectTabsEnhanced({
 
         {currentTab === 'estimates' && (
           groupByPhase ? (
-            renderGroupedItems(
-              estimates,
-              groupedEstimates,
-              (estimate) => (
-                <div key={estimate.id}>
-                  {/* Render individual estimate - no ref when grouped */}
-                  <ProjectEstimates
-                    projectId={projectId}
-                    estimates={[estimate]}
-                  />
-                </div>
-              )
-            )
+            <>
+              {/* Hidden master instance to handle modal when grouped */}
+              <div style={{ display: 'none' }}>
+                <ProjectEstimates
+                  ref={estimatesRef}
+                  projectId={projectId}
+                  estimates={[]}
+                  openAddModal={isAddEstimateOpen}
+                  onAddModalClose={() => setIsAddEstimateOpen(false)}
+                />
+              </div>
+              {renderGroupedItems(
+                estimates,
+                groupedEstimates,
+                (estimate) => (
+                  <div key={estimate.id}>
+                    {/* Individual estimates without modal handling */}
+                    <ProjectEstimates
+                      projectId={projectId}
+                      estimates={[estimate]}
+                    />
+                  </div>
+                )
+              )}
+            </>
           ) : (
             <ProjectEstimates
               ref={estimatesRef}
               projectId={projectId}
               estimates={estimates}
+              openAddModal={isAddEstimateOpen}
+              onAddModalClose={() => setIsAddEstimateOpen(false)}
             />
           )
         )}
