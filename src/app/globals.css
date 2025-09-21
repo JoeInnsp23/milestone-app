@@ -613,14 +613,12 @@
   /* Chart tooltip styling for opacity fix */
   .chart-tooltip {
     background-color: hsl(var(--card));
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     border: 1px solid hsl(var(--border));
     border-radius: 0.5rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     padding: 0.75rem;
-    z-index: 50;
-    opacity: 1;
+    z-index: 1000;
+    opacity: 1 !important;
   }
 
   /* Estimates toggle switch styling */

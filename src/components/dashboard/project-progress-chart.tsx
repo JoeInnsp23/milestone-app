@@ -160,16 +160,10 @@ export const ProjectProgressChart = memo(function ProjectProgressChart({ data }:
           dataKey="name"
           className="text-xs"
           tick={{ fill: isDark ? '#94a3b8' : '#6b7280' }}
-          angle={-45}
-          textAnchor="end"
-          height={100}
+          interval={0}
+          height={60}
         />
-        <YAxis
-          className="text-xs"
-          tick={{ fill: isDark ? '#94a3b8' : '#6b7280' }}
-          domain={[0, 100]}
-          tickFormatter={(value) => `${value}%`}
-        />
+        <YAxis hide={true} />
         <Tooltip content={<CustomTooltip />} />
         <Legend content={<CustomLegend />} />
 
