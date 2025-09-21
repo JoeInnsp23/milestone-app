@@ -18,7 +18,7 @@ export function FloatSummaryCard({
     : 0;
 
   return (
-    <div className="dashboard-card">
+    <div className="dashboard-card h-full">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Wallet className="h-5 w-5" />

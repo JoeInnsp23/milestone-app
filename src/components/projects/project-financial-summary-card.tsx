@@ -33,9 +33,9 @@ export function ProjectFinancialSummaryCard({
   const hasEstimates = estimatedRevenue > 0 || estimatedCosts > 0;
 
   return (
-    <div className="dashboard-card">
+    <div className="dashboard-card h-full flex flex-col">
       {/* Card Header with Toggle */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <DollarSign className="h-5 w-5" />
           Financial Summary
@@ -53,9 +53,9 @@ export function ProjectFinancialSummaryCard({
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="flex-1 flex flex-col justify-between space-y-3">
         {/* Total Income */}
-        <div className="pb-4 border-b">
+        <div className="pb-3 border-b">
           <div className="flex justify-between items-start">
             <div>
               <div className="text-sm text-muted-foreground uppercase tracking-wide mb-1">
@@ -72,14 +72,14 @@ export function ProjectFinancialSummaryCard({
                 </div>
               )}
             </div>
-            <div className="text-2xl font-bold">
+            <div className="text-xl font-bold">
               {formatCurrency(totalIncome)}
             </div>
           </div>
         </div>
 
         {/* Gross Profit */}
-        <div className="pb-4 border-b">
+        <div className="pb-3 border-b">
           <div className="flex justify-between items-start">
             <div>
               <div className="text-sm text-muted-foreground uppercase tracking-wide mb-1">
@@ -95,7 +95,7 @@ export function ProjectFinancialSummaryCard({
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-600" />
               )}
-              <span className={`text-2xl font-bold ${
+              <span className={`text-xl font-bold ${
                 grossProfit >= 0 ? 'text-green-600' : 'text-red-600'
               }`}>
                 {formatCurrency(grossProfit)}
@@ -126,7 +126,7 @@ export function ProjectFinancialSummaryCard({
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-600" />
               )}
-              <span className={`text-2xl font-bold ${
+              <span className={`text-xl font-bold ${
                 netProfit >= 0 ? 'text-green-600' : 'text-red-600'
               }`}>
                 {formatCurrency(netProfit)}

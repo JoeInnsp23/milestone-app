@@ -608,10 +608,7 @@
     background: var(--negative);
   }
 
-  /* Dashboard card default spacing */
-  .dashboard-card {
-    margin-bottom: 1.5rem;
-  }
+  /* Dashboard card default spacing - removed margin-bottom to let grid/flex handle spacing */
 
   /* Chart tooltip styling for opacity fix */
   .chart-tooltip {
