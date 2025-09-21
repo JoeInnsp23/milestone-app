@@ -8,7 +8,7 @@ import {
 import { PhaseSummary } from '@/types';
 import { ProgressTracker } from './progress-tracker';
 
-const phaseIcons: Record<string, any> = {
+const phaseIcons: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   demolition: Hammer,
   groundworks: Shovel,
   masonry: Layers,

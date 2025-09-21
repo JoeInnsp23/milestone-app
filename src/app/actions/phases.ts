@@ -62,11 +62,8 @@ export async function updatePhaseProgress(
       created_at: new Date()
     });
 
-    // T380 - Trigger webhook for n8n
-    await triggerWebhook({
-      event: 'progress_updated',
-      data: { projectId, buildPhaseId, progress }
-    });
+    // Note: No webhook trigger for progress updates per user requirements
+    // Progress changes are local to the dashboard only
 
     // Revalidate project page
     revalidatePath(`/projects/${projectId}`);
@@ -292,7 +289,7 @@ export async function getProjectPhases(projectId: string) {
       ORDER BY bp.display_order
     `);
 
-    return (phaseSummary as any[]).map((row: any) => ({
+    return (phaseSummary as Array<Record<string, unknown>>).map((row: Record<string, unknown>) => ({
       id: row.id,
       name: row.name,
       color: row.color || '#6B7280',

@@ -8,7 +8,7 @@ import { ProjectTabsEnhanced } from '@/components/projects/project-tabs-enhanced
 import { PhaseSummaryCards } from '@/components/projects/phase-summary-cards';
 import { FloatSummaryCard } from '@/components/projects/float-summary-card';
 import { ProjectEstimatesHandle } from '@/components/projects/project-estimates';
-import { Invoice, Bill, ProjectEstimate, PhaseSummary, BuildPhase, Project } from '@/types';
+import { Invoice, Bill, ProjectEstimate } from '@/types';
 
 interface ProjectDetailClientProps {
   projectId: string;
@@ -26,9 +26,30 @@ interface ProjectDetailClientProps {
   invoices: Invoice[];
   bills: Bill[];
   estimates: ProjectEstimate[];
-  phaseSummaries: any[];
-  allPhases: any[];
-  allProjects: any[];
+  phaseSummaries: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+    projectId: string;
+    revenue: number;
+    costs: number;
+    profit: number;
+    margin: number;
+    itemCount: number;
+    progress: number;
+    invoiceCount: number;
+    billCount: number;
+    estimateCount: number;
+  }>;
+  allPhases: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+    display_order?: number;
+  }>;
+  allProjects: Array<{ id: string; name: string }>;
   floatReceived: number;
   totalCostsPaid: number;
 }
@@ -55,7 +76,7 @@ export function ProjectDetailClient({
   floatReceived,
   totalCostsPaid,
 }: ProjectDetailClientProps) {
-  const [activeTab, setActiveTab] = useState<'invoices' | 'bills' | 'estimates'>('estimates');
+  const [activeTab, setActiveTab] = useState<'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates'>('summary');
   const [pendingOpen, setPendingOpen] = useState(false);
   const estimatesRef = useRef<ProjectEstimatesHandle>(null);
 
@@ -149,6 +170,8 @@ export function ProjectDetailClient({
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab)}
           estimatesRef={estimatesRef}
+          floatReceived={floatReceived}
+          totalCostsPaid={totalCostsPaid}
         />
       </div>
     </>

@@ -26,10 +26,11 @@ async function applyViews() {
     for (const statement of statements) {
       try {
         await db.execute(sql.raw(statement + ';'));
-      } catch (error: any) {
+      } catch (error) {
         // Ignore "already exists" errors for idempotency
-        if (!error.message?.includes('already exists')) {
-          console.warn(`⚠️ Warning executing statement: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (!errorMessage?.includes('already exists')) {
+          console.warn(`⚠️ Warning executing statement: ${errorMessage}`);
         }
       }
     }

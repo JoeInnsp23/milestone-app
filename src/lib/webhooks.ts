@@ -2,7 +2,7 @@
 
 interface WebhookPayload {
   event: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
 export async function triggerWebhook(payload: WebhookPayload) {

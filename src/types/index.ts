@@ -56,6 +56,8 @@ export interface Invoice {
   project_id: string | null;
   build_phase_id?: string | null;
   line_items?: Array<{ description?: string; amount?: number }>;
+  created_at?: Date | string;
+  updated_at?: Date | string;
   // Additional properties from database are allowed via type assertion
 }
 
@@ -72,6 +74,8 @@ export interface Bill {
   contact_name: string | null;
   project_id: string | null;
   build_phase_id?: string | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
   // Additional properties from database are allowed via type assertion
 }
 
@@ -151,6 +155,14 @@ export interface PhaseAssignmentProps {
   itemType: 'invoice' | 'bill' | 'estimate';
   currentPhaseId: string | null;
   currentProjectId: string;
-  phases: any[];
-  projects: any[];
+  phases: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+  }>;
+  projects: Array<{
+    id: string;
+    name: string;
+  }>;
 }

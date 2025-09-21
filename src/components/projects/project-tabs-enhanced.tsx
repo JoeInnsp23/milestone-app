@@ -1,29 +1,41 @@
 'use client';
 
-import { Ref, useState } from 'react';
+import { Ref, useState, useMemo } from 'react';
 import { ProjectInvoices } from './project-invoices';
 import { ProjectBills } from './project-bills';
 import { ProjectEstimates, ProjectEstimatesHandle } from './project-estimates';
-import { Invoice, Bill, ProjectEstimate, BuildPhase } from '@/types';
+import { PhaseSummaryTable } from './phase-summary-table';
+import { CostTrackerTable } from './cost-tracker-table';
+import { Invoice, Bill, ProjectEstimate } from '@/types';
 import { formatCurrency } from '@/lib/export/utils';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+
+interface Phase {
+  id: string;
+  name: string;
+  color?: string;
+  icon?: string;
+  display_order?: number;
+}
 
 interface ProjectTabsEnhancedProps {
   projectId: string;
   invoices: Invoice[];
   bills: Bill[];
   estimates: ProjectEstimate[];
-  phases: any[];
-  projects: any[];
-  activeTab?: 'invoices' | 'bills' | 'estimates';
-  onTabChange?: (tab: 'invoices' | 'bills' | 'estimates') => void;
+  phases: Phase[];
+  projects: Array<{ id: string; name: string }>;
+  activeTab?: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates';
+  onTabChange?: (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => void;
   estimatesRef?: Ref<ProjectEstimatesHandle>;
+  floatReceived?: number;
+  totalCostsPaid?: number;
 }
 
 interface GroupedItem<T> {
-  phase: any | null;
+  phase: Phase | null;
   items: T[];
   subtotal: number;
 }
@@ -34,17 +46,19 @@ export function ProjectTabsEnhanced({
   bills,
   estimates,
   phases,
-  projects,
+  // projects, // Not used currently
   activeTab,
   onTabChange,
   estimatesRef,
+  floatReceived = 0,
+  totalCostsPaid = 0,
 }: ProjectTabsEnhancedProps) {
-  const [internalActiveTab, setInternalActiveTab] = useState<'invoices' | 'bills' | 'estimates'>('estimates');
+  const [internalActiveTab, setInternalActiveTab] = useState<'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates'>('summary');
   const [groupByPhase, setGroupByPhase] = useState(true);
   const [collapsedPhases, setCollapsedPhases] = useState<Set<string>>(new Set());
   const currentTab = activeTab ?? internalActiveTab;
 
-  const handleTabChange = (tab: 'invoices' | 'bills' | 'estimates') => {
+  const handleTabChange = (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => {
     if (tab === currentTab) return;
 
     if (onTabChange) {
@@ -74,7 +88,7 @@ export function ProjectTabsEnhanced({
       return [{
         phase: null,
         items: items.sort((a, b) => {
-          const getDate = (item: any) => {
+          const getDate = (item: Invoice | Bill | ProjectEstimate) => {
             return item.invoice_date || item.bill_date || item.estimate_date || item.created_at;
           };
           const dateA = new Date(getDate(a)).getTime();
@@ -178,10 +192,91 @@ export function ProjectTabsEnhanced({
   const groupedBills = groupItemsByPhase(bills, getBillAmount);
   const groupedEstimates = groupItemsByPhase(estimates, getEstimateAmount);
 
+  // Prepare data for Summary and Cost Tracker tabs
+  const phaseSummaryData = useMemo(() => {
+    return phases.map(phase => {
+      // const phaseInvoices = invoices.filter(inv => inv.build_phase_id === phase.id); // Not used in summary
+      const phaseBills = bills.filter(bill => bill.build_phase_id === phase.id);
+      const phaseEstimates = estimates.filter(est => est.build_phase_id === phase.id);
+
+      const estimatedCost = phaseEstimates
+        .filter(est => est.estimate_type === 'cost' || est.estimate_type === 'materials')
+        .reduce((sum, est) => sum + Number(est.amount || 0), 0);
+
+      const totalPaidToDate = phaseBills
+        .filter(bill => bill.status === 'PAID')
+        .reduce((sum, bill) => sum + Number(bill.amount_paid || 0), 0);
+
+      const costsDue = phaseBills
+        .filter(bill => bill.status !== 'PAID')
+        .reduce((sum, bill) => sum + Number(bill.amount_due || 0), 0);
+
+      const actualTotal = phaseBills.reduce((sum, bill) => sum + Number(bill.total || 0), 0);
+      const variance = estimatedCost - actualTotal;
+
+      return {
+        phaseId: phase.id,
+        phaseName: phase.name,
+        estimatedCost,
+        totalPaidToDate,
+        costsDue,
+        variance
+      };
+    });
+  }, [phases, invoices, bills, estimates]);
+
+  const costTrackerData = useMemo(() => {
+    const items: Array<{
+      id: string;
+      date: Date | string;
+      invoiceReference: string;
+      description: string;
+      amountPaid: number;
+      costsDirectByCustomer: number;
+      refunds: number;
+      costsDue: number;
+      phaseId: string;
+      phaseName: string;
+    }> = [];
+
+    // Combine bills and invoices for cost tracking
+    bills.forEach(bill => {
+      const phase = phases.find(p => p.id === bill.build_phase_id);
+      items.push({
+        id: bill.id,
+        date: bill.bill_date || bill.created_at,
+        invoiceReference: bill.bill_number || 'N/A',
+        description: bill.contact_name || 'Bill',
+        amountPaid: Number(bill.amount_paid || 0),
+        costsDirectByCustomer: 0,
+        refunds: 0,
+        costsDue: Number(bill.amount_due || 0),
+        phaseId: bill.build_phase_id || 'unassigned',
+        phaseName: phase?.name || 'Unassigned'
+      });
+    });
+
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [bills, phases]);
+
+  const floatBalance = floatReceived - totalCostsPaid;
+
   return (
     <div className="dashboard-card">
       <div className="flex justify-between items-center mb-4">
         <div className="tabs-header">
+          <button
+            className={`tab-button ${currentTab === 'summary' ? 'active' : ''}`}
+            onClick={() => handleTabChange('summary')}
+          >
+            Summary
+          </button>
+          <button
+            className={`tab-button ${currentTab === 'cost-tracker' ? 'active' : ''}`}
+            onClick={() => handleTabChange('cost-tracker')}
+          >
+            Cost Tracker
+          </button>
           <button
             className={`tab-button ${currentTab === 'invoices' ? 'active' : ''}`}
             onClick={() => handleTabChange('invoices')}
@@ -202,19 +297,32 @@ export function ProjectTabsEnhanced({
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Switch
-            id="group-by-phase"
-            checked={groupByPhase}
-            onCheckedChange={setGroupByPhase}
-          />
-          <Label htmlFor="group-by-phase" className="text-sm font-medium cursor-pointer">
-            Group by Phase
-          </Label>
-        </div>
+        {(currentTab === 'invoices' || currentTab === 'bills' || currentTab === 'estimates') && (
+          <div className="flex items-center gap-2">
+            <Switch
+              id="group-by-phase"
+              checked={groupByPhase}
+              onCheckedChange={setGroupByPhase}
+            />
+            <Label htmlFor="group-by-phase" className="text-sm font-medium cursor-pointer">
+              Group by Phase
+            </Label>
+          </div>
+        )}
       </div>
 
       <div className="tab-content">
+        {currentTab === 'summary' && (
+          <PhaseSummaryTable
+            phases={phaseSummaryData}
+            floatBalance={floatBalance}
+          />
+        )}
+
+        {currentTab === 'cost-tracker' && (
+          <CostTrackerTable items={costTrackerData} />
+        )}
+
         {currentTab === 'invoices' && (
           groupByPhase ? (
             renderGroupedItems(
