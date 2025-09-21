@@ -652,6 +652,76 @@ export async function getTopProjects(limit: number = 10) {
   }
 }
 
+// Get phase progress for top projects
+export async function getTopProjectsPhaseProgress(limit: number = 3) {
+  try {
+    // First get top projects by profit
+    const topProjects = await db.execute(sql`
+      SELECT
+        project_id,
+        project_name,
+        SUM(profit) as total_profit
+      FROM milestone.project_phase_summary
+      GROUP BY project_id, project_name
+      ORDER BY total_profit DESC
+      LIMIT ${limit}
+    `);
+
+    if (!topProjects || topProjects.length === 0) {
+      return [];
+    }
+
+    const projectIds = (topProjects as Array<Record<string, unknown>>).map(p => p.project_id as string);
+
+    // Get phase progress for these projects
+    const phaseProgress = await db.execute(sql`
+      SELECT
+        pp.project_id,
+        p.name as project_name,
+        bp.id as phase_id,
+        bp.name as phase_name,
+        bp.color as phase_color,
+        bp.display_order,
+        COALESCE(pp.progress_percentage, 0) as progress
+      FROM milestone.phase_progress pp
+      INNER JOIN milestone.build_phases bp ON pp.build_phase_id = bp.id
+      INNER JOIN milestone.projects p ON pp.project_id = p.id
+      WHERE pp.project_id = ANY(ARRAY[${sql.raw(projectIds.map(id => `'${id}'`).join(','))}])
+        AND pp.progress_percentage > 0
+      ORDER BY p.name, bp.display_order
+    `);
+
+    // Transform data for chart
+    const projectsMap = new Map();
+
+    (phaseProgress as Array<Record<string, unknown>>).forEach(row => {
+      const projectId = row.project_id as string;
+      const projectName = row.project_name as string;
+
+      if (!projectsMap.has(projectId)) {
+        projectsMap.set(projectId, {
+          projectId,
+          projectName: projectName.length > 15 ? projectName.substring(0, 15) + '...' : projectName,
+          phases: []
+        });
+      }
+
+      projectsMap.get(projectId).phases.push({
+        phaseId: row.phase_id as string,
+        phaseName: row.phase_name as string,
+        color: row.phase_color as string || '#6B7280',
+        progress: Number(row.progress || 0),
+        displayOrder: Number(row.display_order || 0)
+      });
+    });
+
+    return Array.from(projectsMap.values());
+  } catch (error) {
+    console.error('Error fetching project phase progress:', error);
+    return [];
+  }
+}
+
 // Data Validation Queries
 export async function validateDashboardData() {
   try {
