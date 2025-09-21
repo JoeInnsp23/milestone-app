@@ -16,6 +16,7 @@ interface CostTrackerItem {
   costsDue: number;
   phaseId: string;
   phaseName: string;
+  phaseOrder?: number;
 }
 
 interface CostTrackerTableProps {
@@ -30,6 +31,7 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
     if (!acc[item.phaseId]) {
       acc[item.phaseId] = {
         phaseName: item.phaseName,
+        phaseOrder: item.phaseOrder || 999,
         items: [],
         totals: { paid: 0, direct: 0, refunds: 0, due: 0 }
       };
@@ -42,6 +44,7 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
     return acc;
   }, {} as Record<string, {
     phaseName: string;
+    phaseOrder: number;
     items: CostTrackerItem[];
     totals: { paid: number; direct: number; refunds: number; due: number };
   }>);
@@ -69,7 +72,9 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
 
   return (
     <div className="space-y-4">
-      {Object.entries(groupedItems).map(([phaseId, phaseData]) => {
+      {Object.entries(groupedItems)
+        .sort((a, b) => a[1].phaseOrder - b[1].phaseOrder)
+        .map(([phaseId, phaseData]) => {
         const isCollapsed = collapsedPhases.has(phaseId);
 
         return (

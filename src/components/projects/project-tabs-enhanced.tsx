@@ -301,11 +301,22 @@ export function ProjectTabsEnhanced({
       costsDue: number;
       phaseId: string;
       phaseName: string;
+      phaseOrder: number;
     }> = [];
+
+    // Create a map of phase orders using the same hardcoded list as summary
+    const phaseOrderMap = new Map([
+      ['BP001', 1], ['BP002', 2], ['BP003', 3], ['BP004', 4],
+      ['BP005', 5], ['BP006', 6], ['BP007', 7], ['BP008', 8],
+      ['BP009', 9], ['BP010', 10], ['BP011', 11], ['BP012', 12],
+      ['BP013', 13], ['BP014', 14], ['BP015', 15], ['BP016', 16],
+      ['BP017', 17]
+    ]);
 
     // Combine bills and invoices for cost tracking
     bills.forEach(bill => {
       const phase = phases.find(p => p.id === bill.build_phase_id);
+      const phaseOrder = phaseOrderMap.get(bill.build_phase_id || '') || 999;
       items.push({
         id: bill.id,
         date: bill.bill_date || bill.created_at || new Date(),
@@ -316,11 +327,18 @@ export function ProjectTabsEnhanced({
         refunds: 0,
         costsDue: Number(bill.amount_due || 0),
         phaseId: bill.build_phase_id || 'unassigned',
-        phaseName: phase?.name || 'Unassigned'
+        phaseName: phase?.name || 'Unassigned',
+        phaseOrder
       });
     });
 
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Sort by phase order first, then by date within each phase
+    return items.sort((a, b) => {
+      if (a.phaseOrder !== b.phaseOrder) {
+        return a.phaseOrder - b.phaseOrder;
+      }
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
   }, [bills, phases]);
 
   return (
