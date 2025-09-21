@@ -457,7 +457,7 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
                   <select
                     id="estimate_type"
                     name="estimate_type"
-                    defaultValue={editingEstimate?.estimate_type || 'revenue'}
+                    defaultValue={editingEstimate?.estimate_type || 'cost'}
                     required
                   >
                     <option value="revenue">Revenue</option>
