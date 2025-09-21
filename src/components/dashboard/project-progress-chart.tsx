@@ -98,7 +98,14 @@ export const ProjectProgressChart = memo(function ProjectProgressChart({ data }:
       if (validPayload.length === 0) return null;
 
       return (
-        <div className="chart-tooltip">
+        <div style={{
+          backgroundColor: isDark ? 'hsl(217.2, 32.6%, 17.5%)' : 'hsl(0, 0%, 100%)',
+          border: `1px solid ${isDark ? 'hsl(217.2, 19.1%, 26.7%)' : 'hsl(214.3, 31.8%, 91.4%)'}`,
+          borderRadius: '0.5rem',
+          padding: '0.75rem',
+          opacity: 1,
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.3)'
+        }}>
           <div className="flex flex-col mb-2">
             <span className="font-bold text-foreground">
               {label}
@@ -164,7 +171,13 @@ export const ProjectProgressChart = memo(function ProjectProgressChart({ data }:
           height={60}
         />
         <YAxis hide={true} />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip
+          content={<CustomTooltip />}
+          wrapperStyle={{
+            opacity: 1,
+            zIndex: 9999
+          }}
+        />
         <Legend content={<CustomLegend />} />
 
         {sortedPhases.map((phase) => (
