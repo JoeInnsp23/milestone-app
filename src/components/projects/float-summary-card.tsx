@@ -1,19 +1,16 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/export/utils';
 import { Wallet, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface FloatSummaryCardProps {
   floatReceived: number;
   totalCostsPaid: number;
-  projectId: string;
 }
 
 export function FloatSummaryCard({
   floatReceived,
-  totalCostsPaid,
-  projectId
+  totalCostsPaid
 }: FloatSummaryCardProps) {
   const floatBalance = floatReceived - totalCostsPaid;
   const floatUtilization = floatReceived > 0
@@ -21,7 +18,7 @@ export function FloatSummaryCard({
     : 0;
 
   return (
-    <Card className="p-6">
+    <div className="dashboard-card">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Wallet className="h-5 w-5" />
@@ -84,6 +81,6 @@ export function FloatSummaryCard({
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

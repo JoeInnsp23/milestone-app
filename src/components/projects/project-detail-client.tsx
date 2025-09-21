@@ -138,7 +138,6 @@ export function ProjectDetailClient({
             <FloatSummaryCard
               floatReceived={floatReceived}
               totalCostsPaid={totalCostsPaid}
-              projectId={projectId}
             />
           </div>
           <div className="lg:col-span-3">
