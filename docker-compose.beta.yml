@@ -42,8 +42,8 @@ services:
     environment:
       # Copy all env vars from .env.beta
       DATABASE_URL: "postgresql://milestone_user:J22%2F%2BcGJpFZaLSffuzOymJIvke%2FwhllGRGHMrW8n7ys%3D@milestone-postgres-beta:5432/milestone"
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_ZnVuLW9hcmZpc2gtOTkuY2xlcmsuYWNjb3VudHMuZGV2JA
-      CLERK_SECRET_KEY: sk_test_W35ANt3ubzNnHxZJTG5evJ0jvwjR0jh1pXnUw7Z2nm
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_live_Y2xlcmsuZGFzaGJvYXJkLmlubnNwaXJlZGFjY291bnRhbmN5LmNvbSQ
+      CLERK_SECRET_KEY: sk_live_6Wd40vHEjHw0rMVphb9NQrqENNoebaxitokPwtQI8j
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /demo/sign-in
       NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: /demo/dashboard
       NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: /demo/dashboard

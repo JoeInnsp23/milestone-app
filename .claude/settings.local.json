@@ -57,7 +57,10 @@
       "Bash(grep:*)",
       "Bash(chmod:*)",
       "Bash(./build-beta.sh:*)",
-      "Bash(docker build:*)"
+      "Bash(docker build:*)",
+      "Read(//etc/nginx/sites-available/**)",
+      "Bash(sudo nginx:*)",
+      "Bash(sudo systemctl reload:*)"
     ],
     "deny": [],
     "ask": []
