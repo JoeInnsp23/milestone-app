@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Minus, Plus } from 'lucide-react';
 import { updatePhaseProgress } from '@/app/actions/phases';
+import toast from 'react-hot-toast';
 
 interface ProgressTrackerProps {
   phaseId: string;
@@ -30,9 +32,11 @@ export function ProgressTracker({
 
     try {
       await updatePhaseProgress(projectId, phaseId, newProgress);
+      toast.success(`Progress updated to ${newProgress}%`);
     } catch (error) {
       console.error('Failed to update progress:', error);
       setProgress(progress); // Revert on error
+      toast.error('Failed to update progress');
     } finally {
       setIsUpdating(false);
     }
@@ -56,15 +60,13 @@ export function ProgressTracker({
           <Minus className="h-3 w-3" />
         </Button>
 
-        <div className="flex-1 bg-secondary rounded-full h-2 overflow-hidden">
-          <div
-            className="h-full transition-all duration-300"
-            style={{
-              width: `${progress}%`,
-              backgroundColor: phaseColor
-            }}
-          />
-        </div>
+        <Progress
+          value={progress}
+          className="flex-1"
+          style={{
+            '--progress-color': phaseColor
+          } as React.CSSProperties}
+        />
 
         <Button
           size="sm"

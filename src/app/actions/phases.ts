@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { invoices, bills, projectEstimates, phaseProgress, auditLogs } from '@/db/schema';
+import { invoices, bills, projectEstimates, phaseProgress, auditLogs, buildPhases, projects } from '@/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
@@ -189,6 +189,45 @@ export async function updateItemPhase({
   } catch (error) {
     console.error('Failed to update phase:', error);
     throw error;
+  }
+}
+
+// Get all available phases
+export async function getAllPhases() {
+  try {
+    const phases = await db.select({
+      id: buildPhases.id,
+      name: buildPhases.name,
+      color: buildPhases.color,
+      icon: buildPhases.icon,
+      display_order: buildPhases.display_order
+    })
+    .from(buildPhases)
+    .where(eq(buildPhases.is_active, true))
+    .orderBy(buildPhases.display_order);
+
+    return phases;
+  } catch (error) {
+    console.error('Failed to get all phases:', error);
+    return [];
+  }
+}
+
+// Get all projects
+export async function getAllProjects() {
+  try {
+    const projectList = await db.select({
+      id: projects.id,
+      name: projects.name,
+    })
+    .from(projects)
+    .where(eq(projects.is_active, true))
+    .orderBy(projects.name);
+
+    return projectList;
+  } catch (error) {
+    console.error('Failed to get all projects:', error);
+    return [];
   }
 }
 

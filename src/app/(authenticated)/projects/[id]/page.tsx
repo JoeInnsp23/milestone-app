@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { getProjectById } from '@/lib/queries';
 import { Navigation } from '@/components/dashboard/navigation';
 import { ProjectDetailClient } from '@/components/projects/project-detail-client';
+import { getProjectPhases, getAllPhases, getAllProjects } from '@/app/actions/phases';
 import { Invoice, Bill } from '@/types';
 
 interface ProjectPageProps {
@@ -58,6 +59,26 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const totalCostsWithEstimates = totalCosts + estimatedCosts;
   const operatingExpenses = totalCostsWithEstimates * 0.4; // 40% as operating expenses
 
+  // Fetch phase data
+  const phaseSummaries = await getProjectPhases(resolvedParams.id);
+  const allPhases = await getAllPhases();
+  const allProjects = await getAllProjects();
+
+  // Calculate float metrics
+  const totalPaid = project.invoices
+    .filter(inv => inv.status === 'PAID')
+    .reduce((sum, inv) => {
+      const paid = typeof inv.amount_paid === 'string' ? parseFloat(inv.amount_paid) : Number(inv.amount_paid);
+      return sum + (paid || 0);
+    }, 0);
+
+  const totalCostsPaid = project.bills
+    .filter(bill => bill.status === 'PAID')
+    .reduce((sum, bill) => {
+      const paid = typeof bill.amount_paid === 'string' ? parseFloat(bill.amount_paid) : Number(bill.amount_paid);
+      return sum + (paid || 0);
+    }, 0);
+
   return (
     <div className="min-h-screen dashboard-bg-gradient">
       {/* Navigation */}
@@ -80,6 +101,11 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
           invoices={project.invoices as Invoice[]}
           bills={project.bills as Bill[]}
           estimates={project.estimates || []}
+          phaseSummaries={phaseSummaries}
+          allPhases={allPhases}
+          allProjects={allProjects}
+          floatReceived={totalPaid}
+          totalCostsPaid={totalCostsPaid}
         />
       </div>
     </div>

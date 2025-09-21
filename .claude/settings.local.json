@@ -49,7 +49,8 @@
       "mcp__memory__add_observations",
       "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql -h localhost -p 5433 -U milestone_user -d milestone -c \"CREATE SCHEMA IF NOT EXISTS milestone;\")",
       "Bash(npx drizzle-kit generate:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npx shadcn@latest add:*)"
     ],
     "deny": [],
     "ask": []

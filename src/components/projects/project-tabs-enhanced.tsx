@@ -8,20 +8,22 @@ import { Invoice, Bill, ProjectEstimate, BuildPhase } from '@/types';
 import { formatCurrency } from '@/lib/export/utils';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 
 interface ProjectTabsEnhancedProps {
   projectId: string;
   invoices: Invoice[];
   bills: Bill[];
   estimates: ProjectEstimate[];
-  phases: BuildPhase[];
+  phases: any[];
+  projects: any[];
   activeTab?: 'invoices' | 'bills' | 'estimates';
   onTabChange?: (tab: 'invoices' | 'bills' | 'estimates') => void;
   estimatesRef?: Ref<ProjectEstimatesHandle>;
 }
 
 interface GroupedItem<T> {
-  phase: BuildPhase | null;
+  phase: any | null;
   items: T[];
   subtotal: number;
 }
@@ -32,6 +34,7 @@ export function ProjectTabsEnhanced({
   bills,
   estimates,
   phases,
+  projects,
   activeTab,
   onTabChange,
   estimatesRef,
@@ -200,12 +203,10 @@ export function ProjectTabsEnhanced({
         </div>
 
         <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+          <Switch
             id="group-by-phase"
             checked={groupByPhase}
-            onChange={(e) => setGroupByPhase(e.target.checked)}
-            className="h-4 w-4"
+            onCheckedChange={setGroupByPhase}
           />
           <Label htmlFor="group-by-phase" className="text-sm font-medium cursor-pointer">
             Group by Phase

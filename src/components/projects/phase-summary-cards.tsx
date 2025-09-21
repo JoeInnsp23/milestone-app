@@ -48,7 +48,12 @@ const phaseColors: Record<string, string> = {
   pm_fee: '#4B0082'
 };
 
-export function PhaseSummaryCards({ phases }: { phases: PhaseSummary[] }) {
+interface PhaseSummaryCardsProps {
+  phases: PhaseSummary[];
+  projectId?: string;
+}
+
+export function PhaseSummaryCards({ phases, projectId }: PhaseSummaryCardsProps) {
   if (!phases || phases.length === 0) {
     return (
       <div className="text-muted-foreground text-sm">

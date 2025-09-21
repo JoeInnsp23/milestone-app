@@ -151,6 +151,6 @@ export interface PhaseAssignmentProps {
   itemType: 'invoice' | 'bill' | 'estimate';
   currentPhaseId: string | null;
   currentProjectId: string;
-  phases: BuildPhase[];
-  projects: Project[];
+  phases: any[];
+  projects: any[];
 }
