@@ -327,8 +327,6 @@ export function ProjectTabsEnhanced({
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [bills, phases]);
 
-  const floatBalance = floatReceived - totalCostsPaid;
-
   return (
     <div className="dashboard-card">
       <div className="flex justify-between items-center mb-4">
