@@ -9,8 +9,6 @@ import { CostTrackerTable } from './cost-tracker-table';
 import { Invoice, Bill, ProjectEstimate } from '@/types';
 import { formatCurrency } from '@/lib/export/utils';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
 interface Phase {
   id: string;
@@ -393,16 +391,15 @@ export function ProjectTabsEnhanced({
         </div>
 
         {(currentTab === 'invoices' || currentTab === 'bills' || currentTab === 'estimates') && (
-          <div className="flex items-center gap-2">
-            <Switch
-              id="group-by-phase"
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-sm text-muted-foreground">Group by Phase</span>
+            <input
+              type="checkbox"
               checked={groupByPhase}
-              onCheckedChange={setGroupByPhase}
+              onChange={(e) => setGroupByPhase(e.target.checked)}
+              className="estimates-toggle"
             />
-            <Label htmlFor="group-by-phase" className="text-sm font-medium cursor-pointer">
-              Group by Phase
-            </Label>
-          </div>
+          </label>
         )}
       </div>
 
