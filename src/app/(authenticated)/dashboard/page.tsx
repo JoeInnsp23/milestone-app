@@ -1,28 +1,18 @@
 import { auth } from '@clerk/nextjs/server';
 import { getDashboardStats, getProjectSummaries, getMonthlyRevenue, getTopProjects, getTopProjectsPhaseProgress } from '@/lib/queries';
-import { Navigation } from '@/components/dashboard/navigation';
-import { ProfitChart } from '@/components/dashboard/profit-chart';
-import { RevenueChart } from '@/components/dashboard/revenue-chart';
-import { MonthlyTrendWrapper } from '@/components/dashboard/monthly-trend-wrapper';
-import { ProjectProgressChart } from '@/components/dashboard/project-progress-chart';
-import { ExportDialog } from '@/components/export/export-dialog';
-import { format } from 'date-fns';
 import { runDashboardValidation } from '@/lib/server-validation';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
+import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton';
 
 interface DashboardPageProps {
   searchParams: Promise<{ view?: string }>;
 }
 
-export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const params = await searchParams;
+async function DashboardData() {
   const { userId } = await auth();
   if (!userId) {
     return null;
-  }
-
-  if (params?.view === 'all') {
-    redirect('/projects');
   }
 
   const view = 'overview';
@@ -125,92 +115,35 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     totalCosts: stats.total_costs || 0,
     totalProfit: stats.total_profit || 0,
     profitMargin: stats.profit_margin || 0,
-    activeProjects: totalUniqueProjects, // Use actual unique project count
+    activeProjects: totalUniqueProjects,
     profitableProjects: profitableProjectsCount,
   };
 
+  const { DashboardContent } = await import('@/components/dashboard/dashboard-content');
+
   return (
-    <div className="min-h-screen dashboard-bg-gradient">
-        {/* Navigation */}
-        <Navigation view={view} />
+    <DashboardContent
+      view={view}
+      stats={stats}
+      formattedStats={formattedStats}
+      profitData={profitData}
+      revenueBreakdownData={revenueBreakdownData}
+      monthlyRevenue={monthlyRevenue}
+      phaseProgress={phaseProgress}
+    />
+  );
+}
 
-        {/* Main content */}
-        <div className="container">
-        <>
-            {/* Header Card */}
-            <div className="header-card">
-              <div className="flex justify-between items-center">
-                <div className="flex-1">
-                  <h1>{stats.company_name || 'Company Ltd'}</h1>
-                  <div className="subtitle">
-                    {stats.date_from && stats.date_to ?
-                      ` ${format(new Date(stats.date_from), 'd MMMM yyyy')} to ${format(new Date(stats.date_to), 'd MMMM yyyy')}` :
-                      ' All Time'}
-                  </div>
-                </div>
-                <ExportDialog />
-              </div>
-            </div>
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
 
-            {/* KPI Cards */}
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">TOTAL PROJECTS</div>
-                <div className="stat-value">{formattedStats.activeProjects}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">TOTAL REVENUE</div>
-                <div className="stat-value">£{formattedStats.totalRevenue.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">NET PROFIT</div>
-                <div className={`stat-value ${formattedStats.totalProfit >= 0 ? 'positive' : 'negative'}`}>
-                  £{formattedStats.totalProfit.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">PROFITABLE PROJECTS</div>
-                <div className="stat-value">{formattedStats.profitableProjects}/{formattedStats.activeProjects}</div>
-              </div>
-            </div>
+  if (params?.view === 'all') {
+    redirect('/projects');
+  }
 
-            {/* Charts Grid - 2x2 */}
-            <div className="chart-grid">
-              <div className="chart-card">
-                <div className="chart-title">Top 10 Projects by Net Profit</div>
-                <ProfitChart data={profitData} />
-              </div>
-              <div className="chart-card">
-                <div className="chart-title">Revenue Breakdown</div>
-                <RevenueChart data={revenueBreakdownData} />
-              </div>
-              <MonthlyTrendWrapper
-                initialData={Array.isArray(monthlyRevenue) ? monthlyRevenue.map((item: Record<string, unknown>) => ({
-                  month: String(item.month || ''),
-                  revenue: Number(item.revenue || 0),
-                  costs: Number(item.costs || 0),
-                  profit: Number(item.profit || 0)
-                })) : []}
-              />
-              <div className="chart-card">
-                <div className="chart-title">Project Progress</div>
-                <ProjectProgressChart data={phaseProgress} />
-              </div>
-            </div>
-        </>
-
-        {/* Sync Status */}
-        {stats.last_sync_time && (
-          <div className="dashboard-card">
-            <div className="flex items-center justify-between text-sm" style={{ color: 'var(--text-muted)' }}>
-              <span>Data last synchronized from Xero</span>
-              <span className="font-medium">
-                {format(new Date(stats.last_sync_time), 'PPpp')}
-              </span>
-            </div>
-          </div>
-        )}
-        </div>
-      </div>
+  return (
+    <Suspense fallback={<DashboardSkeleton />}>
+      <DashboardData />
+    </Suspense>
   );
 }

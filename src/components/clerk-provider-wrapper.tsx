@@ -5,11 +5,10 @@ import { dark } from '@clerk/themes';
 import { useEffect, useState } from 'react';
 
 export function ClerkProviderWrapper({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // Immediately check theme without waiting
     const checkTheme = () => {
       setIsDark(document.documentElement.classList.contains('dark'));
     };
@@ -25,18 +24,6 @@ export function ClerkProviderWrapper({ children }: { children: React.ReactNode }
 
     return () => observer.disconnect();
   }, []);
-
-  if (!mounted) {
-    return (
-      <ClerkProvider
-        appearance={{
-          cssLayerName: 'clerk'
-        }}
-      >
-        {children}
-      </ClerkProvider>
-    );
-  }
 
   return (
     <ClerkProvider

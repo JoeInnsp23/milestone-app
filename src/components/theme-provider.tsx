@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useLayoutEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -9,16 +9,19 @@ type Theme = 'light' | 'dark';
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  mounted: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+// Use useLayoutEffect to apply theme before paint
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
+  useIsomorphicLayoutEffect(() => {
     // Get theme from localStorage or default to dark
     const savedTheme = localStorage.getItem('theme') as Theme;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -26,18 +29,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     setTheme(initialTheme);
 
-    // Apply theme to HTML element
+    // Apply theme to HTML element immediately
     if (initialTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    setMounted(true);
   }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    document.cookie = `theme=${newTheme};path=/;max-age=31536000`;
 
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -46,13 +52,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -64,7 +65,8 @@ export function useTheme() {
     // Return default values during SSR
     return {
       theme: 'dark' as Theme,
-      toggleTheme: () => {}
+      toggleTheme: () => {},
+      mounted: false
     };
   }
   return context;
