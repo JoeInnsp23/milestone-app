@@ -162,8 +162,6 @@ export function ProjectDetailClient({
           activeTab={activeTab}
           onTabChange={(tab) => setActiveTab(tab)}
           estimatesRef={estimatesRef}
-          floatReceived={floatReceived}
-          totalCostsPaid={totalCostsPaid}
         />
       </div>
     </>

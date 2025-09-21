@@ -43,8 +43,6 @@ interface ProjectTabsEnhancedProps {
   activeTab?: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates';
   onTabChange?: (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => void;
   estimatesRef?: Ref<ProjectEstimatesHandle>;
-  floatReceived?: number;
-  totalCostsPaid?: number;
 }
 
 interface GroupedItem<T> {
@@ -64,8 +62,6 @@ export function ProjectTabsEnhanced({
   activeTab,
   onTabChange,
   estimatesRef,
-  floatReceived = 0,
-  totalCostsPaid = 0,
 }: ProjectTabsEnhancedProps) {
   const [internalActiveTab, setInternalActiveTab] = useState<'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates'>('summary');
   const [groupByPhase, setGroupByPhase] = useState(true);
