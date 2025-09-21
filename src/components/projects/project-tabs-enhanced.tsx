@@ -26,6 +26,19 @@ interface ProjectTabsEnhancedProps {
   bills: Bill[];
   estimates: ProjectEstimate[];
   phases: Phase[];
+  phaseSummaries?: Array<{
+    id: string;
+    name: string;
+    color?: string;
+    icon?: string;
+    projectId: string;
+    progress: number;
+    revenue: number;
+    costs: number;
+    profit: number;
+    margin: number;
+    itemCount: number;
+  }>;
   projects: Array<{ id: string; name: string }>;
   activeTab?: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates';
   onTabChange?: (tab: 'summary' | 'cost-tracker' | 'invoices' | 'bills' | 'estimates') => void;
@@ -46,6 +59,7 @@ export function ProjectTabsEnhanced({
   bills,
   estimates,
   phases,
+  phaseSummaries,
   // projects, // Not used currently
   activeTab,
   onTabChange,
@@ -216,22 +230,38 @@ export function ProjectTabsEnhanced({
       { id: 'BP017', name: 'Project Management Fee', color: '#4B0082', icon: 'Briefcase', display_order: 17 },
     ];
 
+    // Create a map of phase summaries if available
+    const summariesMap = new Map(phaseSummaries?.map(p => [p.id, p]) || []);
     // Merge any data from passed phases (for updated names, colors, etc)
     const phasesMap = new Map(phases.map(p => [p.id, p]));
 
     return allPhasesData.map(phase => {
       const dbPhase = phasesMap.get(phase.id);
+      const phaseSummary = summariesMap.get(phase.id);
       // Use data from DB if available, otherwise use hardcoded defaults
       const finalPhase = dbPhase ? { ...phase, ...dbPhase } : phase;
 
-      // const phaseInvoices = invoices.filter(inv => inv.build_phase_id === phase.id); // Not used in summary
       const phaseBills = bills.filter(bill => bill.build_phase_id === finalPhase.id);
+      const phaseInvoices = invoices.filter(inv => inv.build_phase_id === finalPhase.id);
       const phaseEstimates = estimates.filter(est => est.build_phase_id === finalPhase.id);
+
+      // Calculate estimated amounts
+      const estimatedRevenue = phaseEstimates
+        .filter(est => est.estimate_type === 'revenue')
+        .reduce((sum, est) => sum + Number(est.amount || 0), 0);
 
       const estimatedCost = phaseEstimates
         .filter(est => est.estimate_type === 'cost' || est.estimate_type === 'materials')
         .reduce((sum, est) => sum + Number(est.amount || 0), 0);
 
+      // Calculate actual amounts
+      const actualRevenue = phaseInvoices
+        .filter(inv => inv.type === 'ACCREC')
+        .reduce((sum, inv) => sum + Number(inv.total || 0), 0);
+
+      const actualCosts = phaseBills.reduce((sum, bill) => sum + Number(bill.total || 0), 0);
+
+      // Calculate payment status
       const totalPaidToDate = phaseBills
         .filter(bill => bill.status === 'PAID')
         .reduce((sum, bill) => sum + Number(bill.amount_paid || 0), 0);
@@ -240,19 +270,28 @@ export function ProjectTabsEnhanced({
         .filter(bill => bill.status !== 'PAID')
         .reduce((sum, bill) => sum + Number(bill.amount_due || 0), 0);
 
-      const actualTotal = phaseBills.reduce((sum, bill) => sum + Number(bill.total || 0), 0);
-      const variance = estimatedCost - actualTotal;
+      const variance = estimatedCost - actualCosts;
+
+      // Calculate progress (based on paid vs estimated)
+      const progress = estimatedCost > 0
+        ? Math.round((totalPaidToDate / estimatedCost) * 100)
+        : 0;
 
       return {
         phaseId: finalPhase.id,
         phaseName: finalPhase.name,
+        phaseColor: finalPhase.color,
+        estimatedRevenue,
         estimatedCost,
+        actualRevenue,
+        actualCosts,
         totalPaidToDate,
         costsDue,
-        variance
+        variance,
+        progress: phaseSummary?.progress || progress
       };
     });
-  }, [phases, bills, estimates]);
+  }, [phases, phaseSummaries, bills, invoices, estimates]);
 
   const costTrackerData = useMemo(() => {
     const items: Array<{
