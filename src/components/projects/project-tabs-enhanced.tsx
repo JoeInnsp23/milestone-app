@@ -301,10 +301,11 @@ export function ProjectTabsEnhanced({
       costsDue: number;
       phaseId: string;
       phaseName: string;
+      phaseColor: string;
       phaseOrder: number;
     }> = [];
 
-    // Create a map of phase orders using the same hardcoded list as summary
+    // Create maps for phase orders and colors using the same hardcoded list as summary
     const phaseOrderMap = new Map([
       ['BP001', 1], ['BP002', 2], ['BP003', 3], ['BP004', 4],
       ['BP005', 5], ['BP006', 6], ['BP007', 7], ['BP008', 8],
@@ -313,10 +314,19 @@ export function ProjectTabsEnhanced({
       ['BP017', 17]
     ]);
 
+    const phaseColorMap = new Map([
+      ['BP001', '#8B4513'], ['BP002', '#8B5A2B'], ['BP003', '#A0522D'], ['BP004', '#708090'],
+      ['BP005', '#FFD700'], ['BP006', '#4682B4'], ['BP007', '#8B7355'], ['BP008', '#87CEEB'],
+      ['BP009', '#F5F5DC'], ['BP010', '#9370DB'], ['BP011', '#228B22'], ['BP012', '#DAA520'],
+      ['BP013', '#696969'], ['BP014', '#D2691E'], ['BP015', '#FF6347'], ['BP016', '#6B7280'],
+      ['BP017', '#4B0082']
+    ]);
+
     // Combine bills and invoices for cost tracking
     bills.forEach(bill => {
       const phase = phases.find(p => p.id === bill.build_phase_id);
       const phaseOrder = phaseOrderMap.get(bill.build_phase_id || '') || 999;
+      const phaseColor = phase?.color || phaseColorMap.get(bill.build_phase_id || '') || '#6B7280';
       items.push({
         id: bill.id,
         date: bill.bill_date || bill.created_at || new Date(),
@@ -328,6 +338,7 @@ export function ProjectTabsEnhanced({
         costsDue: Number(bill.amount_due || 0),
         phaseId: bill.build_phase_id || 'unassigned',
         phaseName: phase?.name || 'Unassigned',
+        phaseColor,
         phaseOrder
       });
     });

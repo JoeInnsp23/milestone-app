@@ -16,6 +16,7 @@ interface CostTrackerItem {
   costsDue: number;
   phaseId: string;
   phaseName: string;
+  phaseColor?: string;
   phaseOrder?: number;
 }
 
@@ -31,6 +32,7 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
     if (!acc[item.phaseId]) {
       acc[item.phaseId] = {
         phaseName: item.phaseName,
+        phaseColor: item.phaseColor || '#6B7280',
         phaseOrder: item.phaseOrder || 999,
         items: [],
         totals: { paid: 0, direct: 0, refunds: 0, due: 0 }
@@ -44,6 +46,7 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
     return acc;
   }, {} as Record<string, {
     phaseName: string;
+    phaseColor: string;
     phaseOrder: number;
     items: CostTrackerItem[];
     totals: { paid: number; direct: number; refunds: number; due: number };
@@ -80,10 +83,18 @@ export function CostTrackerTable({ items }: CostTrackerTableProps) {
         return (
           <div key={phaseId} className="border rounded-lg overflow-hidden">
             <div
-              className="bg-muted p-4 cursor-pointer flex justify-between items-center hover:bg-muted/80 transition-colors"
+              className="p-4 cursor-pointer flex justify-between items-center transition-all duration-200 hover:opacity-90"
+              style={{
+                backgroundColor: phaseData.phaseColor + '20',
+                borderLeft: `4px solid ${phaseData.phaseColor}`
+              }}
               onClick={() => togglePhase(phaseId)}
             >
               <div className="flex items-center gap-2">
+                <div
+                  className="w-3 h-3 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: phaseData.phaseColor }}
+                />
                 {isCollapsed ? (
                   <ChevronRight className="h-4 w-4" />
                 ) : (
