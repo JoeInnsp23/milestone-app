@@ -34,6 +34,13 @@ export function ProjectHeaderClient({
 
   return (
     <>
+      {/* Back Button - Above header card */}
+      <Link href="/projects" className="inline-block mb-4">
+        <button className="text-sm text-white/80 hover:text-white transition-colors">
+          ← Back to All Projects
+        </button>
+      </Link>
+
       {/* Header Card */}
       <div className="header-card">
         <div className="flex justify-between items-center">
@@ -54,13 +61,6 @@ export function ProjectHeaderClient({
           </div>
         </div>
       </div>
-
-      {/* Back Button - Outside header card */}
-      <Link href="/projects" className="inline-block mb-4">
-        <button className="text-sm text-white/80 hover:text-white transition-colors">
-          ← Back to All Projects
-        </button>
-      </Link>
     </>
   );
 }
