@@ -22,6 +22,8 @@ export default async function ProjectsPage() {
     const existing = projectsMap.get(summary.project_id) || {
       project_id: summary.project_id,
       project_name: summary.project_name,
+      client_name: summary.client_name,
+      project_status: summary.project_status,
       actual_revenue: 0,
       actual_costs: 0,
       profit: 0,
