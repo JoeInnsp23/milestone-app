@@ -203,7 +203,12 @@ export async function getAllPhases() {
     .where(eq(buildPhases.is_active, true))
     .orderBy(buildPhases.display_order);
 
-    return phases;
+    return phases.map(phase => ({
+      ...phase,
+      color: phase.color ?? undefined,
+      icon: phase.icon ?? undefined,
+      display_order: phase.display_order ?? undefined
+    }));
   } catch (error) {
     console.error('Failed to get all phases:', error);
     return [];
@@ -290,10 +295,10 @@ export async function getProjectPhases(projectId: string) {
     `);
 
     return (phaseSummary as Array<Record<string, unknown>>).map((row: Record<string, unknown>) => ({
-      id: row.id,
-      name: row.name,
-      color: row.color || '#6B7280',
-      icon: row.icon || 'HelpCircle',
+      id: row.id as string,
+      name: row.name as string,
+      color: (row.color as string) || '#6B7280',
+      icon: (row.icon as string) || 'HelpCircle',
       projectId,
       progress: Number(row.progress || 0),
       revenue: Number(row.revenue || 0),

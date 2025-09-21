@@ -127,8 +127,8 @@ export interface BuildPhase {
 export interface PhaseSummary {
   id: string;
   name: string;
-  color: string;
-  icon: string;
+  color?: string;
+  icon?: string;
   projectId: string;
   revenue: number;
   costs: number;

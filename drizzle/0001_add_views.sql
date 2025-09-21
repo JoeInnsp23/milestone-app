@@ -115,8 +115,10 @@ SELECT
     COALESCE(i.invoice_count, 0) as invoice_count,
     COALESCE(b.bill_count, 0) as bill_count,
     CURRENT_TIMESTAMP as last_updated
-FROM (
-    -- Only include project-phase combinations that have actual data
+FROM milestone.projects p
+CROSS JOIN milestone.build_phases bp
+LEFT JOIN (
+    -- Get actual phase data where it exists
     SELECT DISTINCT project_id, build_phase_id
     FROM (
         SELECT project_id, build_phase_id FROM milestone.invoices WHERE build_phase_id IS NOT NULL
@@ -127,9 +129,7 @@ FROM (
         UNION
         SELECT project_id, build_phase_id FROM milestone.phase_progress
     ) phase_data
-) active_phases
-JOIN milestone.projects p ON p.id = active_phases.project_id
-JOIN milestone.build_phases bp ON bp.id = active_phases.build_phase_id
+) active_phases ON p.id = active_phases.project_id AND bp.id = active_phases.build_phase_id
 LEFT JOIN invoice_summary i ON i.project_id = p.id AND i.build_phase_id = bp.id
 LEFT JOIN bill_summary b ON b.project_id = p.id AND b.build_phase_id = bp.id
 LEFT JOIN estimate_summary e ON e.project_id = p.id AND e.build_phase_id = bp.id

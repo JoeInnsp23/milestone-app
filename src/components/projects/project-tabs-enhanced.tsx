@@ -88,11 +88,12 @@ export function ProjectTabsEnhanced({
       return [{
         phase: null,
         items: items.sort((a, b) => {
-          const getDate = (item: Invoice | Bill | ProjectEstimate) => {
-            return item.invoice_date || item.bill_date || item.estimate_date || item.created_at;
+          // Complex type due to mixed item types with different date fields
+          const getDate = (item: T & { invoice_date?: Date | string | null; bill_date?: Date | string | null; estimate_date?: Date | string | null; created_at?: Date | string | null }) => {
+            return item.invoice_date || item.bill_date || item.estimate_date || item.created_at || new Date();
           };
-          const dateA = new Date(getDate(a)).getTime();
-          const dateB = new Date(getDate(b)).getTime();
+          const dateA = new Date(getDate(a as T & { invoice_date?: Date | string | null; bill_date?: Date | string | null; estimate_date?: Date | string | null; created_at?: Date | string | null })).getTime();
+          const dateB = new Date(getDate(b as T & { invoice_date?: Date | string | null; bill_date?: Date | string | null; estimate_date?: Date | string | null; created_at?: Date | string | null })).getTime();
           return dateB - dateA; // Descending order
         }),
         subtotal: items.reduce((sum, item) => sum + getAmount(item), 0)
@@ -194,8 +195,8 @@ export function ProjectTabsEnhanced({
 
   // Prepare data for Summary and Cost Tracker tabs
   const phaseSummaryData = useMemo(() => {
-    // Ensure we have all phases, even if empty
-    const allPhasesData = phases.length > 0 ? phases : [
+    // ALWAYS use all 17 phases as the base
+    const allPhasesData = [
       { id: 'BP001', name: 'Demolition Enabling works', color: '#8B4513', icon: 'Hammer', display_order: 1 },
       { id: 'BP002', name: 'Groundworks', color: '#8B5A2B', icon: 'Shovel', display_order: 2 },
       { id: 'BP003', name: 'Masonry', color: '#A0522D', icon: 'Layers', display_order: 3 },
@@ -215,10 +216,17 @@ export function ProjectTabsEnhanced({
       { id: 'BP017', name: 'Project Management Fee', color: '#4B0082', icon: 'Briefcase', display_order: 17 },
     ];
 
+    // Merge any data from passed phases (for updated names, colors, etc)
+    const phasesMap = new Map(phases.map(p => [p.id, p]));
+
     return allPhasesData.map(phase => {
+      const dbPhase = phasesMap.get(phase.id);
+      // Use data from DB if available, otherwise use hardcoded defaults
+      const finalPhase = dbPhase ? { ...phase, ...dbPhase } : phase;
+
       // const phaseInvoices = invoices.filter(inv => inv.build_phase_id === phase.id); // Not used in summary
-      const phaseBills = bills.filter(bill => bill.build_phase_id === phase.id);
-      const phaseEstimates = estimates.filter(est => est.build_phase_id === phase.id);
+      const phaseBills = bills.filter(bill => bill.build_phase_id === finalPhase.id);
+      const phaseEstimates = estimates.filter(est => est.build_phase_id === finalPhase.id);
 
       const estimatedCost = phaseEstimates
         .filter(est => est.estimate_type === 'cost' || est.estimate_type === 'materials')
@@ -236,20 +244,15 @@ export function ProjectTabsEnhanced({
       const variance = estimatedCost - actualTotal;
 
       return {
-        phaseId: phase.id,
-        phaseName: phase.name,
+        phaseId: finalPhase.id,
+        phaseName: finalPhase.name,
         estimatedCost,
         totalPaidToDate,
         costsDue,
         variance
       };
-    }).sort((a, b) => {
-      // Sort by display order if available, otherwise by phase ID
-      const orderA = phases.find(p => p.id === a.phaseId)?.display_order || parseInt(a.phaseId.replace('BP', ''));
-      const orderB = phases.find(p => p.id === b.phaseId)?.display_order || parseInt(b.phaseId.replace('BP', ''));
-      return (orderA || 0) - (orderB || 0);
     });
-  }, [phases, invoices, bills, estimates]);
+  }, [phases, bills, estimates]);
 
   const costTrackerData = useMemo(() => {
     const items: Array<{
@@ -270,7 +273,7 @@ export function ProjectTabsEnhanced({
       const phase = phases.find(p => p.id === bill.build_phase_id);
       items.push({
         id: bill.id,
-        date: bill.bill_date || bill.created_at,
+        date: bill.bill_date || bill.created_at || new Date(),
         invoiceReference: bill.bill_number || 'N/A',
         description: bill.contact_name || 'Bill',
         amountPaid: Number(bill.amount_paid || 0),
