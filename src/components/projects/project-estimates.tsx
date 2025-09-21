@@ -271,42 +271,13 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
 
     return (
       <div className="estimates-section">
-      {/* Summary Cards - only show when not grouped */}
-      {!isGrouped && (
-        <div className="summary-cards">
-          <div className="summary-card">
-            <div className="summary-label">Est. Revenue</div>
-            <div className="summary-value" style={{ color: '#10b981' }}>
-              {formatCurrency(totals.revenue)}
-            </div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-label">Est. Costs</div>
-            <div className="summary-value" style={{ color: '#ef4444' }}>
-              {formatCurrency(totals.cost + totals.materials)}
-            </div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-label">Est. Profit</div>
-            <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
-              {formatCurrency(estimatedProfit)}
-            </div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-label">Est. Margin</div>
-            <div className="summary-value" style={{ color: '#8b5cf6' }}>
-              {estimatedMargin.toFixed(1)}%
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Estimates Table */}
       {estimates.length === 0 ? (
         <div className="empty-state">
           <p>No estimates added yet. Click &quot;Add Estimate&quot; to create your first estimate.</p>
         </div>
       ) : (
+        <>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className={isGrouped ? "" : "bg-secondary text-sm"}>
@@ -392,36 +363,67 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
             </tbody>
           </table>
         </div>
-      )}
 
-      {/* Phase Subtotal Cards - only show when grouped */}
-      {isGrouped && estimates.length > 0 && (
-        <div className="summary-cards">
-          <div className="summary-card">
-            <div className="summary-label">Total Estimates</div>
-            <div className="summary-value">
-              {formatCurrency(totals.revenue + totals.cost + totals.materials)}
+        {/* Summary Cards - show at bottom when not grouped, or as phase subtotals when grouped */}
+        {!isGrouped && (
+          <div className="summary-cards">
+            <div className="summary-card">
+              <div className="summary-label">Total Revenue</div>
+              <div className="summary-value" style={{ color: '#10b981' }}>
+                {formatCurrency(totals.revenue)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Total Costs</div>
+              <div className="summary-value" style={{ color: '#ef4444' }}>
+                {formatCurrency(totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Est. Profit</div>
+              <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
+                {formatCurrency(estimatedProfit)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Est. Margin</div>
+              <div className="summary-value" style={{ color: '#8b5cf6' }}>
+                {estimatedMargin.toFixed(1)}%
+              </div>
             </div>
           </div>
-          <div className="summary-card">
-            <div className="summary-label">Revenue</div>
-            <div className="summary-value" style={{ color: '#10b981' }}>
-              {formatCurrency(totals.revenue)}
+        )}
+
+        {/* Phase Subtotal Cards - only show when grouped */}
+        {isGrouped && estimates.length > 0 && (
+          <div className="summary-cards">
+            <div className="summary-card">
+              <div className="summary-label">Total Estimates</div>
+              <div className="summary-value">
+                {formatCurrency(totals.revenue + totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Revenue</div>
+              <div className="summary-value" style={{ color: '#10b981' }}>
+                {formatCurrency(totals.revenue)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Costs</div>
+              <div className="summary-value" style={{ color: '#ef4444' }}>
+                {formatCurrency(totals.cost + totals.materials)}
+              </div>
+            </div>
+            <div className="summary-card">
+              <div className="summary-label">Net</div>
+              <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
+                {formatCurrency(estimatedProfit)}
+              </div>
             </div>
           </div>
-          <div className="summary-card">
-            <div className="summary-label">Costs</div>
-            <div className="summary-value" style={{ color: '#ef4444' }}>
-              {formatCurrency(totals.cost + totals.materials)}
-            </div>
-          </div>
-          <div className="summary-card">
-            <div className="summary-label">Net</div>
-            <div className="summary-value" style={{ color: estimatedProfit >= 0 ? '#3b82f6' : '#ef4444' }}>
-              {formatCurrency(estimatedProfit)}
-            </div>
-          </div>
-        </div>
+        )}
+        </>
       )}
 
       {/* Create/Edit Modal */}
@@ -607,11 +609,6 @@ export const ProjectEstimates = forwardRef<ProjectEstimatesHandle, ProjectEstima
           grid-template-columns: repeat(4, 1fr);
           gap: 16px;
           margin-top: 24px;
-        }
-
-        .estimates-section > .summary-cards:first-child {
-          margin-top: 0;
-          margin-bottom: 24px;
         }
 
         .summary-card {
