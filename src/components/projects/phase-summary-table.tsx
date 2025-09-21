@@ -19,12 +19,10 @@ interface PhaseSummaryData {
 
 interface PhaseSummaryTableProps {
   phases: PhaseSummaryData[];
-  floatBalance?: number;
 }
 
 export function PhaseSummaryTable({
-  phases,
-  floatBalance
+  phases
 }: PhaseSummaryTableProps) {
   const totals = phases.reduce(
     (acc, phase) => ({
@@ -68,7 +66,7 @@ export function PhaseSummaryTable({
             const phaseMargin = phaseRevenue > 0 ? (phaseProfit / phaseRevenue) * 100 : 0;
 
             return (
-              <TableRow key={phase.phaseId} className="hover:bg-muted/50">
+              <TableRow key={phase.phaseId} className="group hover:bg-muted/50 transition-colors duration-150">
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {phase.phaseColor && (
@@ -104,7 +102,11 @@ export function PhaseSummaryTable({
                 }`}>
                   {formatCurrency(phaseProfit)}
                 </TableCell>
-                <TableCell className="text-right text-muted-foreground">
+                <TableCell className={`text-right ${
+                  phaseMargin >= 20 ? 'text-green-600' :
+                  phaseMargin >= 0 ? 'text-muted-foreground' :
+                  'text-red-600'
+                }`}>
                   {phaseMargin.toFixed(1)}%
                 </TableCell>
                 <TableCell className="text-right">
@@ -140,7 +142,11 @@ export function PhaseSummaryTable({
             }`}>
               {formatCurrency(totalProfit)}
             </TableCell>
-            <TableCell className="text-right">
+            <TableCell className={`text-right ${
+              totalMargin >= 20 ? 'text-green-600' :
+              totalMargin >= 0 ? 'text-muted-foreground' :
+              'text-red-600'
+            }`}>
               {totalMargin.toFixed(1)}%
             </TableCell>
             <TableCell className="text-right">
@@ -155,16 +161,6 @@ export function PhaseSummaryTable({
               {formatCurrency(totals.variance)}
             </TableCell>
           </TableRow>
-          {floatBalance !== undefined && (
-            <TableRow className="border-t bg-blue-50/50">
-              <TableCell colSpan={8} className="text-right font-medium">
-                Float Balance
-              </TableCell>
-              <TableCell className="text-right font-bold text-blue-600">
-                {formatCurrency(floatBalance)}
-              </TableCell>
-            </TableRow>
-          )}
         </TableBody>
       </Table>
     </div>

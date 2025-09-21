@@ -383,7 +383,6 @@ export function ProjectTabsEnhanced({
         {currentTab === 'summary' && (
           <PhaseSummaryTable
             phases={phaseSummaryData}
-            floatBalance={floatBalance}
           />
         )}
 
