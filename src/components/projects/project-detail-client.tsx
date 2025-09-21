@@ -125,14 +125,14 @@ export function ProjectDetailClient({
       {/* Main content with consistent spacing */}
       <div className="space-y-6">
         {/* Float Summary Card and KPI Cards */}
-        <div className="grid gap-6 lg:grid-cols-4">
-          <div className="lg:col-span-1">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
             <FloatSummaryCard
               floatReceived={floatReceived}
               totalCostsPaid={totalCostsPaid}
             />
           </div>
-          <div className="lg:col-span-3">
+          <div>
             <ProjectKPISection
               actualRevenue={actualRevenue}
               actualCosts={actualCosts}
