@@ -41,7 +41,8 @@ export default async function ProjectsPage() {
   const projects = Array.from(projectsMap.values());
 
   // Run server-side validation in development
-  await runProjectCountValidation(projects.length);
+  // Use the active_projects count from stats for validation, not the grouped summaries
+  await runProjectCountValidation(stats.active_projects);
 
   const statsTyped = stats as {
     company_name?: string;
