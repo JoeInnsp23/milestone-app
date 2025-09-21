@@ -140,7 +140,8 @@ export function ProjectTabsEnhanced({
   const renderGroupedItems = <T extends { id: string }>(
     items: T[],
     groups: GroupedItem<T>[],
-    renderItem: (item: T) => React.ReactNode
+    renderItem: (item: T) => React.ReactNode,
+    showSubtotal: boolean = true
   ) => {
     if (!groupByPhase) {
       return (
@@ -182,9 +183,11 @@ export function ProjectTabsEnhanced({
                   </span>
                 </div>
 
-                <div className="flex gap-6 text-sm">
-                  <span>Total: <span className="font-medium">{formatCurrency(group.subtotal)}</span></span>
-                </div>
+                {showSubtotal && (
+                  <div className="flex gap-6 text-sm">
+                    <span>Total: <span className="font-medium">{formatCurrency(group.subtotal)}</span></span>
+                  </div>
+                )}
               </div>
 
               {!isCollapsed && (
@@ -485,7 +488,8 @@ export function ProjectTabsEnhanced({
                       phases={phases}
                     />
                   </div>
-                )
+                ),
+                false // Don't show subtotal for estimates
               )}
             </>
           ) : (
