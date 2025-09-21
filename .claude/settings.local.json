@@ -56,7 +56,8 @@
       "Bash(PGPASSWORD='J22/+cGJpFZaLSffuzOymJIvke/whllGRGHMrW8n7ys=' psql:*)",
       "Bash(grep:*)",
       "Bash(chmod:*)",
-      "Bash(./build-beta.sh:*)"
+      "Bash(./build-beta.sh:*)",
+      "Bash(docker build:*)"
     ],
     "deny": [],
     "ask": []
