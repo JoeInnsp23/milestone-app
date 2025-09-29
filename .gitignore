@@ -50,3 +50,7 @@ postgres_backups/
 # Drizzle files
 drizzle/meta/
 postgres_data/
+
+# PostgreSQL data directories
+postgres_data_beta/
+postgres_data/

@@ -60,7 +60,8 @@
       "Bash(docker build:*)",
       "Read(//etc/nginx/sites-available/**)",
       "Bash(sudo nginx:*)",
-      "Bash(sudo systemctl reload:*)"
+      "Bash(sudo systemctl reload:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
